@@ -124,6 +124,14 @@ h1 {
     border-radius: 6px;
 }
 
+.download-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+    width: 100%;
+}
+
 .btn {
     margin-top: auto;
     width: 100%;
@@ -139,6 +147,12 @@ h1 {
 
 .btn:hover {
     background-color: var(--accent-hover);
+}
+
+@media (max-width: 360px) {
+    .grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 footer {

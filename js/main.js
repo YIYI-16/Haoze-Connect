@@ -5,6 +5,7 @@ document.getElementById('panel-link').href = CONFIG.panelUrl;
 
 document.getElementById('win-meta').textContent = `${CONFIG.windows.version} · ${CONFIG.windows.arch}`;
 document.getElementById('win-link').href = CONFIG.windows.url;
+document.getElementById('win-portable-link').href = CONFIG.windows.portableUrl;
 
 document.getElementById('android-meta').textContent = `${CONFIG.android.version} · ${CONFIG.android.arch}`;
 document.getElementById('android-link').href = CONFIG.android.url;
