@@ -102,6 +102,21 @@ delivery location is `/home/zhou/` with owner `zhou:zhou`.
 These remain unsigned Windows / debug-certificate Android test packages;
 real-device installation, login and VPN routing behavior were unverified for that build.
 
+## Repository migration
+
+The download website remains on `main`; client source is maintained on the
+`client` branch. The manually dispatched `haoze-build.yml` workflow is present
+on the default branch for Actions discovery and on the client branch. Its
+`source_ref` input defaults to `client`, so a dispatch from the website branch
+still checks out app source. Android artifacts include only the verified ARM64
+split. This workflow builds artifacts; publishing a Release remains a separate
+explicit operation.
+
+Historical build and runtime evidence remains under local `artifacts/5.0.3/`
+and the repository migration backup. Old Actions runs cannot be moved between
+repositories. Existing 5.0.3 release assets retain their original signing and
+binary provenance; a validation rebuild is recorded separately.
+
 ## Branding & package identity
 
 | Item | Value | Where |

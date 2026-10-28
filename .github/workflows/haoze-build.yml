@@ -28,6 +28,11 @@ on:
           - windows
           - android
           - all
+      source_ref:
+        description: Client source branch or commit (website main has no app source)
+        type: string
+        required: true
+        default: client
 
 permissions:
   contents: read
@@ -46,6 +51,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_ref }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.21.0
@@ -131,11 +138,12 @@ jobs:
             echo "ARTIFACT_NAME=HaozeConnect-Android-debug-signed-test" >> "$GITHUB_ENV"
           fi
 
-      # Keep the split layout of the default gradle build (x86_64, armeabi-v7a,
-      # arm64-v8a + universal); a debug-signed run is purpose-named above.
+      # Build and upload only the ARM64 split; the native AAR is ARM64-pinned.
+      # Other filenames emitted by the upstream Gradle split configuration
+      # must not be treated as verified packages for other architectures.
       - name: Build APK
         run: |
-          flutter build apk --release \
+          flutter build apk --release --target-platform android-arm64 --split-per-abi \
             --target lib/main_prod.dart \
             --dart-define='XBOARD_BASE_URL=https://www.haoze.cyou' \
             --dart-define='XBOARD_APP_NAME=Haoze Connect'
@@ -144,9 +152,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: |
-            build/app/outputs/flutter-apk/*.apk
-            build/app/outputs/apk/release/*.apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           if-no-files-found: error
 
   windows:
@@ -157,6 +163,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_ref }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.21.0
