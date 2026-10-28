@@ -28,16 +28,19 @@
 > The repository preserves the existing download site's `index.html`, `css/`
 > and `js/` alongside the client source and its upstream history.
 > Development and Windows test builds previously used the private
-> `HaozeZane/Haoze-Connect` repository; Android test packages are built locally.
+> `HaozeZane/Haoze-Connect` repository; the originally released Android APK was
+> built locally. The migrated workflow now builds both platforms.
 > This source upload does not publish a GitHub Release or submit to an app store.
 > Read `LICENSE.md` for the upstream distribution conditions; no claim is made
 > here about the legal sufficiency of this standalone source mirror. Verified
 > locally as described in `docs/DISTRIBUTION.md`: 201 related Flutter tests,
 > 38 distribution checks and strict `flutter analyze` pass. The Android ARM64
 > Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
-> debug certificate. The private Windows 5.0.3 build passed analysis, 106 tests
-> and a native launch smoke test, then produced unsigned EXE/ZIP test packages:
-> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40668753377).
+> debug certificate. The migrated Android/Windows workflow passed analysis,
+> 106 tests on each platform, Windows native launch and both packaging jobs:
+> [Migration build](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40684285128).
+> [Released 5.0.3 assets](https://github.com/YIYI-16/Haoze-Connect/releases/tag/v5.0.3)
+> preserve the originally accepted binary bytes and signing.
 > Downloaded Windows package contents and native-core hashes were verified.
 > The installed final package was tested on Windows Server 2022 in an elevated
 > session: account/quota restoration, real proxy and VPN egress, and subscription

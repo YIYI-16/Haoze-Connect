@@ -112,6 +112,15 @@ still checks out app source. Android artifacts include only the verified ARM64
 split. This workflow builds artifacts; publishing a Release remains a separate
 explicit operation.
 
+Migration acceptance: [run 40684285128](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40684285128)
+succeeded for both Android and Windows on client source `a79e9c48`. Downloaded
+validation artifacts passed ZIP CRC, Windows x64/pinned-core checks, and Android
+package/version/ARM64/signature checks. The public [5.0.3 Release](https://github.com/YIYI-16/Haoze-Connect/releases/tag/v5.0.3)
+contains the previously accepted binary bytes; downloads and checksums were
+verified anonymously after publication. `main` keeps the website with its
+placeholder URLs replaced by these real Release assets. The user retained
+responsibility for deleting the old repository; this workflow did not delete it.
+
 Historical build and runtime evidence remains under local `artifacts/5.0.3/`
 and the repository migration backup. Old Actions runs cannot be moved between
 repositories. Existing 5.0.3 release assets retain their original signing and
