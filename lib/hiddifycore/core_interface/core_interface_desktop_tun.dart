@@ -17,7 +17,18 @@ import 'package:rxdart/rxdart.dart';
 /// (`HiddifyAdminBG`). Flutter never elevates; [NeedAdminBgService] /
 /// [EnsureAdminBgService] live in hiddify-core.
 class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
-  CoreInterfaceDesktopTun() : super(port: 17078);
+  CoreInterfaceDesktopTun({
+    Future<bool> Function()? privilegeProbe,
+    this.stopTimeout = const Duration(seconds: 8),
+    this.startTimeout = const Duration(seconds: 30),
+  }) : _privilegeProbe = privilegeProbe,
+       super(port: 17078);
+
+  final Future<bool> Function()? _privilegeProbe;
+  final Duration stopTimeout;
+  final Duration startTimeout;
+  int _stopEpoch = 0;
+  final _stopEpochChanges = StreamController<int>.broadcast(sync: true);
 
   static const _servicePort = 18020;
   final _status = BehaviorSubject<CoreStatus>.seeded(const CoreStatus.stopped());
@@ -109,49 +120,55 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<void> startManaged(String path, String name, bool disableMemoryLimit) async {
     final options = _options;
     if (options == null) throw StateError('Apply connection options before starting the core.');
+    final beforePrivilege = _stopEpoch;
     final wantAdminBg = useAdminBgService || _usingAdminBg || options.enableTun;
     final elevationWrapper = wrapAdminElevation;
-    await stop();
-    if (!wantAdminBg) {
+    final privileged = wantAdminBg && await _isPrivileged();
+    if (_stopEpoch != beforePrivilege) return;
+
+    // Stop only queues teardown. Restart queues stop/start atomically, so a
+    // start cannot race the asynchronous TUN teardown.
+    if (!wantAdminBg || privileged) {
+      if (_usingAdminBg) {
+        final expected = _stopEpoch + 1;
+        await stop();
+        if (_stopEpoch != expected) return;
+      }
+      final epoch = _stopEpoch;
       _usingAdminBg = false;
       bgClient = fgClient;
       _clientChanges.add(null);
-      _checkResponse(
-        await fgClient.start(StartRequest(configPath: path, configName: name, disableMemoryLimit: disableMemoryLimit)),
-      );
-      _status.add(const CoreStatus.started());
-      return;
-    }
-
-    // Already elevated: run TUN in this process. AppImage also cannot install a service.
-    if (await _isPrivileged()) {
       _status.add(const CoreStatus.starting());
       try {
-        _usingAdminBg = false;
-        bgClient = fgClient;
-        _clientChanges.add(null);
-        _checkResponse(
-          await fgClient.changeHiddifySettings(
-            ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
-          ),
-        );
-        _checkResponse(
-          await fgClient.start(
+        final started = await _foregroundCommand(
+          starting: true,
+          epoch: epoch,
+          send: () => fgClient.restart(
             StartRequest(configPath: path, configName: name, disableMemoryLimit: disableMemoryLimit),
           ),
         );
-        _status.add(const CoreStatus.started());
+        if (started && _stopEpoch == epoch) _status.add(const CoreStatus.started());
       } catch (error) {
+        if (_stopEpoch != epoch) return;
+        // Cancel a timed-out native start before reporting failure. A newer
+        // user operation owns cleanup once the epoch has changed.
+        try {
+          await stop();
+        } catch (stopError) {
+          loggy.warning('could not confirm cleanup after native startup failure: ${stopError.runtimeType}');
+        }
         _status.add(CoreStatus.stopped(message: error.toString()));
         rethrow;
       }
       return;
     }
 
+    final expected = _stopEpoch + 1;
+    await stop();
+    if (_stopEpoch != expected) return;
     if (_isAppImage) {
       throw StateError('VPN mode in the AppImage needs root. Quit and run: sudo ${Platform.environment['APPIMAGE']}');
     }
-
     _status.add(const CoreStatus.starting());
     try {
       final ensure = _ensureAdminBgAndAttach(
@@ -177,6 +194,94 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
       rethrow;
     }
   }
+
+  /// Wait for the native outcome, not the immediate RPC acknowledgement.
+  Future<bool> _foregroundCommand({
+    required bool starting,
+    required Future<CoreInfoResponse> Function() send,
+    int? epoch,
+  }) async {
+    final ready = Completer<void>();
+    final outcome = Completer<CoreInfoResponse?>();
+    Object? streamFailure;
+    var issued = false;
+    var sawStarting = false;
+    var cancelled = epoch != null && _stopEpoch != epoch;
+    void finish(CoreInfoResponse? info) {
+      if (!outcome.isCompleted) outcome.complete(info);
+    }
+
+    void fail(Object error) {
+      if (outcome.isCompleted) return;
+      streamFailure = error;
+      if (!ready.isCompleted) ready.complete();
+      finish(null);
+    }
+
+    final statuses = fgClient
+        .coreInfoListener(Empty())
+        .listen(
+          (info) {
+            // Arm after the initial snapshot: an earlier STOPPED is not the
+            // outcome of the command about to be issued.
+            if (!ready.isCompleted) {
+              ready.complete();
+              return;
+            }
+            if (!issued) return;
+            if (!starting) {
+              if (info.coreState == CoreStates.STOPPED) finish(info);
+              return;
+            }
+            if (info.coreState == CoreStates.STARTING) sawStarting = true;
+            if (_isRunningState(info.coreState) ||
+                (info.coreState == CoreStates.STOPPED &&
+                    (sawStarting ||
+                        (info.messageType != MessageType.EMPTY && info.messageType != MessageType.ALREADY_STOPPED)))) {
+              finish(info);
+            }
+          },
+          onError: (Object error) => fail(error),
+          onDone: () => fail(StateError('The native status channel closed.')),
+        );
+    final cancellation = epoch == null
+        ? null
+        : _stopEpochChanges.stream.listen((value) {
+            if (value == epoch) return;
+            cancelled = true;
+            if (!ready.isCompleted) ready.complete();
+            finish(null);
+          });
+    try {
+      return await (() async {
+        await ready.future;
+        if (cancelled) return false;
+        if (streamFailure != null) throw StateError('The native status channel is unavailable.');
+        issued = true;
+        final response = await send();
+        if (cancelled) return false;
+        _checkResponse(response, allowStopped: !starting);
+        if (!starting && response.coreState == CoreStates.STOPPED) return true;
+        if (starting && _isRunningState(response.coreState)) return true;
+        final finalState = await outcome.future;
+        if (cancelled) return false;
+        if (streamFailure != null || finalState == null) {
+          throw StateError('The native status channel is unavailable.');
+        }
+        _checkResponse(finalState, allowStopped: !starting);
+        if (starting && !_isRunningState(finalState.coreState)) {
+          throw StateError('The native core stopped before startup completed.');
+        }
+        return true;
+      })().timeout(starting ? startTimeout : stopTimeout);
+    } finally {
+      await cancellation?.cancel();
+      await statuses.cancel();
+    }
+  }
+
+  bool _isRunningState(CoreStates state) =>
+      state == CoreStates.WAITING || state == CoreStates.STARTED || state == CoreStates.NO_AVAILABLE_PROXIES;
 
   Future<void> _ensureAdminBgAndAttach({
     required String path,
@@ -264,6 +369,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<bool> _isPrivileged() async {
     final cached = _privileged;
     if (cached != null) return cached;
+    if (_privilegeProbe case final probe?) return _privileged = await probe();
     if (Platform.isLinux || Platform.isMacOS) {
       final result = await Process.run('id', ['-u']);
       _privileged = result.exitCode == 0 && result.stdout.toString().trim() == '0';
@@ -298,6 +404,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
 
   @override
   Future<bool> stop() async {
+    _stopEpochChanges.add(++_stopEpoch);
     _status.add(const CoreStatus.stopping());
     final wasAdminBg = _usingAdminBg;
     final old = _serviceChannel;
@@ -324,9 +431,10 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
       }
     }
     try {
-      _checkResponse(await fgClient.stop(Empty()), allowStopped: true);
+      await _foregroundCommand(starting: false, send: () => fgClient.stop(Empty()));
     } catch (error) {
-      loggy.warning('stopping the in-process core failed: $error');
+      loggy.warning('stopping the in-process core failed: ${error.runtimeType}');
+      rethrow;
     }
     _status.add(const CoreStatus.stopped());
     return true;
@@ -354,6 +462,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<void> dispose() async {
     await _serviceChannel?.shutdown();
     await _clientChanges.close();
+    await _stopEpochChanges.close();
     await _status.close();
   }
 }

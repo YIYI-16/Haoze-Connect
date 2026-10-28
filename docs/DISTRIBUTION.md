@@ -25,6 +25,12 @@ minimum toolset version and Microsoft Authenticode signature using local trust
 without online revocation requests. Release/Profile installation retains the
 original signed Microsoft files.
 
+In-process desktop VPN refreshes now use the native atomic Restart operation.
+The client waits for the actual startup/stop state instead of treating an RPC
+acknowledgement as completed teardown; a user disconnect cancels the pending
+startup. Local gRPC regressions model delayed teardown, startup failure, stop
+timeout and disconnect during restart.
+
 CI also starts the built application and checks for a stable, responsive native
 window before packaging. This checks native loading, not account or VPN
 functionality. TLS failures now explain the system-time/certificate-trust check
