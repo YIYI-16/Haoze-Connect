@@ -31,12 +31,12 @@
 > public fork, releases produced through that fork's GitHub Actions,
 > attribution kept). No claim is made here about the legal sufficiency of that
 > interpretation. No public release or store submission has been made. Verified
-> locally as described in `docs/DISTRIBUTION.md`: 140 related Flutter tests,
+> locally as described in `docs/DISTRIBUTION.md`: 160 related Flutter tests,
 > 37 distribution checks and strict `flutter analyze` pass. The Android ARM64
 > Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
-> debug certificate. The private Windows build passed analysis and 61 tests,
+> debug certificate. The private Windows 5.0.1 build passed analysis and 81 tests,
 > compiled the x64 app, and produced unsigned EXE/ZIP test packages:
-> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40630912669).
+> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40638363439).
 > Downloaded Windows package contents and native-core hashes were verified.
 > Real-device installation, login and node connectivity still need testing;
 > the Windows icon remains the upstream placeholder. Source remains private;

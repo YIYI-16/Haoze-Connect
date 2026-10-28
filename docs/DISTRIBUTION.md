@@ -8,11 +8,35 @@ produced. Nothing here is a statement about the legal sufficiency of the
 license interpretation below — read `LICENSE.md` yourself before any public
 distribution.
 
-**No public fork exists yet.** This repository is currently only a local
-checkout; nothing has been published or released. Before any public
+**No public fork exists yet.** Source and test builds also exist in the
+authorized private `HaozeZane/Haoze-Connect` repository; no public Release or
+store submission has been made. Before any public
 distribution, a public fork must be created and the release must be produced
 through that fork's GitHub Actions, as `LICENSE.md` requires (see the license
 notes below).
+
+## 5.0.1 default-China test build
+
+The managed app defaults to region `cn`, including the built-in region-direct
+rule and `223.5.5.5` direct DNS. An upgrade uses this default when no region was
+saved. Explicit user selections, DNS overrides and rule switches are preserved.
+
+Build source: `605ce607c32419281ca8c49b5337c6f7689ebb92`.
+Local verification: 160 related Flutter tests, 37 distribution checks, strict
+analysis and a real ARM64 Release-mode APK build passed. The APK version is
+`5.0.1+50001`; its test certificate matches the previous APK.
+
+The private [Windows run 40638363439](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40638363439)
+succeeded, including strict analysis, 81 Flutter tests, x64 compilation and
+EXE/ZIP packaging. Downloaded packages passed integrity, architecture, app
+version and pinned native-core checks.
+
+Current artifacts and verification records are in `artifacts/5.0.1/`. The
+three-package bundle is `HaozeConnect-Android-Windows-Test-5.0.1.zip` (Windows
+Setup EXE, Windows standalone ZIP, Android ARM64 APK). The requested home
+delivery location is `/home/zhou/` with owner `zhou:zhou`.
+These remain unsigned Windows / debug-certificate Android test packages;
+real-device installation, login and VPN routing behavior remain unverified.
 
 ## Branding & package identity
 
@@ -139,7 +163,7 @@ tags cannot run those upstream distribution jobs; use the Haoze manual workflow.
 Windows branding asset is still pending: `windows/runner/resources/app_icon.ico`
 remains the upstream placeholder icon until Haoze icon material exists.
 
-## Local validation performed
+## Earlier 5.0.0 validation baseline
 
 - `python3 scripts/haoze_validate.py` — configuration/unittest checks:
   Android id/label/allowBackup/namespace, original launcher vector, Windows exe
