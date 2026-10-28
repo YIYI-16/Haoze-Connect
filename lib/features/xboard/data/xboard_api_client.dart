@@ -1,20 +1,22 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hiddify/features/xboard/config/xboard_config.dart';
+import 'package:hiddify/features/xboard/data/xboard_transport_failure.dart';
 import 'package:hiddify/features/xboard/model/xboard_models.dart';
+import 'package:hiddify/utils/custom_loggers.dart';
 
 /// Classification kept separate from the user-facing [XboardException.message]
 /// so callers can distinguish an invalid session from a network outage.
 enum XboardFailureKind { network, unauthorized, server, protocol, configuration, subscription }
 
 class XboardException implements Exception {
-  const XboardException(this.message, {this.kind = XboardFailureKind.server});
+  const XboardException(this.message, {this.kind = XboardFailureKind.server, this.transportFailure});
 
   final String message;
   final XboardFailureKind kind;
+  final XboardTransportFailure? transportFailure;
 
   bool get isUnauthorized => kind == XboardFailureKind.unauthorized;
 
@@ -64,7 +66,7 @@ abstract interface class XboardApi {
 ///
 /// It intentionally does not reuse the app's Sentry-enabled HTTP client: panel
 /// credentials and subscription URLs must never pass through request logging.
-class XboardApiClient implements XboardApi {
+class XboardApiClient with InfraLogger implements XboardApi {
   XboardApiClient({required this.config, required String userAgent, Dio? dio})
     : _dio =
           dio ??
@@ -171,11 +173,7 @@ class XboardApiClient implements XboardApi {
       // Use an absolute URL: Dio concatenates baseUrl and path as plain strings,
       // so a base without a trailing slash plus a path without a leading slash
       // would produce `/api/v1passport/...`.
-      final response = await _dio.request<dynamic>(
-        config.endpoint(path).toString(),
-        data: body,
-        options: Options(method: method, headers: authData == null ? null : {'Authorization': authData}),
-      );
+      final response = await _sendRequest(method, path, body: body, authData: authData);
       final status = response.statusCode ?? 0;
       final payload = response.data;
       final data = payload is Map ? payload.cast<String, dynamic>() : <String, dynamic>{};
@@ -203,11 +201,36 @@ class XboardApiClient implements XboardApi {
         // traces. Only the status-derived safe message is shown.
         throw XboardException(_fallbackMessage(status));
       }
-      throw XboardException(_networkMessage(error), kind: XboardFailureKind.network);
+      final failure = classifyXboardTransportFailure(error);
+      throw XboardException(_networkMessage(failure), kind: XboardFailureKind.network, transportFailure: failure);
     } on TimeoutException {
       throw const XboardException('网络请求超时，请稍后重试', kind: XboardFailureKind.network);
     } catch (_) {
       throw const XboardException('无法连接面板，请检查网络后重试', kind: XboardFailureKind.network);
+    }
+  }
+
+  Future<Response<dynamic>> _sendRequest(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    String? authData,
+  }) async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        return await _dio.request<dynamic>(
+          config.endpoint(path).toString(),
+          data: body,
+          options: Options(method: method, headers: authData == null ? null : {'Authorization': authData}),
+        );
+      } on DioException catch (error) {
+        if (error.type != DioExceptionType.badResponse) {
+          loggy.warning(XboardTransportDiagnostic(error, attempt: attempt + 1).toString());
+        }
+        // Only reads may be replayed, once, after a known connection interruption.
+        // Login, registration and verification-code POSTs must never be replayed.
+        if (method != 'GET' || attempt != 0 || !classifyXboardTransportFailure(error).canRetryGet) rethrow;
+      }
     }
   }
 
@@ -217,19 +240,17 @@ class XboardApiClient implements XboardApi {
     throw const XboardException('面板返回的数据格式不正确', kind: XboardFailureKind.protocol);
   }
 
-  String _networkMessage(DioException error) {
-    if (error.type == DioExceptionType.badCertificate || error.error is TlsException) {
-      // TLS failures otherwise arrive as Dio's `unknown` type. Keep certificate
-      // verification enabled and give a useful message without the raw error,
-      // which can contain a request URL or credentials.
-      return 'HTTPS 安全连接失败，请检查系统时间和证书信任后重试';
-    }
-    return switch (error.type) {
-      DioExceptionType.connectionTimeout ||
-      DioExceptionType.sendTimeout ||
-      DioExceptionType.receiveTimeout => '网络请求超时，请稍后重试',
-      DioExceptionType.connectionError => '无法连接面板，请检查网络后重试',
-      DioExceptionType.cancel => '请求已取消',
+  String _networkMessage(XboardTransportFailure failure) {
+    // Never surface the underlying exception, which can contain sensitive URLs.
+    return switch (failure) {
+      XboardTransportFailure.certificateRejected => 'HTTPS 证书验证失败，请检查系统时间和证书信任后重试',
+      XboardTransportFailure.tlsHandshake => 'HTTPS 握手失败，请检查网络或代理设置后重试',
+      XboardTransportFailure.tlsProtocol => 'HTTPS 安全连接失败，请检查网络或代理设置后重试',
+      XboardTransportFailure.tlsInterrupted => 'HTTPS 连接在握手时中断，请检查网络或代理设置后重试',
+      XboardTransportFailure.connectionInterrupted => '面板连接中断，请检查网络后重试',
+      XboardTransportFailure.timeout => '网络请求超时，请稍后重试',
+      XboardTransportFailure.connection => '无法连接面板，请检查网络后重试',
+      XboardTransportFailure.cancelled => '请求已取消',
       _ => '面板请求失败，请稍后重试',
     };
   }

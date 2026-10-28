@@ -21,19 +21,23 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     Future<bool> Function()? privilegeProbe,
     this.stopTimeout = const Duration(seconds: 8),
     this.startTimeout = const Duration(seconds: 30),
+    this.tunCollisionRetryDelay = const Duration(milliseconds: 500),
   }) : _privilegeProbe = privilegeProbe,
        super(port: 17078);
 
   final Future<bool> Function()? _privilegeProbe;
   final Duration stopTimeout;
   final Duration startTimeout;
+  final Duration tunCollisionRetryDelay;
   int _stopEpoch = 0;
-  final _stopEpochChanges = StreamController<int>.broadcast(sync: true);
+  int _startOperation = 0;
+  final _operationChanges = StreamController<void>.broadcast(sync: true);
 
   static const _servicePort = 18020;
   final _status = BehaviorSubject<CoreStatus>.seeded(const CoreStatus.stopped());
   final _clientChanges = StreamController<void>.broadcast();
   ClientChannel? _serviceChannel;
+  Future<void>? _pendingAdminEnsure;
   Directory? _workingDirectory;
   SingboxConfigOption? _options;
   bool _usingAdminBg = false;
@@ -118,92 +122,122 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
 
   @override
   Future<void> startManaged(String path, String name, bool disableMemoryLimit) async {
+    final operation = ++_startOperation;
+    _operationChanges.add(null);
     final options = _options;
     if (options == null) throw StateError('Apply connection options before starting the core.');
-    final beforePrivilege = _stopEpoch;
+    var epoch = _stopEpoch;
     final wantAdminBg = useAdminBgService || _usingAdminBg || options.enableTun;
     final elevationWrapper = wrapAdminElevation;
     final privileged = wantAdminBg && await _isPrivileged();
-    if (_stopEpoch != beforePrivilege) return;
+    if (!_ownsStart(operation, epoch)) return;
+    final foreground = !wantAdminBg || privileged;
     final restoreForegroundOptions = privileged && (useAdminBgService || _usingAdminBg);
 
-    // Stop only queues teardown. Restart queues stop/start atomically, so a
-    // start cannot race the asynchronous TUN teardown.
-    if (!wantAdminBg || privileged) {
-      if (_usingAdminBg) {
-        final expected = _stopEpoch + 1;
-        await stop();
-        if (_stopEpoch != expected) return;
-      }
-      final epoch = _stopEpoch;
+    if (!foreground || _usingAdminBg || _pendingAdminEnsure != null) {
+      final expected = epoch + 1;
+      final stopped = await stop();
+      if (!stopped || !_ownsStart(operation, expected)) return;
+      epoch = expected;
+    }
+    if (!foreground && _isAppImage) {
+      throw StateError('VPN mode in the AppImage needs root. Quit and run: sudo ${Platform.environment['APPIMAGE']}');
+    }
+    if (foreground) {
       _usingAdminBg = false;
       useAdminBgService = false;
       wrapAdminElevation = null;
       bgClient = fgClient;
       _clientChanges.add(null);
+    }
+
+    // Restart already serializes native close/start. The retry below is only
+    // for the specific IPv6-address collision, whose cleanup can remain stale
+    // even after that serialized teardown. Never retry a generic TUN failure.
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (!_ownsStart(operation, epoch)) return;
       _status.add(const CoreStatus.starting());
       try {
-        if (restoreForegroundOptions) {
-          _checkResponse(
-            await fgClient.changeHiddifySettings(
-              ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
+        if (foreground) {
+          if (restoreForegroundOptions) {
+            _checkResponse(
+              await fgClient.changeHiddifySettings(
+                ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
+              ),
+            );
+            if (!_ownsStart(operation, epoch)) return;
+          }
+          final started = await _foregroundCommand(
+            starting: true,
+            epoch: epoch,
+            operation: operation,
+            send: () => fgClient.restart(
+              StartRequest(configPath: path, configName: name, disableMemoryLimit: disableMemoryLimit),
             ),
           );
-          if (_stopEpoch != epoch) return;
+          if (!started || !_ownsStart(operation, epoch)) return;
+        } else {
+          late final Future<void> ensure;
+          ensure =
+              _ensureAdminBgAndAttach(
+                path: path,
+                name: name,
+                options: options,
+                disableMemoryLimit: disableMemoryLimit,
+                operation: operation,
+                epoch: epoch,
+              ).whenComplete(() {
+                if (identical(_pendingAdminEnsure, ensure)) _pendingAdminEnsure = null;
+              });
+          _pendingAdminEnsure = ensure;
+          if (elevationWrapper != null) {
+            final ok = await elevationWrapper(ensure);
+            await ensure;
+            if (!_ownsStart(operation, epoch)) return;
+            wrapAdminElevation = null;
+            if (!ok) {
+              throw StateError('Administrator permission was not given, so VPN mode could not connect.');
+            }
+          } else {
+            await ensure;
+          }
+          if (!_ownsStart(operation, epoch)) return;
         }
-        final started = await _foregroundCommand(
-          starting: true,
-          epoch: epoch,
-          send: () => fgClient.restart(
-            StartRequest(configPath: path, configName: name, disableMemoryLimit: disableMemoryLimit),
-          ),
-        );
-        if (started && _stopEpoch == epoch) _status.add(const CoreStatus.started());
-      } catch (error) {
-        if (_stopEpoch != epoch) return;
-        // Cancel a timed-out native start before reporting failure. A newer
-        // user operation owns cleanup once the epoch has changed.
+        _status.add(const CoreStatus.started());
+        return;
+      } catch (error, stackTrace) {
+        if (!_ownsStart(operation, epoch)) return;
+        final collision = options.enableTun && _isTunIpv6AddressCollision(error);
+        final expectedCleanup = epoch + 1;
+        var stopped = false;
+        // Public stop increments the epoch too. Only our exact cleanup epoch
+        // may resume this operation; a user stop or newer start owns it otherwise.
         try {
-          await stop();
+          stopped = await _stop(confirmAdminStop: !foreground);
         } catch (stopError) {
           loggy.warning('could not confirm cleanup after native startup failure: ${stopError.runtimeType}');
         }
-        _status.add(CoreStatus.stopped(message: error.toString()));
-        rethrow;
-      }
-      return;
-    }
-
-    final expected = _stopEpoch + 1;
-    await stop();
-    if (_stopEpoch != expected) return;
-    if (_isAppImage) {
-      throw StateError('VPN mode in the AppImage needs root. Quit and run: sudo ${Platform.environment['APPIMAGE']}');
-    }
-    _status.add(const CoreStatus.starting());
-    try {
-      final ensure = _ensureAdminBgAndAttach(
-        path: path,
-        name: name,
-        options: options,
-        disableMemoryLimit: disableMemoryLimit,
-      );
-      final wrap = elevationWrapper;
-      if (wrap != null) {
-        final ok = await wrap(ensure);
-        wrapAdminElevation = null;
-        if (!ok) {
-          throw StateError('Administrator permission was not given, so VPN mode could not connect.');
+        if (!_ownsStart(operation, expectedCleanup)) return;
+        epoch = expectedCleanup;
+        if (collision && attempt == 0 && stopped) {
+          await Future<void>.delayed(tunCollisionRetryDelay);
+          if (!_ownsStart(operation, epoch)) return;
+          continue;
         }
-      } else {
-        await ensure;
+        final failure = collision ? StateError('$error\nVPN 虚拟网卡 IPv6 地址初始化冲突，无法安全恢复。请退出客户端后重新启动；若仍失败，请保留日志。') : error;
+        _status.add(CoreStatus.stopped(alert: foreground ? null : CoreAlert.startFailed, message: failure.toString()));
+        Error.throwWithStackTrace(failure, stackTrace);
       }
-      _status.add(const CoreStatus.started());
-    } catch (error) {
-      wrapAdminElevation = null;
-      await _abandonVpnStart(error);
-      rethrow;
     }
+  }
+
+  bool _ownsStart(int operation, int epoch) => operation == _startOperation && epoch == _stopEpoch;
+
+  bool _isTunIpv6AddressCollision(Object error) {
+    const prefix = 'start inbound/tun[tun-in]: configure tun interface: set ipv6 address: ';
+    const duplicates = ['The object already exists.', '对象已存在。'];
+    final message = error.toString();
+    return duplicates.any((suffix) => message.contains('$prefix$suffix'));
   }
 
   /// Wait for the native outcome, not the immediate RPC acknowledgement.
@@ -211,13 +245,15 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     required bool starting,
     required Future<CoreInfoResponse> Function() send,
     int? epoch,
+    int? operation,
   }) async {
     final ready = Completer<void>();
     final outcome = Completer<CoreInfoResponse?>();
     Object? streamFailure;
     var issued = false;
     var sawStarting = false;
-    var cancelled = epoch != null && _stopEpoch != epoch;
+    bool isCurrent() => (epoch == null || _stopEpoch == epoch) && (operation == null || _startOperation == operation);
+    var cancelled = !isCurrent();
     void finish(CoreInfoResponse? info) {
       if (!outcome.isCompleted) outcome.complete(info);
     }
@@ -255,10 +291,10 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
           onError: (Object error) => fail(error),
           onDone: () => fail(StateError('The native status channel closed.')),
         );
-    final cancellation = epoch == null
+    final cancellation = epoch == null && operation == null
         ? null
-        : _stopEpochChanges.stream.listen((value) {
-            if (value == epoch) return;
+        : _operationChanges.stream.listen((_) {
+            if (isCurrent()) return;
             cancelled = true;
             if (!ready.isCompleted) ready.complete();
             finish(null);
@@ -299,10 +335,13 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     required String name,
     required SingboxConfigOption options,
     required bool disableMemoryLimit,
+    required int operation,
+    required int epoch,
   }) async {
     final workingDirectory = _workingDirectory;
     if (workingDirectory == null) throw StateError('Set up the core before starting VPN mode.');
     final snapshot = await snapshotVpnConfiguration(path, workingDirectory);
+    if (!_ownsStart(operation, epoch)) return;
     final resources = <String, List<int>>{};
     for (final entry in snapshot.$2.entries) {
       resources[entry.key] = entry.value;
@@ -333,16 +372,19 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
         );
       }
     }
+    if (!_ownsStart(operation, epoch)) return;
     if (last != EnsureAdminBgServiceProgress.ENSURE_ADMIN_BG_SERVICE_CONNECTED) {
       throw StateError(
         (lastMessage != null && lastMessage.isNotEmpty) ? lastMessage : 'The VPN service did not become ready.',
       );
     }
 
-    _secret = (await File(_secretPath).readAsString()).trim();
-    if (_secret.length < 32) {
+    final secret = (await File(_secretPath).readAsString()).trim();
+    if (!_ownsStart(operation, epoch)) return;
+    if (secret.length < 32) {
       throw StateError('The VPN service secret is missing. Reinstall the VPN service.');
     }
+    _secret = secret;
     final old = _serviceChannel;
     _serviceChannel = ClientChannel(
       '127.0.0.1',
@@ -355,26 +397,26 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     _clientChanges.add(null);
   }
 
-  /// Tears down a partial VPN connect so the UI never stays Connected/Starting.
-  Future<void> _abandonVpnStart(Object error) async {
-    final failedChannel = _serviceChannel;
-    _serviceChannel = null;
-    _usingAdminBg = false;
-    bgClient = fgClient;
-    _clientChanges.add(null);
-    if (failedChannel != null) {
-      unawaited(() async {
-        try {
-          await failedChannel.shutdown();
-        } catch (_) {}
-      }());
-    }
+  /// A successful CLI exit alone is insufficient after a partially failed
+  /// Ensure. Require the authenticated native core to report STOPPED as well.
+  Future<void> _confirmAdminBgStopped() async {
+    final secret = (await File(_secretPath).readAsString()).trim();
+    if (secret.length < 32) throw StateError('The VPN service secret is missing.');
+    final channel = ClientChannel(
+      '127.0.0.1',
+      port: _servicePort,
+      options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
+    );
     try {
-      await _runCli(['admin_bgservice', 'disconnect']);
-    } catch (_) {}
-    final message = error.toString();
-    _status.add(CoreStatus.stopped(alert: CoreAlert.startFailed, message: message));
-    loggy.warning('VPN start failed: $message');
+      final client = CoreClient(
+        channel,
+        options: CallOptions(metadata: {'x-hiddify-secret': secret}, timeout: stopTimeout),
+      );
+      final state = await client.coreInfoListener(Empty()).first.timeout(stopTimeout);
+      if (state.coreState != CoreStates.STOPPED) throw StateError('The VPN service did not confirm shutdown.');
+    } finally {
+      await channel.terminate();
+    }
   }
 
   Future<bool> _isPrivileged() async {
@@ -414,10 +456,15 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   }
 
   @override
-  Future<bool> stop() async {
-    _stopEpochChanges.add(++_stopEpoch);
+  Future<bool> stop() => _stop();
+
+  Future<bool> _stop({bool confirmAdminStop = false}) async {
+    final epoch = ++_stopEpoch;
+    final operation = _startOperation;
+    _operationChanges.add(null);
     _status.add(const CoreStatus.stopping());
     final wasAdminBg = _usingAdminBg;
+    final pendingEnsure = _pendingAdminEnsure;
     final old = _serviceChannel;
     _serviceChannel = null;
     _usingAdminBg = false;
@@ -434,16 +481,35 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
         }
       }());
     }
-    if (wasAdminBg) {
+    // Canceling the Ensure stream does not cancel its native CLI subprocess.
+    // Observe its completion before disconnecting, so it cannot start a tunnel
+    // after this stop has already reported success or after a newer start.
+    if (pendingEnsure != null) {
+      await pendingEnsure.catchError((Object _) {}).timeout(startTimeout);
+      if (!_ownsStart(operation, epoch)) return false;
+    }
+    if (wasAdminBg || pendingEnsure != null || confirmAdminStop) {
       try {
-        await _runCli(['admin_bgservice', 'disconnect']);
+        await _runCli(['admin_bgservice', 'disconnect']).timeout(stopTimeout);
+        if (!_ownsStart(operation, epoch)) return false;
+        if (confirmAdminStop) await _confirmAdminBgStopped();
       } catch (error) {
+        if (!_ownsStart(operation, epoch)) return false;
         loggy.warning('stopping the VPN service failed: $error');
+        rethrow;
       }
     }
+    if (!_ownsStart(operation, epoch)) return false;
     try {
-      await _foregroundCommand(starting: false, send: () => fgClient.stop(Empty()));
+      final stopped = await _foregroundCommand(
+        starting: false,
+        epoch: epoch,
+        operation: operation,
+        send: () => fgClient.stop(Empty()),
+      );
+      if (!stopped || !_ownsStart(operation, epoch)) return false;
     } catch (error) {
+      if (!_ownsStart(operation, epoch)) return false;
       loggy.warning('stopping the in-process core failed: ${error.runtimeType}');
       rethrow;
     }
@@ -473,7 +539,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<void> dispose() async {
     await _serviceChannel?.shutdown();
     await _clientChanges.close();
-    await _stopEpochChanges.close();
+    await _operationChanges.close();
     await _status.close();
   }
 }

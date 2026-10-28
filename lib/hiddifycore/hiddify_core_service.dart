@@ -50,6 +50,7 @@ class HiddifyCoreService with InfraLogger {
   // before the old channel is closed, so the end of the old listener's stream isn't taken for the
   // core stopping; the new listener reports the core's real state first thing.
   int _statusListener = 0;
+  Future<Either<String, Unit>>? _setupFuture;
 
   Future<void> init() async {
     await setup()
@@ -94,7 +95,13 @@ class HiddifyCoreService with InfraLogger {
     });
   }
 
-  TaskEither<String, Unit> setup() {
+  TaskEither<String, Unit> setup() => TaskEither(() {
+    // Resume and config validation can request setup together. Replacing the
+    // same clients twice races their listeners and native initialization.
+    return _setupFuture ??= _setup().run().whenComplete(() => _setupFuture = null);
+  });
+
+  TaskEither<String, Unit> _setup() {
     return TaskEither(() async {
       // the status listener in place stops counting before its channel is replaced
       _statusListener++;
@@ -698,6 +705,10 @@ class HiddifyCoreService with InfraLogger {
   }
 
   Future<void> startListeningLogs(String key, CoreClient cc) async {
+    if (key == 'bg' && !await core.isBgClientAvailable()) {
+      await stopListenSingle('bgLogListener');
+      return;
+    }
     final logLevel = ref.read(ConfigOptions.logLevel);
     final coreLogLevel = getCoreLogLevel(logLevel);
     final listenKey = "${key}LogListener";

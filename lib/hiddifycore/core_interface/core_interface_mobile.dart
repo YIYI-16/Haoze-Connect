@@ -29,7 +29,6 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
   static const portBack = 17079;
   static const portFront = 17078;
 
-  bool _isBgClientAvailable = false;
   bool _debug = false;
   bool _useMtls = false;
   ChannelCredentials _credentials = const ChannelCredentials.insecure();
@@ -141,10 +140,6 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
       unawaited(channel?.shutdown());
     }
 
-    // Tunnel can outlive the Flutter process; treat a live bg port as available.
-    if (await isPortOpen('127.0.0.1', portBack)) {
-      _isBgClientAvailable = true;
-    }
     return '';
   }
 
@@ -193,7 +188,6 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
       'debug': _debug,
     });
 
-    _isBgClientAvailable = true;
     loggy.info('Waiting for starting core');
     final waitingSince = DateTime.now();
     // The reply to "start" only means the service was asked to start; whether it did arrives
@@ -232,17 +226,14 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
     // (after Mobile.close), so only briefly poll the gRPC port.
     await stopMethodChannel();
     if (!await isPortOpen('127.0.0.1', portBack)) {
-      _isBgClientAvailable = false;
       return true;
     }
     if (!await waitUntilPort(portBack, false, null)) {
       loggy.warning('background port $portBack still open after stop');
       // Platform stop finished; do not leave Disconnecting forever (#2395).
-      _isBgClientAvailable = false;
       return true;
     }
 
-    _isBgClientAvailable = false;
     return true;
   }
 
@@ -251,8 +242,10 @@ class CoreInterfaceMobile extends CoreInterface with InfraLogger {
   }
 
   @override
-  Future<bool> isBgClientAvailable() async {
-    return _isBgClientAvailable;
+  Future<bool> isBgClientAvailable() {
+    // A native start request is only an acknowledgement. Probe the actual
+    // service, including a tunnel that outlived Flutter or stopped externally.
+    return isActiveBg();
   }
 
   @override

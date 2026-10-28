@@ -41,7 +41,7 @@ class PreferencesEntry<T, P> with InfraLogger {
 
   Future<bool> write(T value) async {
     Object? mapped = value;
-    if (mapTo != null) {
+    if (value != null && mapTo != null) {
       mapped = mapTo!(value);
     }
     loggy.debug("updating preference [$key]($T) to [$mapped]");
@@ -52,6 +52,7 @@ class PreferencesEntry<T, P> with InfraLogger {
       }
 
       return switch (mapped) {
+        null => await preferences.remove(key),
         final String value => await preferences.setString(key, value),
         final bool value => await preferences.setBool(key, value),
         final int value => await preferences.setInt(key, value),
@@ -66,14 +67,16 @@ class PreferencesEntry<T, P> with InfraLogger {
   }
 
   Future<T?> writeRaw(P input) async {
-    final T value;
-    if (mapFrom != null) {
-      value = mapFrom!(input);
-    } else {
-      value = input as T;
-    }
+    final value = _fromRaw(input);
     if (await write(value)) return value;
     return null;
+  }
+
+  T _fromRaw(P input) {
+    if (mapFrom != null) {
+      return mapFrom!(input);
+    }
+    return input as T;
   }
 
   Future<void> remove() async {
@@ -127,8 +130,9 @@ class PreferencesNotifier<T, P> extends StateNotifier<T> {
   }
 
   Future<void> updateRaw(P input) async {
-    final value = await entry.writeRaw(input);
-    if (value != null) state = value;
+    // A null value can be a successful removal, so use the persistence result
+    // rather than writeRaw's nullable return value to decide whether to publish.
+    await update(entry._fromRaw(input));
   }
 
   Future<void> update(T value) async {

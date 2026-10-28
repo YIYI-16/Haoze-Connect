@@ -103,6 +103,8 @@ void main() {
   }
 
   const defaults = ['builtin:bypassLan on', 'builtin:blockAds off', 'builtin:bypassRegion on'];
+  const chinaDomains = 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs';
+  const countryGeo = 'https://raw.githubusercontent.com/hiddify/hiddify-geo/rule-set/country';
 
   group('a new list', () {
     test('defaults to China with direct DNS and an enabled region bypass when no region is saved', () async {
@@ -115,6 +117,9 @@ void main() {
           .singleWhere((rule) => rule.name == BuiltinRule.bypassRegion.key);
       expect(rule.outbound, Outbound.direct);
       expect(rule.enabled, isTrue);
+      expect(rule.ruleSets, [chinaDomains, '$countryGeo/geoip-{region}.srs']);
+      expect(rule.domains, isEmpty);
+      expect(rule.ipCidrs, isEmpty);
       expect(container.read(sharedPreferencesProvider).requireValue.containsKey('region'), isFalse);
     });
 
@@ -131,6 +136,32 @@ void main() {
   });
 
   group('a saved list', () {
+    test('refreshes saved China domain content without changing custom rules, order or switches', () async {
+      final unknown = Rule(
+        name: 'builtin:customChinaDomains',
+        enabled: true,
+        outbound: Outbound.proxy,
+        ruleSets: ['https://example.com/custom.srs'],
+        domains: ['custom.example'],
+      );
+      save([
+        unknown,
+        builtin(BuiltinRule.bypassRegion, enabled: false),
+        builtin(BuiltinRule.bypassLan, enabled: true),
+        builtin(BuiltinRule.blockAds, enabled: false),
+      ]);
+      final container = await open(region: Region.cn);
+      final updated = container.read(rulesNotifierProvider);
+      expect(updated[0], unknown);
+      expect(updated[1].ruleSets, [chinaDomains, '$countryGeo/geoip-{region}.srs']);
+      expect(current(container), [
+        'builtin:customChinaDomains on',
+        'builtin:bypassRegion off',
+        'builtin:bypassLan on',
+        'builtin:blockAds off',
+      ]);
+    });
+
     test('keeps its order and switches', () async {
       save([
         custom('a'),
@@ -218,8 +249,18 @@ void main() {
 
     test("between regions keeps the region rule's place and switch", () async {
       final container = await openSaved();
+      final customRule = container.read(rulesNotifierProvider).first;
       await changeRegion(container, Region.cn);
       expect(current(container), ['a on', 'builtin:bypassRegion off', 'builtin:bypassLan on', 'builtin:blockAds off']);
+      expect(container.read(rulesNotifierProvider)[1].ruleSets, [chinaDomains, '$countryGeo/geoip-{region}.srs']);
+      expect(identical(container.read(rulesNotifierProvider).first, customRule), isTrue);
+      expectSaved(container);
+
+      await changeRegion(container, Region.ir);
+      expect(current(container), ['a on', 'builtin:bypassRegion off', 'builtin:bypassLan on', 'builtin:blockAds off']);
+      expect(container.read(rulesNotifierProvider)[1].ruleSets, BuiltinRule.bypassRegion.rule.ruleSets);
+      expect(identical(container.read(rulesNotifierProvider).first, customRule), isTrue);
+      expectSaved(container);
     });
 
     test('on a list never saved keeps the default order', () async {
@@ -227,6 +268,21 @@ void main() {
       await changeRegion(container, Region.ir);
       expect(current(container), defaults);
     });
+  });
+
+  test('only China changes its built-in domain source', () {
+    for (final region in Region.values) {
+      for (final builtin in BuiltinRule.values) {
+        final expected = builtin.rule;
+        if (region == Region.cn && builtin == BuiltinRule.bypassRegion) expected.ruleSets[0] = chinaDomains;
+        expect(builtin.ruleForRegion(region), expected, reason: '${builtin.name}: ${region.name}');
+      }
+    }
+    // Regional specialization creates a new message and leaves the template intact.
+    expect(BuiltinRule.bypassRegion.rule.ruleSets, [
+      '$countryGeo/geosite-{region}.srs',
+      '$countryGeo/geoip-{region}.srs',
+    ]);
   });
 
   group('the user', () {

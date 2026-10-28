@@ -100,6 +100,9 @@ jobs:
         run: |
           flutter analyze
           flutter test test/features/xboard test/features/xboard_ui \
+            test/core/utils/preferences_utils_test.dart \
+            test/features/settings/data/ipv6_routing_policy_test.dart \
+            test/hiddifycore/core_setup_lifecycle_test.dart \
             test/hiddifycore/core_listener_lifecycle_test.dart \
             test/hiddifycore/core_reload_cancellation_test.dart test/hiddifycore/core_desktop_lifecycle_test.dart \
             test/features/route_rules/builtin_rules_test.dart \
@@ -203,7 +206,7 @@ jobs:
         run: |
           flutter analyze
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter test test/features/xboard test/features/xboard_ui test/hiddifycore/core_listener_lifecycle_test.dart test/hiddifycore/core_reload_cancellation_test.dart test/hiddifycore/core_desktop_lifecycle_test.dart test/features/route_rules/builtin_rules_test.dart test/features/profile/data/profile_repository_test.dart test/features/connection/model/startup_connection_test.dart
+          flutter test test/features/xboard test/features/xboard_ui test/core/utils/preferences_utils_test.dart test/features/settings/data/ipv6_routing_policy_test.dart test/hiddifycore/core_setup_lifecycle_test.dart test/hiddifycore/core_listener_lifecycle_test.dart test/hiddifycore/core_reload_cancellation_test.dart test/hiddifycore/core_desktop_lifecycle_test.dart test/features/route_rules/builtin_rules_test.dart test/features/profile/data/profile_repository_test.dart test/features/connection/model/startup_connection_test.dart
 
       - name: Setup Inno Setup (required by EXE installer packaging)
         run: choco install innosetup -y --no-progress

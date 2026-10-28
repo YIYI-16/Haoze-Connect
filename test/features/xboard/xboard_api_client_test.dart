@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiddify/features/xboard/config/xboard_config.dart';
 import 'package:hiddify/features/xboard/data/xboard_api_client.dart';
+import 'package:hiddify/features/xboard/data/xboard_transport_failure.dart';
+import 'package:logging/logging.dart';
 
 void main() {
   late XboardClientConfig config;
@@ -172,19 +174,25 @@ void main() {
     );
   });
 
-  test('TLS errors explain trust checks without exposing request details or invalidating the account', () async {
-    for (final type in [DioExceptionType.unknown, DioExceptionType.badCertificate]) {
+  test('verified certificate failures are safe and never retried', () async {
+    for (final failure in [
+      (DioExceptionType.unknown, const HandshakeException('CERTIFICATE_VERIFY_FAILED: Bearer secret')),
+      (DioExceptionType.badCertificate, null),
+      (DioExceptionType.unknown, const CertificateException('Bearer secret')),
+      (
+        DioExceptionType.unknown,
+        const HandshakeException('Handshake error', OSError('CERTIFICATE_VERIFY_FAILED: Bearer secret')),
+      ),
+    ]) {
+      var requests = 0;
       final api = XboardApiClient(
         config: config,
         userAgent: 'test',
         dio: Dio()
-          ..httpClientAdapter = _FakeAdapter(
-            (options) => throw DioException(
-              requestOptions: options,
-              type: type,
-              error: const HandshakeException('certificate failed for Bearer secret'),
-            ),
-          ),
+          ..httpClientAdapter = _FakeAdapter((options) {
+            requests++;
+            throw DioException(requestOptions: options, type: failure.$1, error: failure.$2);
+          }),
       );
       addTearDown(api.close);
       await expectLater(
@@ -192,11 +200,205 @@ void main() {
         throwsA(
           isA<XboardException>()
               .having((error) => error.kind, 'kind', XboardFailureKind.network)
+              .having((error) => error.transportFailure, 'category', XboardTransportFailure.certificateRejected)
               .having((error) => error.message, 'trust guidance', contains('证书信任'))
               .having((error) => error.message, 'safe message', isNot(contains('secret'))),
         ),
       );
+      expect(requests, 1);
     }
+  });
+
+  test('GET recovers once after a handshake or socket interruption and preserves authorization', () async {
+    for (final cause in [
+      const HandshakeException('Connection terminated during handshake'),
+      const SocketException('Connection reset by peer', osError: OSError('reset', 104)),
+      const SocketException('Windows connection reset', osError: OSError('reset', 10054)),
+      const HttpException('Connection closed before full header was received'),
+    ]) {
+      final requests = <RequestOptions>[];
+      final api = XboardApiClient(
+        config: config,
+        userAgent: 'test',
+        dio: Dio()
+          ..httpClientAdapter = _FakeAdapter((options) async {
+            requests.add(options);
+            if (requests.length == 1) throw DioException(requestOptions: options, error: cause);
+            return _json(200, {
+              'data': {'transfer_enable': 500, 'u': 10, 'd': 20},
+            });
+          }),
+      );
+      addTearDown(api.close);
+
+      final result = await api.fetchSubscription('Bearer secret');
+      expect(result.subscription.remaining, 470);
+      expect(requests, hasLength(2));
+      expect(requests.map((request) => request.method), everyElement('GET'));
+      expect(requests.map((request) => request.headers['Authorization']), everyElement('Bearer secret'));
+      expect(requests.map((request) => request.uri).toSet(), hasLength(1));
+    }
+  });
+
+  test('a repeated transient GET failure stops after two attempts', () async {
+    var requests = 0;
+    final api = XboardApiClient(
+      config: config,
+      userAgent: 'test',
+      dio: Dio()
+        ..httpClientAdapter = _FakeAdapter((options) {
+          requests++;
+          throw DioException(
+            requestOptions: options,
+            error: const HandshakeException('Connection terminated during handshake https://secret.invalid'),
+          );
+        }),
+    );
+    addTearDown(api.close);
+
+    await expectLater(
+      api.fetchPublicConfig(),
+      throwsA(
+        isA<XboardException>()
+            .having((error) => error.transportFailure, 'category', XboardTransportFailure.tlsInterrupted)
+            .having((error) => error.message, 'connection guidance', contains('握手时中断'))
+            .having((error) => error.message, 'privacy', isNot(contains('secret'))),
+      ),
+    );
+    expect(requests, 2);
+  });
+
+  test('all mutating endpoints avoid replay even after handshake termination', () async {
+    var requests = 0;
+    final api = XboardApiClient(
+      config: config,
+      userAgent: 'test',
+      dio: Dio()
+        ..httpClientAdapter = _FakeAdapter((options) {
+          requests++;
+          throw DioException(
+            requestOptions: options,
+            error: const HandshakeException('Connection terminated during handshake'),
+          );
+        }),
+    );
+    addTearDown(api.close);
+
+    await expectLater(api.login(email: 'a@example.com', password: 'secret'), throwsA(isA<XboardException>()));
+    expect(requests, 1);
+    await expectLater(api.register(email: 'a@example.com', password: 'secret'), throwsA(isA<XboardException>()));
+    expect(requests, 2);
+    await expectLater(api.sendEmailCode('a@example.com'), throwsA(isA<XboardException>()));
+    expect(requests, 3);
+  });
+
+  test('TLS protocol errors, DNS failures, timeouts and HTTP responses are not retried', () async {
+    for (final failure in [
+      (DioExceptionType.unknown, const HandshakeException('WRONG_VERSION_NUMBER: secret')),
+      (DioExceptionType.unknown, const TlsException('Read failed: secret')),
+      (DioExceptionType.connectionError, const SocketException('Failed host lookup: secret')),
+      (DioExceptionType.receiveTimeout, null),
+      (DioExceptionType.cancel, null),
+      (DioExceptionType.badResponse, null),
+    ]) {
+      var requests = 0;
+      final api = XboardApiClient(
+        config: config,
+        userAgent: 'test',
+        dio: Dio()
+          ..httpClientAdapter = _FakeAdapter((options) {
+            requests++;
+            throw DioException(requestOptions: options, type: failure.$1, error: failure.$2);
+          }),
+      );
+      addTearDown(api.close);
+      await expectLater(
+        api.fetchPublicConfig(),
+        throwsA(
+          isA<XboardException>()
+              .having((error) => error.message, 'privacy', isNot(contains('secret')))
+              .having((error) => error.message, 'no false certificate claim', isNot(contains('证书'))),
+        ),
+      );
+      expect(requests, 1);
+    }
+  });
+
+  test('transport diagnostics exclude credentials, URLs and raw error text', () {
+    final diagnostic = XboardTransportDiagnostic(
+      DioException(
+        requestOptions: RequestOptions(
+          path: 'https://secret.invalid/token',
+          headers: {'Authorization': 'Bearer secret'},
+          data: {'password': 'secret'},
+        ),
+        error: const HandshakeException('Connection terminated during handshake secret', OSError('secret', 104)),
+        message: 'secret',
+      ),
+      attempt: 2,
+    );
+
+    expect(diagnostic.failure, XboardTransportFailure.tlsInterrupted);
+    expect(diagnostic.causeType, 'HandshakeException');
+    expect(diagnostic.osErrorCode, 104);
+    expect(diagnostic.toString(), contains('attempt=2'));
+    expect(diagnostic.toString(), isNot(contains('secret')));
+    expect(diagnostic.toString(), isNot(contains('Bearer')));
+  });
+
+  test('transport failures reach the app logger without sensitive error payloads', () async {
+    final records = <LogRecord>[];
+    final subscription = Logger.root.onRecord
+        .where((record) => record.loggerName == 'infra.XboardApiClient')
+        .listen(records.add);
+    addTearDown(subscription.cancel);
+    final adapter = _FakeAdapter((options) {
+      throw DioException(
+        requestOptions: options,
+        error: const HandshakeException('Connection terminated during handshake raw-secret'),
+        message: 'raw-secret',
+      );
+    });
+    final client = XboardApiClient(config: config, userAgent: 'test', dio: Dio()..httpClientAdapter = adapter);
+    addTearDown(client.close);
+
+    await expectLater(client.fetchSubscription('Bearer account-secret'), throwsA(isA<XboardException>()));
+
+    expect(records, hasLength(2));
+    for (final record in records) {
+      expect(record.message, contains('category=tlsInterrupted'));
+      expect(record.message, isNot(contains('secret')));
+      expect(record.message, isNot(contains('panel.example.com')));
+      expect(record.message, isNot(contains('Authorization')));
+      expect(record.error, isNull);
+      expect(record.stackTrace, isNull);
+    }
+  });
+
+  test('native IO adapter retries a real peer-terminated TLS handshake only once', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    var connections = 0;
+    final listener = server.listen((socket) {
+      connections++;
+      socket.destroy();
+    });
+    addTearDown(listener.cancel);
+    addTearDown(server.close);
+    final api = XboardApiClient(
+      config: XboardClientConfig.parse(baseUrl: 'https://127.0.0.1:${server.port}', appName: 'Test Connect'),
+      userAgent: 'test',
+    );
+    addTearDown(api.close);
+
+    await expectLater(
+      api.fetchPublicConfig(),
+      throwsA(
+        isA<XboardException>()
+            .having((error) => error.kind, 'kind', XboardFailureKind.network)
+            .having((error) => error.transportFailure, 'category', XboardTransportFailure.tlsInterrupted),
+      ),
+    );
+    expect(connections, 2);
   });
 
   test('rejects non-https panel URLs', () {

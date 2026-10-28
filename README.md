@@ -24,6 +24,11 @@
 >   draft drift instead of trusting a changed digest automatically.
 > - Validation: `python3 scripts/haoze_validate.py`.
 >
+> 5.0.4 corrects Chinese CDN domain routing, disabled-IPv6 data policy, nullable
+> preferences, mobile setup overlap and safe panel transport diagnostics. TUN
+> address-collision recovery is bounded and cancellation-aware; device-specific
+> IPv6/TLS limits are documented in `docs/DISTRIBUTION.md`.
+>
 > Public source mirror: [YIYI-16/Haoze-Connect](https://github.com/YIYI-16/Haoze-Connect).
 > The repository preserves the existing download site's `index.html`, `css/`
 > and `js/` alongside the client source and its upstream history.

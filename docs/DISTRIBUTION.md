@@ -17,6 +17,55 @@ and Windows test builds remain in the authorized private
 been made. See `LICENSE.md` and the license notes below before distributing
 binaries publicly.
 
+## 5.0.4 routing and connection corrections
+
+China's built-in domain rule now uses MetaCubeX's complete Chinese-service
+`cn.srs` dataset. This covers services whose CDN addresses are outside mainland
+China; the prior country set missed observed Bilibili, NetEase and ByteDance
+requests. Existing GeoIP rules, other regions, saved rule order and switches
+are preserved. The selected dataset was verified compatible with the pinned
+native core in a real TUN session before packaging.
+
+On the supplied US Windows host, selecting its available Hong Kong node showed
+Baidu direct and YouTube through Hong Kong. After applying the full domain set,
+Bilibili also became direct and NetEase/ByteDance response headers changed
+from the HK node IP to the US host IP; international Cloudflare remained HK.
+Core per-domain connection chains and the app's physical TCP sockets were
+correlated, rather than inferring website routing from ipify alone.
+
+When global IPv6 is disabled, effective core options now add a transient
+`::/0` reject rule ahead of user data rules, after subscription overrides.
+It is not persisted in the editable routing list; IPv6 TUN capture remains
+present. This covers literal/cached IPv6 data destinations too, with native
+DNS hijack and the special proxy prefix preceding app rules. The supplied
+Windows host has no native IPv6 address/default route, so real dual-stack leak
+acceptance remains unverified on that host.
+
+Exact TUN IPv6 address-collision failures receive at most one retry after
+confirmed teardown. Stop epochs and operation tickets cancel stale attempts;
+unconfirmed cleanup and unrelated failures are not retried. This is bounded
+recovery for a native address-reconciliation failure, not a claim that the
+underlying Windows/sing-tun condition has been reproduced or eliminated on the
+user's own PC. No unrelated interface addresses are deleted and no OS IPv6 or
+TLS security setting is disabled.
+
+Nullable preferences now remove their stored keys. Concurrent mobile core
+setup is coalesced and background logs attach only to an available background
+service. Panel diagnostics distinguish certificate rejection, TLS handshake
+interruption and transport failures, without credentials or raw URLs in logs.
+Only a read-only GET may retry once after a known transport interruption;
+certificate failures and POST mutations never replay. Valid certificate checks
+remain enabled. The intermittent user-device TLS cause is still unconfirmed;
+public checks on both observed CDN edges validated successfully.
+
+Local integration validation passed 242 related Flutter tests, 38 distribution
+checks and strict analysis. Final platform packages and runtime checks are
+tracked separately below.
+
+Build/native hashes, packaging and final-device evidence are recorded separately
+under local `artifacts/5.0.4/verification/`. Android real-device acceptance is
+not implied by compilation or the Windows routing results.
+
 ## 5.0.3 Windows runtime correction
 
 The Windows job uses the `windows-2022` / Visual Studio 2022 runner instead of
@@ -45,7 +94,7 @@ payload. Trusted signing must cover the application binaries and installer.
 No test procedure disables Windows security policy. Real-machine evidence and
 the new build results are recorded under `artifacts/5.0.3/verification/`.
 
-## Current 5.0.3 validation
+## 5.0.3 validation
 
 Binary source commit: `50704d3df42e4fc118db824c5f6d4f601be6fe0b`.
 GitHub 5.0.3 is a stable Release marked Latest, available through
@@ -314,8 +363,8 @@ to the Hiddify project with the original license linked and changes documented
 in the Readme, noncommercial use only, and no app-store publication with a
 similar name/UI. Development uses a local checkout and an authorized private
 repository for Windows test builds. Source is also published in the standalone
-`YIYI-16/Haoze-Connect` mirror; no public binary release exists. Before a public
-binary distribution, review the public-fork and GitHub Actions requirements.
+`YIYI-16/Haoze-Connect` mirror, with binaries on its Releases page. Review the
+public-fork and GitHub Actions requirements for binary distribution.
 The attribution links in `constants.dart`/
 `README.md` have to stay, and app stores stay out of scope. Whether this
 satisfies every clause is not asserted here — double-check before public

@@ -17,6 +17,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'rules_notifier.g.dart';
 
 const _geoUrl = 'https://raw.githubusercontent.com/hiddify/hiddify-geo/rule-set';
+const _chinaDomainsUrl = 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs';
 
 /// Rules the app ships with, in the order a new list starts with. They are always in the list: the user can
 /// only switch and move them, and their content comes from here, so an update can change it.
@@ -75,6 +76,16 @@ enum BuiltinRule {
       ruleSets: ['$_geoUrl/country/geosite-{region}.srs', '$_geoUrl/country/geoip-{region}.srs'],
     ),
   }..name = key;
+
+  Rule ruleForRegion(Region region) {
+    final content = rule;
+    if (this == bypassRegion && region == Region.cn) {
+      // Use the complete Chinese domain set for domestic services on overseas
+      // CDNs too. Keep IP classification and every other region unchanged.
+      content.ruleSets[0] = _chinaDomainsUrl;
+    }
+    return content;
+  }
 }
 
 @riverpod
@@ -109,11 +120,11 @@ class RulesNotifier extends _$RulesNotifier with AppLogger {
       if (builtin == null) {
         rules.add(rule);
       } else if (missing.remove(builtin)) {
-        rules.add(builtin.rule..enabled = rule.enabled);
+        rules.add(builtin.ruleForRegion(region)..enabled = rule.enabled);
       }
     }
     return _updateListOrder([
-      for (final builtin in missing) builtin.rule..enabled = builtin.enabledByDefault,
+      for (final builtin in missing) builtin.ruleForRegion(region)..enabled = builtin.enabledByDefault,
       ...rules,
     ]);
   }

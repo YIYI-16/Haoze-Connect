@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartx/dartx.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hiddify/core/model/optional_range.dart';
@@ -8,6 +10,7 @@ import 'package:hiddify/core/utils/preferences_utils.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/profile/data/profile_parser.dart';
 import 'package:hiddify/features/route_rules/notifier/rules_notifier.dart';
+import 'package:hiddify/features/settings/data/ipv6_routing_policy.dart';
 import 'package:hiddify/features/settings/model/config_option_failure.dart';
 import 'package:hiddify/hiddifycore/generated/v2/config/route_rule.pb.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
@@ -556,14 +559,17 @@ class ConfigOptionRepository with ExceptionHandler, InfraLogger {
   final SharedPreferences preferences;
   final SingboxConfigOption Function() _getConfigOptions;
 
-  Either<ConfigOptionFailure, SingboxConfigOption> fullOptions() =>
-      Either.tryCatch(() => _getConfigOptions(), ConfigOptionFailure.unexpected);
+  Either<ConfigOptionFailure, SingboxConfigOption> fullOptions() => Either.tryCatch(() {
+    final options = _getConfigOptions();
+    return applyIPv6RoutingPolicy(options, globalMode: options.ipv6Mode);
+  }, ConfigOptionFailure.unexpected);
 
-  Either<ConfigOptionFailure, SingboxConfigOption> fullOptionsOverrided(String? profileOverride) =>
-      Either.tryCatch(() => _getConfigOptions(), ConfigOptionFailure.unexpected).flatMap(
-        (options) => Either.tryCatch(() {
-          final json = ProfileParser.applyProfileOverride(options.toJson(), profileOverride);
-          return SingboxConfigOption.fromJson(json);
-        }, ConfigOptionFailure.unexpected),
-      );
+  Either<ConfigOptionFailure, SingboxConfigOption> fullOptionsOverrided(String? profileOverride) => Either.tryCatch(() {
+    final options = _getConfigOptions();
+    // Override merging mutates nested maps. Isolate provider-owned routing data
+    // before merging, then enforce the global UI policy after every override.
+    final isolated = jsonDecode(jsonEncode(options.toJson())) as Map<String, dynamic>;
+    final json = ProfileParser.applyProfileOverride(isolated, profileOverride);
+    return applyIPv6RoutingPolicy(SingboxConfigOption.fromJson(json), globalMode: options.ipv6Mode);
+  }, ConfigOptionFailure.unexpected);
 }
