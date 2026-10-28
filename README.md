@@ -24,13 +24,14 @@
 >   draft drift instead of trusting a changed digest automatically.
 > - Validation: `python3 scripts/haoze_validate.py`.
 >
-> No public fork exists yet. The user authorized the private
-> `HaozeZane/Haoze-Connect` repository for Windows test builds; Android test
-> packages are built locally. Before anything is distributed publicly, a public fork has to be
-> created under the conditions stated in `LICENSE.md` (source published as a
-> public fork, releases produced through that fork's GitHub Actions,
-> attribution kept). No claim is made here about the legal sufficiency of that
-> interpretation. No public release or store submission has been made. Verified
+> Public source mirror: [YIYI-16/Haoze-Connect](https://github.com/YIYI-16/Haoze-Connect).
+> The repository preserves the existing download site's `index.html`, `css/`
+> and `js/` alongside the client source and its upstream history.
+> Development and Windows test builds previously used the private
+> `HaozeZane/Haoze-Connect` repository; Android test packages are built locally.
+> This source upload does not publish a GitHub Release or submit to an app store.
+> Read `LICENSE.md` for the upstream distribution conditions; no claim is made
+> here about the legal sufficiency of this standalone source mirror. Verified
 > locally as described in `docs/DISTRIBUTION.md`: 201 related Flutter tests,
 > 38 distribution checks and strict `flutter analyze` pass. The Android ARM64
 > Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
@@ -43,7 +44,7 @@
 > refresh while connected passed. Windows 11 Smart App Control compatibility
 > still requires trusted signing of the unsigned payload. Android device tests,
 > unelevated Windows helper installation and service coexistence remain unverified.
-> The Windows icon remains the upstream placeholder. Source remains private;
+> The Windows icon remains the upstream placeholder. Source is mirrored publicly;
 > the workflow only creates test artifacts and does not publish releases.
 
 <div dir="ltr" align=center>

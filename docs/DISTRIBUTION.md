@@ -8,12 +8,14 @@ produced. Nothing here is a statement about the legal sufficiency of the
 license interpretation below — read `LICENSE.md` yourself before any public
 distribution.
 
-**No public fork exists yet.** Source and test builds also exist in the
-authorized private `HaozeZane/Haoze-Connect` repository; no public Release or
-store submission has been made. Before any public
-distribution, a public fork must be created and the release must be produced
-through that fork's GitHub Actions, as `LICENSE.md` requires (see the license
-notes below).
+Public source mirror: [YIYI-16/Haoze-Connect](https://github.com/YIYI-16/Haoze-Connect).
+The source history is merged with the repository's existing download website;
+`index.html`, `css/` and `js/` are preserved. The GitHub repository is a
+standalone mirror rather than an upstream-registered fork. Earlier development
+and Windows test builds remain in the authorized private
+`HaozeZane/Haoze-Connect` repository. No public Release or store submission has
+been made. See `LICENSE.md` and the license notes below before distributing
+binaries publicly.
 
 ## 5.0.3 Windows runtime correction
 
@@ -248,7 +250,8 @@ remains the upstream placeholder icon until Haoze icon material exists.
   delivered APK is the smaller Release-mode test build described below.
 - Android packages are built locally. The user subsequently authorized the
   private `HaozeZane/Haoze-Connect` repository and Windows test-artifact builds.
-  No public fork, public release or store submission is authorized.
+  The later source-mirror upload to `YIYI-16/Haoze-Connect` is authorized;
+  no public binary release or store submission is included.
 - After the final Sol fixes, a local Release-mode ARM64 build also succeeded.
   The delivered `artifacts/HaozeConnect-Android-arm64-test.apk` is the
   `app-arm64-v8a-release.apk` split (56,330,486 bytes, about 54 MiB), has only
@@ -281,9 +284,10 @@ published app release, producing all releases with GitHub Actions, attribution
 to the Hiddify project with the original license linked and changes documented
 in the Readme, noncommercial use only, and no app-store publication with a
 similar name/UI. Development uses a local checkout and an authorized private
-repository for Windows test builds. No public fork or public release exists. Before a public
-distribution it has to become a public fork, releases have to be produced
-through that fork's GitHub Actions, the attribution links in `constants.dart`/
+repository for Windows test builds. Source is also published in the standalone
+`YIYI-16/Haoze-Connect` mirror; no public binary release exists. Before a public
+binary distribution, review the public-fork and GitHub Actions requirements.
+The attribution links in `constants.dart`/
 `README.md` have to stay, and app stores stay out of scope. Whether this
 satisfies every clause is not asserted here — double-check before public
 distribution.
