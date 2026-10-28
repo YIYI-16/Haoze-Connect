@@ -109,7 +109,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<void> startManaged(String path, String name, bool disableMemoryLimit) async {
     final options = _options;
     if (options == null) throw StateError('Apply connection options before starting the core.');
-    final wantAdminBg = useAdminBgService || options.enableTun;
+    final wantAdminBg = useAdminBgService || _usingAdminBg || options.enableTun;
     final elevationWrapper = wrapAdminElevation;
     await stop();
     if (!wantAdminBg) {
