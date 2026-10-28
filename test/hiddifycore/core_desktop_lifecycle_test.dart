@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grpc/grpc.dart';
@@ -103,6 +104,18 @@ void main() {
     expect(statuses.last, isA<CoreStopped>());
   });
 
+  test('an elevated foreground start restores options previously stripped for an admin service', () async {
+    core.useAdminBgService = true;
+    native.settingsJson = '{"enable-tun":false}';
+    final restart = core.startManaged('managed-config', 'Managed', false);
+    await native.restartEntered.future;
+    expect(jsonDecode(native.settingsJson)['enable-tun'], isTrue);
+    expect(core.useAdminBgService, isFalse);
+    native.emit(CoreStates.STARTING);
+    native.emit(CoreStates.WAITING);
+    await restart;
+  });
+
   test('stop timeout propagates without claiming native teardown finished', () async {
     await expectLater(core.stop(), throwsA(isA<TimeoutException>()));
     expect(native.stopCalls, 1);
@@ -141,6 +154,7 @@ class _ForegroundService extends CoreServiceBase {
   int restartCalls = 0;
   int stopCalls = 0;
   int startCalls = 0;
+  String settingsJson = '{}';
 
   void emit(CoreStates state, {MessageType messageType = MessageType.EMPTY, String message = ''}) {
     status.add(CoreInfoResponse(coreState: state, messageType: messageType, message: message));
@@ -150,8 +164,10 @@ class _ForegroundService extends CoreServiceBase {
   Stream<CoreInfoResponse> coreInfoListener(ServiceCall call, Empty request) => status.stream;
 
   @override
-  Future<CoreInfoResponse> changeHiddifySettings(ServiceCall call, ChangeHiddifySettingsRequest request) async =>
-      CoreInfoResponse(messageType: MessageType.EMPTY);
+  Future<CoreInfoResponse> changeHiddifySettings(ServiceCall call, ChangeHiddifySettingsRequest request) async {
+    settingsJson = request.hiddifySettingsJson;
+    return CoreInfoResponse(messageType: MessageType.EMPTY);
+  }
 
   @override
   Future<CoreInfoResponse> restart(ServiceCall call, StartRequest request) async {

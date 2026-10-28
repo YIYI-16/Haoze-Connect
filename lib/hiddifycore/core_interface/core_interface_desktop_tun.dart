@@ -125,6 +125,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     final elevationWrapper = wrapAdminElevation;
     final privileged = wantAdminBg && await _isPrivileged();
     if (_stopEpoch != beforePrivilege) return;
+    final restoreForegroundOptions = privileged && (useAdminBgService || _usingAdminBg);
 
     // Stop only queues teardown. Restart queues stop/start atomically, so a
     // start cannot race the asynchronous TUN teardown.
@@ -136,10 +137,20 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
       }
       final epoch = _stopEpoch;
       _usingAdminBg = false;
+      useAdminBgService = false;
+      wrapAdminElevation = null;
       bgClient = fgClient;
       _clientChanges.add(null);
       _status.add(const CoreStatus.starting());
       try {
+        if (restoreForegroundOptions) {
+          _checkResponse(
+            await fgClient.changeHiddifySettings(
+              ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
+            ),
+          );
+          if (_stopEpoch != epoch) return;
+        }
         final started = await _foregroundCommand(
           starting: true,
           epoch: epoch,
