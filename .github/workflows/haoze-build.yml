@@ -93,6 +93,7 @@ jobs:
         run: |
           flutter analyze
           flutter test test/features/xboard test/features/xboard_ui \
+            test/features/route_rules/builtin_rules_test.dart \
             test/features/profile/data/profile_repository_test.dart \
             test/features/connection/model/startup_connection_test.dart
 
@@ -191,7 +192,7 @@ jobs:
         run: |
           flutter analyze
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          flutter test test/features/xboard test/features/xboard_ui test/features/profile/data/profile_repository_test.dart test/features/connection/model/startup_connection_test.dart
+          flutter test test/features/xboard test/features/xboard_ui test/features/route_rules/builtin_rules_test.dart test/features/profile/data/profile_repository_test.dart test/features/connection/model/startup_connection_test.dart
 
       - name: Setup Inno Setup (required by EXE installer packaging)
         run: choco install innosetup -y --no-progress

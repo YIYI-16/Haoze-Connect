@@ -6,6 +6,8 @@
 > - Xboard login and registration, automatically managed subscriptions,
 >   panel-reported remaining traffic, expiry and account status. Users do not
 >   need to enter a panel address or copy a subscription URL.
+> - From 5.0.1, China is the default region, enabling the built-in region-direct
+>   rule and its direct DNS default; explicit user preferences are preserved.
 > - Android package id `com.haoze.connect` (Kotlin/native namespaces left as
 >   upstream), display name **Haoze Connect**; original "Haoze" vector launcher
 >   mark; `android:allowBackup=false` for the Flutter secure-storage prefs.

@@ -47,8 +47,8 @@ void main() {
   });
 
   /// The app's providers with [region] saved. The rules stay alive, as the config options keep them in the app.
-  Future<ProviderContainer> open({Region region = Region.ir}) async {
-    SharedPreferences.setMockInitialValues({'region': region.name});
+  Future<ProviderContainer> open({Region? region = Region.ir}) async {
+    SharedPreferences.setMockInitialValues({if (region != null) 'region': region.name});
     final container = ProviderContainer(
       overrides: [
         appDirectoriesProvider.overrideWith(() => _Directories(dir)),
@@ -105,6 +105,19 @@ void main() {
   const defaults = ['builtin:bypassLan on', 'builtin:blockAds off', 'builtin:bypassRegion on'];
 
   group('a new list', () {
+    test('defaults to China with direct DNS and an enabled region bypass when no region is saved', () async {
+      final container = await open(region: null);
+      expect(container.read(ConfigOptions.region), Region.cn);
+      expect(container.read(ConfigOptions.directDnsAddress), '223.5.5.5');
+      expect(current(container), defaults);
+      final rule = container
+          .read(rulesNotifierProvider)
+          .singleWhere((rule) => rule.name == BuiltinRule.bypassRegion.key);
+      expect(rule.outbound, Outbound.direct);
+      expect(rule.enabled, isTrue);
+      expect(container.read(sharedPreferencesProvider).requireValue.containsKey('region'), isFalse);
+    });
+
     test('holds the built-in rules in their default order and state', () async {
       final container = await open();
       expect(current(container), defaults);

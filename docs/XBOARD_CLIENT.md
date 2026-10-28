@@ -4,6 +4,12 @@ This fork ships a managed Hiddify client for a self-hosted Xboard panel. The
 account owns exactly one managed subscription profile; legacy profile-import
 deep links are ignored so they cannot bypass the panel.
 
+From 5.0.1, an unset region defaults to China (`cn`). This activates the built-in
+region-direct rule and selects `223.5.5.5` as the default direct DNS. Upgrading
+from 5.0.0 also uses China if no region was saved; explicit region selections,
+custom DNS values and rule switches remain user preferences. Connection modes
+retain their existing platform defaults.
+
 ## Build configuration
 
 The panel URL and the brand shown on the Xboard screens are compile-time
