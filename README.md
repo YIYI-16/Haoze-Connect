@@ -31,15 +31,19 @@
 > public fork, releases produced through that fork's GitHub Actions,
 > attribution kept). No claim is made here about the legal sufficiency of that
 > interpretation. No public release or store submission has been made. Verified
-> locally as described in `docs/DISTRIBUTION.md`: 160 related Flutter tests,
-> 37 distribution checks and strict `flutter analyze` pass. The Android ARM64
+> locally as described in `docs/DISTRIBUTION.md`: 201 related Flutter tests,
+> 38 distribution checks and strict `flutter analyze` pass. The Android ARM64
 > Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
-> debug certificate. The private Windows 5.0.1 build passed analysis and 81 tests,
-> compiled the x64 app, and produced unsigned EXE/ZIP test packages:
-> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40638363439).
+> debug certificate. The private Windows 5.0.3 build passed analysis, 106 tests
+> and a native launch smoke test, then produced unsigned EXE/ZIP test packages:
+> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40668753377).
 > Downloaded Windows package contents and native-core hashes were verified.
-> Real-device installation, login and node connectivity still need testing;
-> the Windows icon remains the upstream placeholder. Source remains private;
+> The installed final package was tested on Windows Server 2022 in an elevated
+> session: account/quota restoration, real proxy and VPN egress, and subscription
+> refresh while connected passed. Windows 11 Smart App Control compatibility
+> still requires trusted signing of the unsigned payload. Android device tests,
+> unelevated Windows helper installation and service coexistence remain unverified.
+> The Windows icon remains the upstream placeholder. Source remains private;
 > the workflow only creates test artifacts and does not publish releases.
 
 <div dir="ltr" align=center>

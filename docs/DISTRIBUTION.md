@@ -43,7 +43,41 @@ payload. Trusted signing must cover the application binaries and installer.
 No test procedure disables Windows security policy. Real-machine evidence and
 the new build results are recorded under `artifacts/5.0.3/verification/`.
 
-## 5.0.1 default-China test build
+## Current 5.0.3 validation
+
+Binary source commit: `50704d3df42e4fc118db824c5f6d4f601be6fe0b`.
+The local suite passed 201 related Flutter tests, 38 distribution checks and
+strict analysis. The Android ARM64 Release-mode test APK passed v2 signature
+verification; it retains the same internal Android debug certificate.
+Android device installation and VPN behavior have not been exercised here.
+
+The private [Windows run 40668753377](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40668753377)
+passed strict analysis, 106 Flutter tests, the native launch smoke test, and
+x64 EXE/standalone ZIP packaging. Downloaded packages passed CRC, safe-path,
+architecture and pinned-core verification. The real installed app's EXE and
+AOT hashes match this final package, distinguishing it from the preliminary
+runtime-only build with the same displayed version.
+
+Manual acceptance on the supplied Windows Server 2022 build 20348 machine
+(elevated Administrator session) verified the final installed EXE: restored
+account/quota after upgrade, real System Proxy egress, real VPN/TUN egress,
+and a subscription refresh while VPN was connected with continued node egress
+and no error banner. Logout stopped the tunnel and restored direct egress;
+reopening the installed app kept the account logged out. The temporary RDP
+peer route created for the VPN test was removed afterwards.
+This reproduces the baseline 5.0.2 refresh failure with
+the corrected result. Evidence is in the `final-*` verification files.
+This server does not reproduce the user's Windows 11 Smart App Control policy;
+unsigned payloads can still be blocked on that machine. Unelevated helper
+installation, upstream-service coexistence and local Windows 11 SAC behavior
+remain unverified.
+
+Current artifacts and verification records are in `artifacts/5.0.3/`.
+The requested delivery contains the Windows Setup EXE, standalone ZIP and
+Android ARM64 APK in `HaozeConnect-Android-Windows-Test-5.0.3.zip`, under
+`/home/zhou/` with owner `zhou:zhou` (delivery hash verified).
+
+## Historical 5.0.1 default-China test build
 
 The managed app defaults to region `cn`, including the built-in region-direct
 rule and `223.5.5.5` direct DNS. An upgrade uses this default when no region was
@@ -59,12 +93,12 @@ succeeded, including strict analysis, 81 Flutter tests, x64 compilation and
 EXE/ZIP packaging. Downloaded packages passed integrity, architecture, app
 version and pinned native-core checks.
 
-Current artifacts and verification records are in `artifacts/5.0.1/`. The
+Historical artifacts and verification records are in `artifacts/5.0.1/`. The
 three-package bundle is `HaozeConnect-Android-Windows-Test-5.0.1.zip` (Windows
 Setup EXE, Windows standalone ZIP, Android ARM64 APK). The requested home
 delivery location is `/home/zhou/` with owner `zhou:zhou`.
 These remain unsigned Windows / debug-certificate Android test packages;
-real-device installation, login and VPN routing behavior remain unverified.
+real-device installation, login and VPN routing behavior were unverified for that build.
 
 ## Branding & package identity
 
@@ -236,8 +270,8 @@ remains the upstream placeholder icon until Haoze icon material exists.
   SHA256 values and audit details are in `artifacts/SHA256SUMS` and
   `artifacts/verification/windows-package-audit.json`.
   Both packages are unsigned internal tests. **Real Windows installation,
-  login, VPN connectivity and coexistence with upstream services remain
-  UNKNOWN**; downloading and inspecting a binary does not verify its runtime.
+  login, VPN connectivity and coexistence with upstream services were
+  UNKNOWN for that 5.0.0 build**; downloading and inspecting a binary does not verify its runtime.
 
 ## License notes for distribution
 
