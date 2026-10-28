@@ -68,9 +68,36 @@ certificate failures and POST mutations never replay. Valid certificate checks
 remain enabled. The intermittent user-device TLS cause is still unconfirmed;
 public checks on both observed CDN edges validated successfully.
 
-Local integration validation passed 242 related Flutter tests, 38 distribution
-checks and strict analysis. Final platform packages and runtime checks are
-tracked separately below.
+Local integration validation passed 242 related Flutter tests, 40 distribution
+checks and strict analysis. The final [5.0.4 build](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40711993494)
+used source `6fc2a229cbf80d1dba03b0a70152f70c413b4be3`; Android and Windows
+each passed strict analysis, 147 CI regression tests and the 40 distribution
+checks. The Windows package also passed the CI native-launch check.
+
+The actual 5.0.4 EXE was installed over 5.0.3 on the supplied Windows Server
+2022 host. Installed EXE/AOT hashes match the portable archive, version is
+`5.0.4+50004`, and the app-local Microsoft CRT is `14.44.35211.0` with a valid
+Microsoft signature. Account/quota restoration and manual refresh succeeded
+before and during the TUN session. The temporary full-CN verification rule was
+removed before testing, so the final observations use built-in rules only:
+Baidu/Bilibili direct; YouTube/Wikipedia via the selected Hong Kong node;
+NetEase/ByteDance/Cloudflare China/Qualcomm China report the US host source IP,
+while international Cloudflare reports the Hong Kong node IP. The account has
+no Canadian node, so a Canada-specific test is not claimed.
+
+Three successive TUN starts and their intervening stops succeeded on this
+host, followed by logout to an empty login screen. The precise IPv6 collision
+was not reproduced here. Four strict public panel requests while connected
+returned HTTP 200, and a separate Dart 3.10.4/Dio check returned HTTP 200 in all
+12 attempts across system DNS and both explicitly selected CDN addresses,
+preserving original-host TLS/SNI verification. These observations do not prove
+that intermittent TLS failures on other devices are eliminated.
+
+The delivered local ARM64 APK keeps the previous Android signing certificate
+(`dd39d441ee2e100f743d9e4623b1e016f5de2cee2351406a20ed7489417c4ecc`),
+package `com.haoze.connect`, minimum API 24 and version `5.0.4+50004`. The CI
+APK without a configured release keystore remains a separate test artifact;
+it does not replace the locally verified upgrade-compatible APK.
 
 Build/native hashes, packaging and final-device evidence are recorded separately
 under local `artifacts/5.0.4/verification/`. Android real-device acceptance is

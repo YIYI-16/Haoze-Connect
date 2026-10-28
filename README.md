@@ -38,20 +38,22 @@
 > This source upload does not publish a GitHub Release or submit to an app store.
 > Read `LICENSE.md` for the upstream distribution conditions; no claim is made
 > here about the legal sufficiency of this standalone source mirror. Verified
-> locally as described in `docs/DISTRIBUTION.md`: 201 related Flutter tests,
-> 38 distribution checks and strict `flutter analyze` pass. The Android ARM64
+> locally as described in `docs/DISTRIBUTION.md`: 242 related Flutter tests,
+> 40 distribution checks and strict `flutter analyze` pass. The Android ARM64
 > Release-mode APK is about 54 MiB, API 24+, and signed with the Android
-> debug certificate. The migrated Android/Windows workflow passed analysis,
-> 106 tests on each platform, Windows native launch and both packaging jobs:
-> [Migration build](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40684285128).
-> [Released 5.0.3 assets](https://github.com/YIYI-16/Haoze-Connect/releases/tag/v5.0.3)
-> preserve the originally accepted binary bytes and signing.
-> Version 5.0.3 is published as a stable Release and marked Latest; APK asset
-> naming omits `test`, with the original Android Debug signing unchanged.
+> debug certificate. The final Android/Windows workflow passed analysis,
+> 147 tests on each platform, Windows native launch and both packaging jobs:
+> [5.0.4 build](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40711993494).
+> [Latest stable assets](https://github.com/YIYI-16/Haoze-Connect/releases/latest)
+> provide separate Windows installer, portable ZIP and Android ARM64 APK;
+> no combined Android/Windows ZIP is distributed. APK asset naming omits
+> `test`, with the original Android Debug signing unchanged.
 > Downloaded Windows package contents and native-core hashes were verified.
 > The installed final package was tested on Windows Server 2022 in an elevated
 > session: account/quota restoration, real proxy and VPN egress, and subscription
-> refresh while connected passed. Windows 11 Smart App Control compatibility
+> refresh while connected passed. With 5.0.4's built-in China rules, Chinese
+> service endpoints use the US host directly and international sites use the
+> selected HK node. Three TUN starts succeeded. Windows 11 Smart App Control compatibility
 > still requires trusted signing of the unsigned payload. Android device tests,
 > unelevated Windows helper installation and service coexistence remain unverified.
 > The Windows icon remains the upstream placeholder. Source is mirrored publicly;
