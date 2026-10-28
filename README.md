@@ -1,6 +1,6 @@
 # Haoze Connect
 
-- [下载安装包（5.0.3 测试版）](https://github.com/YIYI-16/Haoze-Connect/releases/tag/v5.0.3)：Windows 安装版 EXE、便携版 ZIP、Android ARM64 APK。
+- [下载安装包（5.0.3 正式版）](https://github.com/YIYI-16/Haoze-Connect/releases/latest)：Windows 安装版 EXE、便携版 ZIP、Android ARM64 APK。
 - [客户端源码：client 分支](https://github.com/YIYI-16/Haoze-Connect/tree/client)。
 - [手动构建：GitHub Actions](https://github.com/YIYI-16/Haoze-Connect/actions/workflows/haoze-build.yml)。
 
