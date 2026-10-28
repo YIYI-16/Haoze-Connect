@@ -9,6 +9,6 @@ const CONFIG = {
         arch: "Windows 10 / 11 (x64)"
     },
     android: {
-        arch: "Android 8.0+ (arm64-v8a)"
+        arch: "Android 7.0+ (arm64-v8a)"
     }
 };
