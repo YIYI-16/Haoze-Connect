@@ -10,6 +10,22 @@ from 5.0.0 also uses China if no region was saved; explicit region selections,
 custom DNS values and rule switches remain user preferences. Connection modes
 retain their existing platform defaults.
 
+From 5.0.2, managed refreshes share one reload and wait up to 15 seconds for
+connection transitions to settle. An intentional disconnect cancels applying
+the update without invalidating the validated subscription or restoring the
+user's connection preference. Genuine apply failures still block readiness.
+Reload banners use safe error categories; native error/config text is not
+copied into them. Loopback stream errors include the listener's name, and
+overlapping replacements cannot retain an obsolete listener or cancel its
+replacement.
+
+Privileged desktop VPN control does not allow hot reload; updates use the
+managed restart/snapshot path. Stops are tracked before options application
+and through asynchronous starts, so superseded work cannot restart a tunnel
+or stop a newer connection. Foreground settings failures report failure.
+The homepage uses the Haoze brand and only its managed account traffic card;
+traffic formatted in powers of 1024 is labelled GiB/TiB consistently.
+
 ## Build configuration
 
 The panel URL and the brand shown on the Xboard screens are compile-time
@@ -51,7 +67,7 @@ fragments are rejected. The client appends `/api/v1` unless the supplied path
 already ends with it.
 
 Android uses package identity `com.haoze.connect`; the Windows executable is
-`HaozeConnect.exe`. Branding, internal-test signing and the unexecuted Windows
+`HaozeConnect.exe`. Branding, internal-test signing and the Windows test
 build workflow are described in [DISTRIBUTION.md](DISTRIBUTION.md).
 
 ## Runtime flow

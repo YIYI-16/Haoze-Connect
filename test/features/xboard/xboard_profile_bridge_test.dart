@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hiddify/core/db/db.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/features/connection/data/connection_data_providers.dart';
 import 'package:hiddify/features/connection/data/connection_repository.dart';
@@ -21,11 +22,13 @@ import 'package:hiddify/features/profile/model/profile_failure.dart';
 import 'package:hiddify/features/xboard/config/xboard_config.dart';
 import 'package:hiddify/features/xboard/data/xboard_api_client.dart';
 import 'package:hiddify/features/xboard/data/xboard_data_providers.dart';
+import 'package:hiddify/features/xboard/data/xboard_profile_bridge.dart';
 import 'package:hiddify/features/xboard/data/xboard_session_store.dart';
 import 'package:hiddify/features/xboard/model/xboard_models.dart';
 import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
 import 'package:hiddify/singbox/model/singbox_config_option.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -68,6 +71,7 @@ void main() {
   tearDown(() async {
     container.dispose();
     await profiles.changes.close();
+    await connections.status.close();
   });
 
   test('real bridge reloads same URL and ID once, and rotation once after ownership commit', () async {
@@ -95,6 +99,145 @@ void main() {
     await controller.refresh();
     expect(controller.state.subscriptionReady, isFalse);
     expect(controller.state.error, contains('无法应用'));
+  });
+
+  for (final switching in [const Connecting(), const HotReloading()]) {
+    test('refresh waits for ${switching.format()} to settle before applying the profile', () async {
+      final controller = container.read(xboardSessionProvider.notifier);
+      connections.status.add(switching);
+      await Future<void>.delayed(Duration.zero);
+      final refresh = controller.refresh();
+      await Future<void>.delayed(Duration.zero);
+      expect(connections.reloadedIds, ['managed-1']);
+      expect(controller.state.error, isNull);
+      connections.status.add(const Connected());
+      await refresh;
+      expect(connections.reloadedIds, ['managed-1', 'managed-1']);
+      expect(controller.state.subscriptionReady, isTrue);
+      expect(controller.state.error, isNull);
+    });
+  }
+
+  test('concurrent managed reloads share one native operation', () async {
+    connections.reloadGate = Completer<void>();
+    final bridge = container.read(xboardProfileBridgeProvider) as XboardProfileReloader;
+    final first = bridge.reload('managed-1');
+    final second = bridge.reload('managed-1');
+    await Future<void>.delayed(Duration.zero);
+    expect(connections.reloadedIds, ['managed-1', 'managed-1']);
+    connections.reloadGate!.complete();
+    await Future.wait([first, second]);
+  });
+
+  test('a connection that never settles has a bounded, classified failure', () async {
+    connections.status.add(const Connecting());
+    await Future<void>.delayed(Duration.zero);
+    final bridge = container.read(xboardProfileBridgeProvider) as XboardProfileReloader;
+    await expectLater(
+      bridge.reload('managed-1'),
+      throwsA(
+        isA<XboardProfileReloadException>().having(
+          (error) => error.diagnostic,
+          'diagnostic',
+          XboardProfileReloadFailure.transitionTimeout,
+        ),
+      ),
+    );
+    expect(connections.reloadedIds, ['managed-1']);
+  }, timeout: const Timeout(Duration(seconds: 20)));
+
+  test('a reload preserves a disabled user restoration preference', () async {
+    await container.read(Preferences.startedByUser.notifier).update(false);
+    await container.read(xboardSessionProvider.notifier).refresh();
+    expect(container.read(Preferences.startedByUser), isFalse);
+  });
+
+  test('thrown permission failures retain a safe diagnostic and block readiness', () async {
+    connections.reloadError = const ConnectionFailure.missingPrivilege();
+    final controller = container.read(xboardSessionProvider.notifier);
+    await controller.refresh();
+    expect(controller.state.subscriptionReady, isFalse);
+    expect(controller.state.error, contains('权限'));
+    expect(container.read(connectionNotifierProvider).error, isA<MissingPrivilege>());
+  });
+
+  test('raw config and subscription secrets never enter the reload banner', () async {
+    connections.reloadError = const ConnectionFailure.invalidConfig('https://secret.example/?token=private-config');
+    final controller = container.read(xboardSessionProvider.notifier);
+    await controller.refresh();
+    expect(controller.state.subscriptionReady, isFalse);
+    expect(controller.state.error, contains('配置'));
+    expect(controller.state.error, isNot(contains('secret.example')));
+    expect(controller.state.error, isNot(contains('private-config')));
+  });
+
+  test('disconnect supersedes a reload waiting for a connection transition', () async {
+    connections.status.add(const Connecting());
+    await Future<void>.delayed(Duration.zero);
+    final bridge = container.read(xboardProfileBridgeProvider) as XboardProfileReloader;
+    final reload = bridge.reload('managed-1');
+    // Observe the result immediately so a cancellation cannot be unhandled.
+    final failure = expectLater(
+      reload,
+      throwsA(
+        isA<XboardProfileReloadException>().having(
+          (error) => error.diagnostic,
+          'diagnostic',
+          XboardProfileReloadFailure.cancelled,
+        ),
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+    await container.read(connectionNotifierProvider.notifier).toggleConnection();
+    connections.status.add(const Disconnected());
+    await failure;
+    expect(connections.reloadedIds, ['managed-1']);
+    expect(container.read(Preferences.startedByUser), isFalse);
+  });
+
+  test('disconnect supersedes a pending reload without restoring its preference or error state', () async {
+    connections.reloadGate = Completer<void>();
+    final bridge = container.read(xboardProfileBridgeProvider) as XboardProfileReloader;
+    final reload = bridge.reload('managed-1');
+    final failure = expectLater(reload, throwsA(isA<XboardException>()));
+    await Future<void>.delayed(Duration.zero);
+    await container.read(connectionNotifierProvider.notifier).toggleConnection();
+    connections.status.add(const Disconnected());
+    connections.reloadGate!.complete();
+    await failure;
+    expect(container.read(Preferences.startedByUser), isFalse);
+    expect(container.read(connectionNotifierProvider).hasError, isFalse);
+  });
+
+  test('logout supersedes a pending refresh without publishing its stale failure', () async {
+    connections.reloadGate = Completer<void>();
+    final controller = container.read(xboardSessionProvider.notifier);
+    final refresh = controller.refresh();
+    await Future<void>.delayed(Duration.zero);
+    final logout = controller.logout();
+    connections.reloadGate!.complete();
+    await Future.wait([refresh, logout]);
+    expect(controller.state.isAuthenticated, isFalse);
+    expect(controller.state.subscriptionReady, isFalse);
+    expect(controller.state.error, isNull);
+    expect(store.session, isNull);
+    expect(connections.stopCalls, 1);
+    expect(container.read(Preferences.startedByUser), isFalse);
+  });
+
+  test('a user disconnect during refresh preserves a valid subscription without a failure banner', () async {
+    connections.reloadGate = Completer<void>();
+    final controller = container.read(xboardSessionProvider.notifier);
+    final refresh = controller.refresh();
+    await Future<void>.delayed(Duration.zero);
+    await container.read(connectionNotifierProvider.notifier).toggleConnection();
+    connections.status.add(const Disconnected());
+    connections.reloadGate!.complete();
+    await refresh;
+    expect(controller.state.subscriptionReady, isTrue);
+    expect(controller.state.error, isNull);
+    expect(container.read(Preferences.startedByUser), isFalse);
+    expect(container.read(connectionNotifierProvider).valueOrNull, isA<Disconnected>());
   });
 
   test('a rejected token with native stop Left retains retryable cleanup and blocks starts', () async {
@@ -263,10 +406,13 @@ class _Connections implements ConnectionRepository {
   bool failReload = false;
   int stopCalls = 0;
   final reloadedIds = <String>[];
+  final status = BehaviorSubject<ConnectionStatus>.seeded(const Connected());
+  Completer<void>? reloadGate;
+  Object? reloadError;
   @override
   SingboxConfigOption? get configOptionsSnapshot => null;
   @override
-  Stream<ConnectionStatus> watchConnectionStatus() => Stream.value(const Connected());
+  Stream<ConnectionStatus> watchConnectionStatus() => status.stream;
   @override
   TaskEither<ConnectionFailure, Unit> disconnect() {
     stopCalls++;
@@ -276,7 +422,11 @@ class _Connections implements ConnectionRepository {
   @override
   TaskEither<ConnectionFailure, Unit> reconnect(ProfileEntity profile, bool disableMemoryLimit) {
     reloadedIds.add(profile.id);
-    return failReload ? TaskEither.left(const ConnectionFailure.unexpected('reload failed')) : TaskEither.of(unit);
+    return TaskEither(() async {
+      await reloadGate?.future;
+      if (reloadError != null) throw reloadError!;
+      return failReload ? left(const ConnectionFailure.unexpected('reload failed')) : right(unit);
+    });
   }
 
   @override

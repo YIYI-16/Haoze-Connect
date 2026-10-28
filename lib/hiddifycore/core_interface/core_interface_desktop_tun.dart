@@ -40,6 +40,10 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
 
   @override
   bool get managesLifecycle => true;
+  // The privileged control service permits observation and node selection;
+  // changed configurations must go through Ensure with a fresh snapshot.
+  @override
+  bool get supportsHotReload => !_usingAdminBg && !useAdminBgService && !(_options?.enableTun ?? false);
   @override
   bool get persistsAfterAppExit => false;
   @override
@@ -105,9 +109,9 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
   Future<void> startManaged(String path, String name, bool disableMemoryLimit) async {
     final options = _options;
     if (options == null) throw StateError('Apply connection options before starting the core.');
-    await stop();
-
     final wantAdminBg = useAdminBgService || options.enableTun;
+    final elevationWrapper = wrapAdminElevation;
+    await stop();
     if (!wantAdminBg) {
       _usingAdminBg = false;
       bgClient = fgClient;
@@ -145,9 +149,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     }
 
     if (_isAppImage) {
-      throw StateError(
-        'VPN mode in the AppImage needs root. Quit and run: sudo ${Platform.environment['APPIMAGE']}',
-      );
+      throw StateError('VPN mode in the AppImage needs root. Quit and run: sudo ${Platform.environment['APPIMAGE']}');
     }
 
     _status.add(const CoreStatus.starting());
@@ -158,7 +160,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
         options: options,
         disableMemoryLimit: disableMemoryLimit,
       );
-      final wrap = wrapAdminElevation;
+      final wrap = elevationWrapper;
       if (wrap != null) {
         final ok = await wrap(ensure);
         wrapAdminElevation = null;
@@ -217,9 +219,7 @@ class CoreInterfaceDesktopTun extends CoreInterfaceDesktop {
     }
     if (last != EnsureAdminBgServiceProgress.ENSURE_ADMIN_BG_SERVICE_CONNECTED) {
       throw StateError(
-        (lastMessage != null && lastMessage.isNotEmpty)
-            ? lastMessage
-            : 'The VPN service did not become ready.',
+        (lastMessage != null && lastMessage.isNotEmpty) ? lastMessage : 'The VPN service did not become ready.',
       );
     }
 

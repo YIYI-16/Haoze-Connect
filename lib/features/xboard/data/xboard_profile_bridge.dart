@@ -1,4 +1,5 @@
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/features/connection/model/connection_failure.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/xboard/data/xboard_api_client.dart';
@@ -26,6 +27,27 @@ abstract interface class XboardProfileBridge {
 /// committed the new profile owner. Test/non-native bridges may omit this.
 abstract interface class XboardProfileReloader {
   Future<void> reload(String profileId);
+}
+
+enum XboardProfileReloadFailure {
+  cancelled,
+  ownershipChanged,
+  transitionTimeout,
+  unavailableState,
+  permission,
+  configuration,
+  backgroundCore,
+  license,
+  unexpected,
+}
+
+/// Carries a safe diagnostic category, never native config/error text that
+/// could include a subscription URL or credentials.
+class XboardProfileReloadException extends XboardException {
+  const XboardProfileReloadException(super.message, {required this.diagnostic})
+    : super(kind: XboardFailureKind.subscription);
+
+  final XboardProfileReloadFailure diagnostic;
 }
 
 class RiverpodXboardProfileBridge implements XboardProfileBridge, XboardProfileReloader {
@@ -93,8 +115,34 @@ class RiverpodXboardProfileBridge implements XboardProfileBridge, XboardProfileR
     try {
       await _ref.read(connectionNotifierProvider.future);
       await _ref.read(connectionNotifierProvider.notifier).reconnect(profile, throwOnFailure: true);
-    } catch (_) {
-      throw const XboardException('更新后的订阅无法应用到当前连接，请重试', kind: XboardFailureKind.subscription);
+    } catch (error) {
+      final diagnostic = switch (error) {
+        ManagedReloadException(:final reason) => switch (reason) {
+          ManagedReloadFailure.cancelled => XboardProfileReloadFailure.cancelled,
+          ManagedReloadFailure.ownershipChanged => XboardProfileReloadFailure.ownershipChanged,
+          ManagedReloadFailure.transitionTimeout => XboardProfileReloadFailure.transitionTimeout,
+          ManagedReloadFailure.unavailableState => XboardProfileReloadFailure.unavailableState,
+        },
+        MissingPrivilege() ||
+        MissingVpnPermission() ||
+        MissingNotificationPermission() => XboardProfileReloadFailure.permission,
+        InvalidConfig() || InvalidConfigOption() || TunAddressInUse() => XboardProfileReloadFailure.configuration,
+        BackgroundCoreNotAvailable() => XboardProfileReloadFailure.backgroundCore,
+        MissingWarpLicense() || MissingPsiphonLicense() => XboardProfileReloadFailure.license,
+        _ => XboardProfileReloadFailure.unexpected,
+      };
+      final message = switch (diagnostic) {
+        XboardProfileReloadFailure.cancelled => '连接操作已取消，请根据需要重新连接',
+        XboardProfileReloadFailure.ownershipChanged => '托管订阅归属已变化，请刷新账户后重试',
+        XboardProfileReloadFailure.transitionTimeout => '等待连接切换超时，请稍后重试',
+        XboardProfileReloadFailure.unavailableState => '当前连接状态无法确认，请先断开后重试',
+        XboardProfileReloadFailure.permission => '更新后的订阅无法应用到当前连接：权限不足，请确认系统授权后重试',
+        XboardProfileReloadFailure.configuration => '更新后的订阅无法应用到当前连接：连接配置无效，请检查设置后重试',
+        XboardProfileReloadFailure.backgroundCore => '更新后的订阅无法应用到当前连接：后台服务不可用，请重新连接',
+        XboardProfileReloadFailure.license => '更新后的订阅无法应用到当前连接：需要确认附加功能许可',
+        XboardProfileReloadFailure.unexpected => '更新后的订阅无法应用到当前连接：核心连接错误，请重试',
+      };
+      throw XboardProfileReloadException(message, diagnostic: diagnostic);
     }
   }
 

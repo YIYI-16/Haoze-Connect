@@ -10,6 +10,7 @@ import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/features/connection/model/connection_failure.dart';
 import 'package:hiddify/features/log/model/log_level.dart' as config_log_level;
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
+import 'package:hiddify/hiddifycore/core_interface/core_interface.dart';
 import 'package:hiddify/hiddifycore/core_interface/core_interface_wrapper_stub.dart'
     if (dart.library.io) 'package:hiddify/hiddifycore/core_interface/core_interface_wrapper.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcommon/common.pb.dart';
@@ -25,20 +26,25 @@ import 'package:logging/logging.dart' as logging;
 import 'package:rxdart/rxdart.dart';
 
 class HiddifyCoreService with InfraLogger {
-  HiddifyCoreService(this.ref);
+  static const unavailableSettings = 'CORE_SERVICE_UNAVAILABLE';
+  static const deniedSettings = 'CORE_SERVICE_PERMISSION_DENIED';
+  HiddifyCoreService(this.ref, {CoreInterface? core}) : core = core ?? getCoreInterface();
   final Ref ref;
 
   // CoreHiddifyCoreService() {}
-  final core = getCoreInterface();
+  final CoreInterface core;
 
   CoreStatus currentState = const CoreStatus.stopped();
   final statusController = BehaviorSubject<CoreStatus>();
   final CallOptions? grpcOptions = null; //CallOptions(timeout: const Duration(milliseconds: 10000));
   final Map<String, StreamSubscription?> subscriptions = {};
+  final Map<String, Object> _listenerTokens = {};
   List<OutboundGroup> latest = [];
 
   // Counts the stops the app sent, so a start knows when a stop came after it.
   final _stopRequests = BehaviorSubject<int>.seeded(0);
+  int get stopGeneration => _stopRequests.value;
+  int _managedStartGeneration = 0;
 
   // Numbers the status listeners. Setting the core up again (when the app comes back) moves it on
   // before the old channel is closed, so the end of the old listener's stream isn't taken for the
@@ -145,11 +151,19 @@ class HiddifyCoreService with InfraLogger {
           ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
         );
       } on GrpcError catch (e) {
-        if (e.code == StatusCode.unavailable) {
+        if (e.code == StatusCode.unavailable && !core.managesLifecycle) {
           loggy.debug("background core is not started yet! $e");
         } else {
-          rethrow;
+          if (e.code == StatusCode.unavailable ||
+              e.code == StatusCode.deadlineExceeded ||
+              e.code == StatusCode.unauthenticated) {
+            return left(unavailableSettings);
+          }
+          if (e.code == StatusCode.permissionDenied) return left(deniedSettings);
+          return left('Core settings failed (gRPC ${e.codeName}).');
         }
+      } catch (error) {
+        return left(error.toString());
       }
 
       return right(unit);
@@ -162,12 +176,20 @@ class HiddifyCoreService with InfraLogger {
       statusController.add(currentState = const CoreStatus.starting());
       loggy.debug("starting");
       if (core.managesLifecycle) {
+        final operation = ++_managedStartGeneration;
         try {
           await core.startManaged(path, name, disableMemoryLimit);
+          if (operation != _managedStartGeneration) return right(unit);
+          if (_stopRequests.value != stops) {
+            await core.stop();
+            if (operation == _managedStartGeneration) statusController.add(currentState = const CoreStatus.stopped());
+            return right(unit);
+          }
           await startListeningLogs('bg', core.bgClient);
           ref.read(coreRestartSignalProvider.notifier).restart();
           return right(unit);
         } catch (error, stackTrace) {
+          if (operation != _managedStartGeneration || _stopRequests.value != stops) return right(unit);
           final failure = ConnectionFailure.fromError(error, stackTrace);
           statusController.add(currentState = const CoreStatus.stopped());
           return left(failure);
@@ -283,6 +305,7 @@ class HiddifyCoreService with InfraLogger {
       loggy.debug("stopping");
       // a start still waiting gives up, whoever manages the core
       _stopRequests.add(_stopRequests.value + 1);
+      statusController.add(currentState = const CoreStatus.stopping());
       // Mobile (and macOS) publish status via managedStatus from the platform VPN
       // service. Waiting on gRPC stop *before* the platform stop deadlocks: the
       // EventChannel only emits Stopped after MethodChannel stop runs (#2395).
@@ -350,8 +373,15 @@ class HiddifyCoreService with InfraLogger {
   /// Applies a changed config to the running core: first as a hot reload, which keeps the core
   /// (and its connections) running; when the core cannot hot reload it (e.g. the TUN inbound
   /// changed) or the hot reload fails, the core is restarted instead.
-  TaskEither<String, Unit> reload(String path, String name, bool disableMemoryLimit) {
+  TaskEither<String, Unit> reload(String path, String name, bool disableMemoryLimit, {int? expectedStopGeneration}) {
     return TaskEither(() async {
+      final stops = expectedStopGeneration ?? _stopRequests.value;
+      if (_stopRequests.value != stops || currentState is CoreStopped || currentState is CoreStopping) {
+        return right(unit);
+      }
+      if (!core.supportsHotReload) {
+        return restart(path, name, disableMemoryLimit, expectedStopGeneration: stops).run();
+      }
       loggy.debug("hot reloading");
       try {
         final res = await core.bgClient.hotReload(
@@ -362,20 +392,30 @@ class HiddifyCoreService with InfraLogger {
       } on GrpcError catch (e) {
         loggy.warning("hot reload failed, restarting: $e");
       }
-      return restart(path, name, disableMemoryLimit).run();
+      return restart(path, name, disableMemoryLimit, expectedStopGeneration: stops).run();
     });
   }
 
-  TaskEither<String, Unit> restart(String path, String name, bool disableMemoryLimit) {
+  TaskEither<String, Unit> restart(String path, String name, bool disableMemoryLimit, {int? expectedStopGeneration}) {
     return TaskEither(() async {
+      final stops = expectedStopGeneration ?? _stopRequests.value;
+      if (_stopRequests.value != stops) return right(unit);
       loggy.debug("restarting");
       if (core.managesLifecycle) {
+        final operation = ++_managedStartGeneration;
         try {
           await core.startManaged(path, name, disableMemoryLimit);
+          if (operation != _managedStartGeneration) return right(unit);
+          if (_stopRequests.value != stops) {
+            await core.stop();
+            if (operation == _managedStartGeneration) statusController.add(currentState = const CoreStatus.stopped());
+            return right(unit);
+          }
           await startListeningLogs('bg', core.bgClient);
           ref.read(coreRestartSignalProvider.notifier).restart();
           return right(unit);
         } catch (error) {
+          if (operation != _managedStartGeneration || _stopRequests.value != stops) return right(unit);
           statusController.add(currentState = CoreStatus.stopped(message: error.toString()));
           return left(error.toString());
         }
@@ -675,18 +715,20 @@ class HiddifyCoreService with InfraLogger {
   }
 
   Future<void> stopListenSingle(String key) async {
-    // Collect keys to remove first
     final keysToRemove = subscriptions.entries
         .where((entry) => entry.key.startsWith(key))
         .map((entry) => entry.key)
         .toList();
-
-    // Cancel and remove
+    final stopped = <StreamSubscription>[];
+    // Forget every old listener before cancellation yields. A replacement
+    // created during cancellation must never be removed by this operation.
     for (final k in keysToRemove) {
-      final sub = subscriptions[k];
-      await sub?.cancel(); // cancel the subscription
-
-      subscriptions.remove(k);
+      _listenerTokens.remove(k);
+      final sub = subscriptions.remove(k);
+      if (sub != null) stopped.add(sub);
+    }
+    for (final sub in stopped) {
+      await sub.cancel();
     }
   }
 
@@ -695,29 +737,44 @@ class HiddifyCoreService with InfraLogger {
     Stream<T> Function() stream, {
     Function(dynamic error)? onError,
   }) async {
-    if (subscriptions.containsKey(key)) {
-      // return subscriptions[key] as StreamSubscription<T>?;
-      await stopListenSingle(key);
-    }
+    final token = Object();
+    _listenerTokens[key] = token;
+    final previous = subscriptions[key];
     subscriptions[key] = null;
-    late final StreamSubscription<T> subscription;
-    subscriptions[key] = subscription = stream().listen(
-      (event) {
-        // loggy.debug(event);
-      },
-      // an ended stream is not listened to anymore, so the next listenSingle arms it again
-      onDone: () {
-        if (identical(subscriptions[key], subscription)) subscriptions.remove(key);
-      },
-      cancelOnError: true,
-      onError: (error) {
-        loggy.error('Stream error: $error');
-        onError?.call(error);
-        subscriptions[key]?.cancel();
-        subscriptions.remove(key);
-      },
-    );
-    return subscriptions[key] as StreamSubscription<T>?;
+    await previous?.cancel();
+    bool isCurrent() => identical(_listenerTokens[key], token);
+    if (!isCurrent()) return null;
+
+    var ended = false;
+    void forget() {
+      ended = true;
+      if (!isCurrent()) return;
+      _listenerTokens.remove(key);
+      subscriptions.remove(key);
+    }
+
+    try {
+      final subscription = stream().listen(
+        (_) {},
+        onDone: forget,
+        cancelOnError: true,
+        onError: (Object error) {
+          if (!isCurrent()) return;
+          forget();
+          loggy.error('Stream error [$key]: $error');
+          onError?.call(error);
+        },
+      );
+      if (ended || !isCurrent()) {
+        unawaited(subscription.cancel());
+        return null;
+      }
+      subscriptions[key] = subscription;
+      return subscription;
+    } catch (_) {
+      forget();
+      rethrow;
+    }
   }
 
   /// Six engine levels onto six logging levels, nothing merged.

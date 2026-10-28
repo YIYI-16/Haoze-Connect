@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:hiddify/core/haptic/haptic_service.dart';
@@ -23,10 +24,21 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 part 'connection_notifier.g.dart';
 
+/// Safe reasons for a managed reload that could not reach the core.
+enum ManagedReloadFailure { cancelled, ownershipChanged, transitionTimeout, unavailableState }
+
+class ManagedReloadException implements Exception {
+  const ManagedReloadException(this.reason);
+
+  final ManagedReloadFailure reason;
+}
+
 @Riverpod(keepAlive: true)
 class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
   @override
   Stream<ConnectionStatus> build() async* {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     if (Platform.isIOS) {
       await _connectionRepo.setup().mapLeft((l) {
         loggy.error("error setting up connection repository", l);
@@ -151,33 +163,95 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     }
   }
 
+  Future<void>? _reloadFlight;
+  String? _reloadProfileId;
+  bool _disposed = false;
+
   Future<void> reconnect(ProfileEntity? profile, {bool throwOnFailure = false}) async {
-    if (profile != null && (!_xboardAllowsConnect || profile.id != ref.read(xboardManagedProfileIdProvider))) {
-      loggy.warning("refusing to reconnect a profile outside the managed account");
-      if (throwOnFailure) throw const ConnectionFailure.invalidConfig('托管订阅尚未就绪');
+    if (profile == null) {
+      if (state.valueOrNull?.isRunning == true) await _disconnect();
       return;
     }
-    if (throwOnFailure && (state.hasError || state.valueOrNull?.isSwitching == true)) {
-      throw const ConnectionFailure.invalidConfig('当前连接状态无法确认，请先断开后重试');
-    }
-    if (state case AsyncData(:final value) when value.isRunning) {
-      if (profile == null) {
-        loggy.info("no active profile, disconnecting");
-        return _disconnect();
+    final epoch = _connectEpoch;
+    try {
+      _checkReloadOwner(profile, epoch);
+      final inFlight = _reloadFlight;
+      if (inFlight != null) {
+        if (_reloadProfileId == profile.id) {
+          await inFlight;
+          _checkReloadOwner(profile, epoch);
+          return;
+        }
+        // A rotated profile must wait for the previous native operation, then
+        // check that it still belongs to the current account.
+        try {
+          await inFlight;
+        } catch (_) {}
+        _checkReloadOwner(profile, epoch);
+        return reconnect(profile, throwOnFailure: throwOnFailure);
       }
-      loggy.info("active profile changed, reconnecting");
-      await ref.read(Preferences.startedByUser.notifier).update(true);
-      final result = await _connectionRepo.reconnect(profile, ref.read(Preferences.disableMemoryLimit)).run();
-      final failure = result.fold((error) => error, (_) => null);
-      if (failure != null) {
-        loggy.warning("error reconnecting", failure);
-        state = AsyncError(failure, StackTrace.current);
-        if (throwOnFailure) throw failure;
-        await ref
-            .read(dialogNotifierProvider.notifier)
-            .showCustomAlertFromErr(failure.present(ref.read(translationsProvider).requireValue));
+      late final Future<void> tracked;
+      tracked = _reloadManagedProfile(profile, epoch).whenComplete(() {
+        if (identical(_reloadFlight, tracked)) {
+          _reloadFlight = null;
+          _reloadProfileId = null;
+        }
+      });
+      _reloadProfileId = profile.id;
+      _reloadFlight = tracked;
+      await tracked;
+    } on ManagedReloadException {
+      if (throwOnFailure) rethrow;
+    } catch (error, stackTrace) {
+      // A stop or account change owns the UI now, even if an older native
+      // request completes with an error afterwards.
+      try {
+        _checkReloadOwner(profile, epoch);
+      } on ManagedReloadException {
+        if (throwOnFailure) rethrow;
+        return;
       }
+      final failure = ConnectionFailure.fromError(error, stackTrace);
+      loggy.warning("error reconnecting (${failure.runtimeType})");
+      state = AsyncError(failure, stackTrace);
+      if (throwOnFailure) throw failure;
+      await ref
+          .read(dialogNotifierProvider.notifier)
+          .showCustomAlertFromErr(failure.present(ref.read(translationsProvider).requireValue));
     }
+  }
+
+  void _checkReloadOwner(ProfileEntity profile, int epoch) {
+    if (_disposed || epoch != _connectEpoch) {
+      throw const ManagedReloadException(ManagedReloadFailure.cancelled);
+    }
+    if (!_xboardAllowsConnect || profile.id != ref.read(xboardManagedProfileIdProvider)) {
+      throw const ManagedReloadException(ManagedReloadFailure.ownershipChanged);
+    }
+  }
+
+  Future<void> _reloadManagedProfile(ProfileEntity profile, int epoch) async {
+    final elapsed = Stopwatch()..start();
+    // A start/hot reload can finish while the panel request is in flight. Give
+    // it a bounded opportunity to settle rather than rejecting its config.
+    while (true) {
+      _checkReloadOwner(profile, epoch);
+      if (state.hasError) {
+        throw const ManagedReloadException(ManagedReloadFailure.unavailableState);
+      }
+      if (!state.isLoading && state.valueOrNull?.isSwitching != true) break;
+      if (elapsed.elapsed >= const Duration(seconds: 15)) {
+        throw const ManagedReloadException(ManagedReloadFailure.transitionTimeout);
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    _checkReloadOwner(profile, epoch);
+    if (state.valueOrNull?.isRunning != true) return;
+    // A refresh preserves the user's restoration preference. In particular,
+    // it must never write true after the user has requested a disconnect.
+    final result = await _connectionRepo.reconnect(profile, ref.read(Preferences.disableMemoryLimit)).run();
+    _checkReloadOwner(profile, epoch);
+    result.fold((failure) => throw failure, (_) {});
   }
 
   Future<void> abortConnection() async {

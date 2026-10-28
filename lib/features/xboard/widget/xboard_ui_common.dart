@@ -46,10 +46,10 @@ final RegExp xboardEmailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 /// Whether [value] can be the mail address of an account.
 bool isValidXboardEmail(String value) => xboardEmailPattern.hasMatch(value.trim());
 
-/// A byte count the way the traffic card shows it: `1.50 GB`.
+/// A byte count the way the traffic card shows it: `1.50 GiB`.
 String formatXboardBytes(int bytes) {
   if (bytes <= 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
   var value = bytes.toDouble();
   var unit = 0;
   while (value >= 1024 && unit < units.length - 1) {

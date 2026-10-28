@@ -59,6 +59,12 @@ class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements Con
 
   bool _initialized = false;
 
+  ConnectionFailure _coreFailure(String error) => switch (error) {
+    HiddifyCoreService.unavailableSettings => const ConnectionFailure.backgroundCoreNotAvailable(),
+    HiddifyCoreService.deniedSettings => const ConnectionFailure.missingPrivilege(),
+    _ => ConnectionFailure.unexpected(error),
+  };
+
   @override
   TaskEither<ConnectionFailure, Unit> setup() {
     if (_initialized) return TaskEither.of(unit);
@@ -183,11 +189,11 @@ class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements Con
       final stripped = options.copyWith(tlsTricks: options.tlsTricks.copyWith(mixedSniCase: false));
       _configOptionsSnapshot = stripped;
       final optionsResult = await singbox.changeOptions(stripped).run();
-      optionsResult.match((error) => throw ConnectionFailure.unexpected(error), (_) {});
+      optionsResult.match((error) => throw _coreFailure(error), (_) {});
     } else if (useAdminBg) {
       // Re-apply so setOptions sees useAdminBgService.
       final optionsResult = await singbox.changeOptions(options).run();
-      optionsResult.match((error) => throw ConnectionFailure.unexpected(error), (_) {});
+      optionsResult.match((error) => throw _coreFailure(error), (_) {});
     }
   }
 
@@ -249,13 +255,22 @@ class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements Con
   TaskEither<ConnectionFailure, Unit> disconnect() => singbox.stop().mapLeft(UnexpectedConnectionFailure.new);
 
   @override
-  TaskEither<ConnectionFailure, Unit> reconnect(ProfileEntity activeProfile, bool disableMemoryLimit) =>
-      applyConfigOption(activeProfile).flatMap(
-        // hot reload when possible, restart otherwise
-        (_) => singbox
-            .reload(profilePathResolver.file(activeProfile.id).path, activeProfile.name, disableMemoryLimit)
-            .mapLeft(UnexpectedConnectionFailure.new),
-      );
+  TaskEither<ConnectionFailure, Unit> reconnect(ProfileEntity activeProfile, bool disableMemoryLimit) => TaskEither(() {
+    final stops = singbox.stopGeneration;
+    return applyConfigOption(activeProfile)
+        .flatMap(
+          // hot reload when possible, restart otherwise
+          (_) => singbox
+              .reload(
+                profilePathResolver.file(activeProfile.id).path,
+                activeProfile.name,
+                disableMemoryLimit,
+                expectedStopGeneration: stops,
+              )
+              .mapLeft(UnexpectedConnectionFailure.new),
+        )
+        .run();
+  });
 
   @visibleForTesting
   TaskEither<ConnectionFailure, Unit> applyConfigOption(ProfileEntity prof) =>
@@ -292,7 +307,7 @@ class ConnectionRepositoryImpl with ExceptionHandler, InfraLogger implements Con
 
               _configOptionsSnapshot = overridedOptions;
               final optionsResult = await singbox.changeOptions(overridedOptions).run();
-              optionsResult.match((error) => throw ConnectionFailure.unexpected(error), (_) {});
+              optionsResult.match((error) => throw _coreFailure(error), (_) {});
               return unit;
             }, (err, st) => err is ConnectionFailure ? err : ConnectionFailure.unexpected(err, st)),
           );

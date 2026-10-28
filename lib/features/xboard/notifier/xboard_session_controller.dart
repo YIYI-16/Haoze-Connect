@@ -409,6 +409,14 @@ class XboardSessionController extends StateNotifier<XboardSessionState> {
           await _runProfile(() => reloader.reload(profileId));
         }
         ready = true;
+      } on XboardProfileReloadException catch (error) {
+        if (error.diagnostic == XboardProfileReloadFailure.cancelled) {
+          // The profile has been validated and committed. An intentional stop
+          // cancels applying it to the tunnel, not the account's eligibility.
+          ready = true;
+        } else {
+          warning = error.message;
+        }
       } on XboardException catch (error) {
         warning = error.message;
       } catch (_) {

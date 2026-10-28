@@ -7,7 +7,6 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
@@ -25,7 +24,6 @@ class HomePage extends HookConsumerWidget {
     final theme = Theme.of(context);
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
-    final activeProfile = ref.watch(activeProfileProvider);
     final session = ref.watch(xboardSessionProvider);
 
     return Scaffold(
@@ -41,12 +39,12 @@ class HomePage extends HookConsumerWidget {
           children: [
             Assets.images.logo.svg(height: 24),
             const Gap(8),
-            Text.rich(
+            const Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(text: t.common.appTitle),
-                  const TextSpan(text: " "),
-                  const WidgetSpan(child: AppVersionLabel(), alignment: PlaceholderAlignment.middle),
+                  TextSpan(text: xboardAppName),
+                  TextSpan(text: " "),
+                  WidgetSpan(child: AppVersionLabel(), alignment: PlaceholderAlignment.middle),
                 ],
               ),
             ),
@@ -129,20 +127,12 @@ class HomePage extends HookConsumerWidget {
                     // switch (activeProfile) {
                     // AsyncData(value: final profile?) =>
                     MultiSliver(
-                      children: [
+                      children: const [
                         // const Gap(100),
-                        switch (activeProfile) {
-                          AsyncData(value: final profile?) => ProfileTile(
-                            profile: profile,
-                            isMain: true,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                          _ => const Text(""),
-                        },
-                        const SliverToBoxAdapter(
+                        SliverToBoxAdapter(
                           child: Padding(padding: EdgeInsets.fromLTRB(16, 4, 16, 12), child: XboardHomeCard()),
                         ),
-                        const SliverFillRemaining(
+                        SliverFillRemaining(
                           hasScrollBody: false,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

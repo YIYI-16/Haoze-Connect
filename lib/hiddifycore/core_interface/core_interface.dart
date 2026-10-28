@@ -8,6 +8,7 @@ class CoreInterface {
   late CoreClient bgClient;
 
   bool get managesLifecycle => false;
+  bool get supportsHotReload => true;
   bool get persistsAfterAppExit => false;
   Stream<CoreStatus>? get managedStatus => null;
   Stream<void>? get clientChanges => null;
