@@ -132,6 +132,9 @@ tags cannot run those upstream distribution jobs; use the Haoze manual workflow.
   Packaging parameters `-BuildDir` and `-OutDir` resolve relative to the repository
   root (absolute paths are also accepted), regardless of the current directory;
   ZIP and Setup consume the same source tree and write to the same output folder.
+  The Simplified Chinese translation is bundled under `scripts/inno-languages`
+  from the official Inno Setup 6.7.1 source tag, with its credits/license. The
+  runner's compiler installation does not include that contributed language.
 
 Windows branding asset is still pending: `windows/runner/resources/app_icon.ico`
 remains the upstream placeholder icon until Haoze icon material exists.
@@ -154,13 +157,9 @@ remains the upstream placeholder icon until Haoze icon material exists.
   regular files.
 - 140 related Flutter tests and 37 distribution checks passed after the Sol
   review fixes; strict `flutter analyze` reported no issues. The expanded
-  profile database tests use the host SQLite shared library. A real Android
-  debug build succeeded with the pinned draft AAR:
-  `flutter build apk --debug --target-platform android-arm64`, producing
-  `artifacts/HaozeConnect-Android-arm64-debug-test.apk` (about 202 MiB,
-  package `com.haoze.connect`, label `Haoze Connect`, minSdk/API 24+); the
-  debug APK signature (v2) was verified. This was a local arm64 debug build,
-  not a CI release run.
+  profile database tests use the host SQLite shared library. An initial
+  Android ARM64 debug build also succeeded with the pinned draft AAR; the
+  delivered APK is the smaller Release-mode test build described below.
 - Android packages are built locally. The user subsequently authorized the
   private `HaozeZane/Haoze-Connect` repository and Windows test-artifact builds.
   No public fork, public release or store submission is authorized.
@@ -172,10 +171,21 @@ remains the upstream placeholder icon until Haoze icon material exists.
   signing key. An ARM64-only build can still emit other split filenames due
   to the upstream Gradle configuration; only the verified ARM64 split is
   delivered here.
-- **Windows build and runtime are UNKNOWN.** The Windows archive was
-  downloaded and hash-verified on Linux, but nothing was compiled or executed
-  for Windows, so installer/service coexistence and runtime behavior still
-  need real Windows testing.
+- **Windows build and packaging PASS.** The private Windows run
+  [40630912669](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40630912669),
+  source commit `ff44ec874ac0066236c13e5fac796ece13774835`, passed strict
+  analysis, 61 focused Flutter tests and 37 distribution checks, then compiled
+  the x64 Release application and produced:
+  - `artifacts/HaozeConnect-Windows-Setup-x64-5.0.0.exe` (44,859,206 bytes).
+  - `artifacts/HaozeConnect-Windows-Standalone-x64.zip` (60,851,110 bytes).
+  The downloaded ZIP passed CRC/path checks and contains the x64 app,
+  Flutter runtime, AOT code and all three required native-core files. Each
+  bundled core file matches the independently hash-verified pinned archive.
+  SHA256 values and audit details are in `artifacts/SHA256SUMS` and
+  `artifacts/verification/windows-package-audit.json`.
+  Both packages are unsigned internal tests. **Real Windows installation,
+  login, VPN connectivity and coexistence with upstream services remain
+  UNKNOWN**; downloading and inspecting a binary does not verify its runtime.
 
 ## License notes for distribution
 

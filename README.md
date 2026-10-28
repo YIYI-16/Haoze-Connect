@@ -30,15 +30,15 @@
 > attribution kept). No claim is made here about the legal sufficiency of that
 > interpretation. No public release or store submission has been made. Verified
 > locally as described in `docs/DISTRIBUTION.md`: 140 related Flutter tests,
-> 37 distribution checks and strict `flutter analyze` pass. A real Android
-> arm64 debug APK build succeeded
-> (about 202 MiB, API 24+, local debug build). Windows build/runtime is still
-> unverified and no downloaded Windows binary was executed; the Windows icon
-> remains the upstream placeholder.
-> The final local delivery also includes an ARM64 Release-mode test APK
-> (about 54 MiB, signed with the Android debug certificate). Real-device login
-> and node connectivity still need testing. Source remains private; the
-> Windows workflow only creates test artifacts and does not publish releases.
+> 37 distribution checks and strict `flutter analyze` pass. The Android ARM64
+> Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
+> debug certificate. The private Windows build passed analysis and 61 tests,
+> compiled the x64 app, and produced unsigned EXE/ZIP test packages:
+> [Windows build](https://github.com/HaozeZane/Haoze-Connect/actions/runs/40630912669).
+> Downloaded Windows package contents and native-core hashes were verified.
+> Real-device installation, login and node connectivity still need testing;
+> the Windows icon remains the upstream placeholder. Source remains private;
+> the workflow only creates test artifacts and does not publish releases.
 
 <div dir="ltr" align=center>
     
