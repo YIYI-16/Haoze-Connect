@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -217,6 +218,12 @@ class XboardApiClient implements XboardApi {
   }
 
   String _networkMessage(DioException error) {
+    if (error.type == DioExceptionType.badCertificate || error.error is TlsException) {
+      // TLS failures otherwise arrive as Dio's `unknown` type. Keep certificate
+      // verification enabled and give a useful message without the raw error,
+      // which can contain a request URL or credentials.
+      return 'HTTPS 安全连接失败，请检查系统时间和证书信任后重试';
+    }
     return switch (error.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||

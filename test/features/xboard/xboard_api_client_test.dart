@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -169,6 +170,33 @@ void main() {
             .having((error) => error.kind, 'not unauthorized', isNot(XboardFailureKind.unauthorized)),
       ),
     );
+  });
+
+  test('TLS errors explain trust checks without exposing request details or invalidating the account', () async {
+    for (final type in [DioExceptionType.unknown, DioExceptionType.badCertificate]) {
+      final api = XboardApiClient(
+        config: config,
+        userAgent: 'test',
+        dio: Dio()
+          ..httpClientAdapter = _FakeAdapter(
+            (options) => throw DioException(
+              requestOptions: options,
+              type: type,
+              error: const HandshakeException('certificate failed for Bearer secret'),
+            ),
+          ),
+      );
+      addTearDown(api.close);
+      await expectLater(
+        api.fetchSubscription('Bearer secret'),
+        throwsA(
+          isA<XboardException>()
+              .having((error) => error.kind, 'kind', XboardFailureKind.network)
+              .having((error) => error.message, 'trust guidance', contains('证书信任'))
+              .having((error) => error.message, 'safe message', isNot(contains('secret'))),
+        ),
+      );
+    }
   });
 
   test('rejects non-https panel URLs', () {

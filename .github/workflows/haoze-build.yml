@@ -152,7 +152,8 @@ jobs:
   windows:
     if: ${{ inputs.platform == 'windows' || inputs.platform == 'all' }}
     name: Windows ZIP + EXE
-    runs-on: windows-latest
+    # Keep the native toolchain on VS 2022; windows-latest has moved to VS 2026.
+    runs-on: windows-2022
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -177,7 +178,7 @@ jobs:
 
       # Native core comes only from hiddify-core.lock.json (exact draft URL +
       # SHA256 + timestamp); drift fails the build. The downloaded binaries are
-      # never executed here, only extracted beside the app.
+      # verified before building the app and running the native launch check.
       - name: Fetch hash-verified Windows core
         shell: pwsh
         run: python scripts/haoze_core.py fetch --platform windows --cache "$env:RUNNER_TEMP\hiddify-core-cache"
@@ -206,6 +207,10 @@ jobs:
             --target lib/main_prod.dart `
             --dart-define="XBOARD_BASE_URL=https://www.haoze.cyou" `
             --dart-define="XBOARD_APP_NAME=Haoze Connect"
+
+      - name: Check Windows native launch
+        shell: pwsh
+        run: .\scripts\haoze-windows-smoke.ps1
 
       # Produces dist\HaozeConnect\HaozeConnect-Windows-Standalone-x64.zip and
       # HaozeConnect-Windows-Setup-x64-<version>.exe. No signing secrets are

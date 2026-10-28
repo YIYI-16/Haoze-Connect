@@ -156,6 +156,24 @@ class TestWindowsBranding(unittest.TestCase):
         self.assertIn('$PSScriptRoot', ps)
         self.assertNotIn('[string]$StagingDir', ps, "temporary cleanup must not delete a caller-selected directory")
 
+    def test_windows_crt_comes_from_selected_toolchain(self):
+        cmake = read("windows/CMakeLists.txt")
+        self.assertIn('${CMAKE_CXX_COMPILER}', cmake)
+        self.assertIn('${_haoze_vc_root}/Redist/MSVC/*', cmake)
+        self.assertIn('_version VERSION_GREATER_EQUAL _haoze_toolset_version', cmake)
+        self.assertIn('list(FILTER PLUGIN_BUNDLED_LIBRARIES EXCLUDE REGEX', cmake)
+        self.assertIn('set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)', cmake)
+        self.assertIn('set(CMAKE_INSTALL_DEBUG_LIBRARIES FALSE)', cmake)
+        self.assertIn('include(InstallRequiredSystemLibraries)', cmake)
+        self.assertLess(cmake.index('install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"'),
+                        cmake.index('install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}'))
+        self.assertIn('CONFIGURATIONS Profile Release', cmake)
+        self.assertIn('check_msvc_runtime.ps1', cmake)
+        check = read("windows/scripts/check_msvc_runtime.ps1")
+        for assertion in ['ReadUInt16() -ne $expectedMachine', '$version -lt $MinimumVersion',
+                          'Microsoft Corporation', 'CACHE_ONLY_URL_RETRIEVAL', '$status -ne 0']:
+            self.assertIn(assertion, check)
+
 
 class TestDartConstantsAndUpdates(unittest.TestCase):
     def test_app_name_define(self):
@@ -363,6 +381,8 @@ class TestsWorkflow(unittest.TestCase):
 
     def test_windows_packaging_steps(self):
         wf = read(".github/workflows/haoze-build.yml")
+        self.assertIn("runs-on: windows-2022", wf)
+        self.assertIn(".\\scripts\\haoze-windows-smoke.ps1", wf)
         self.assertIn("choco install innosetup -y", wf)
         self.assertIn(".\\scripts\\haoze-package-windows.ps1", wf)
         for artn in ["HaozeConnect-Windows-Standalone-x64-unsigned", "HaozeConnect-Windows-Setup-x64-unsigned"]:

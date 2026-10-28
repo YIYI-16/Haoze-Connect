@@ -15,6 +15,28 @@ distribution, a public fork must be created and the release must be produced
 through that fork's GitHub Actions, as `LICENSE.md` requires (see the license
 notes below).
 
+## 5.0.3 Windows runtime correction
+
+The Windows job uses the `windows-2022` / Visual Studio 2022 runner instead of
+the moving `windows-latest` toolchain. App-local Microsoft CRT DLLs come from
+the selected compiler's Visual Studio installation; the older fixed DLLs from
+the `vclibs` plugin are excluded. Configure verifies their architecture,
+minimum toolset version and Microsoft Authenticode signature using local trust
+without online revocation requests. Release/Profile installation retains the
+original signed Microsoft files.
+
+CI also starts the built application and checks for a stable, responsive native
+window before packaging. This checks native loading, not account or VPN
+functionality. TLS failures now explain the system-time/certificate-trust check
+without logging request details or weakening HTTPS verification.
+
+The app's own EXE/DLL files remain unsigned internal test builds. Windows Smart
+App Control or another enforced Code Integrity policy can block these files;
+recompilation or signing only the installer does not establish trust in its
+payload. Trusted signing must cover the application binaries and installer.
+No test procedure disables Windows security policy. Real-machine evidence and
+the new build results are recorded under `artifacts/5.0.3/verification/`.
+
 ## 5.0.1 default-China test build
 
 The managed app defaults to region `cn`, including the built-in region-direct
