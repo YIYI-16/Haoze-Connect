@@ -17,6 +17,16 @@ and Windows test builds remain in the authorized private
 been made. See `LICENSE.md` and the license notes below before distributing
 binaries publicly.
 
+## Native dependency archive availability
+
+On 2026-10-28 the public upstream `draft` assets changed, and the locked hashes
+correctly stopped CI. The original locally retained archives were re-verified
+and mirrored to the repository's non-Latest `native-a1104ab-20261027` dependency
+release. This is separate from app releases. The lock keeps the original
+upstream URLs/timestamps and exact accepted SHA256 values; no new native
+binary was accepted. The fetcher permits only the specific upstream and
+first-party mirror paths and still fails closed on digest mismatch.
+
 ## 5.0.4 routing and connection corrections
 
 China's built-in domain rule now uses MetaCubeX's complete Chinese-service

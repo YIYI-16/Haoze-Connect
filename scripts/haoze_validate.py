@@ -10,6 +10,8 @@ Run from anywhere:  python3 scripts/haoze_validate.py
 """
 
 import json
+import importlib.util
+import tempfile
 import os
 import re
 import unittest
@@ -259,8 +261,12 @@ class TestsCoreLock(unittest.TestCase):
         asset = self.lock["assets"][platform]
         self.assertEqual(
             asset["url"],
-            "https://github.com/hiddify/hiddify-core/releases/download/draft/"
+            "https://github.com/YIYI-16/Haoze-Connect/releases/download/native-a1104ab-20261027/"
             + filename,
+        )
+        self.assertEqual(
+            asset["upstream_url"],
+            "https://github.com/hiddify/hiddify-core/releases/download/draft/" + filename,
         )
         self.assertRegex(asset["sha256"], re.compile(r"^[0-9a-f]{64}$"))
         self.assertNotEqual(asset["sha256"], "0" * 64)
@@ -287,6 +293,35 @@ class TestsCoreLock(unittest.TestCase):
             "hiddify-core/bin",
             ["hiddify-core.dll", "HiddifyCli.exe", "libcronet.dll"],
         )
+
+    def _load_candidate(self, candidate):
+        spec = importlib.util.spec_from_file_location("haoze_core_validation", repo("scripts/haoze_core.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "lock.json"
+            path.write_text(json.dumps(candidate))
+            return module.load_lock(path)
+
+    def test_mirror_rejects_untrusted_hosts_and_missing_provenance(self):
+        for url in [
+            "https://example.invalid/hiddify-lib-android.tar.gz",
+            "http://github.com/YIYI-16/Haoze-Connect/releases/download/native-a1104ab-20261027/hiddify-lib-android.tar.gz",
+            "https://github.com/YIYI-16/Haoze-Connect.evil/releases/download/native-a1104ab-20261027/hiddify-lib-android.tar.gz",
+        ]:
+            candidate = json.loads(json.dumps(self.lock))
+            candidate["assets"]["android"]["url"] = url
+            with self.subTest(url=url), self.assertRaises(RuntimeError):
+                self._load_candidate(candidate)
+        candidate = json.loads(json.dumps(self.lock))
+        del candidate["assets"]["android"]["upstream_url"]
+        with self.assertRaises(RuntimeError):
+            self._load_candidate(candidate)
+        self.assertEqual(self._load_candidate(self.lock)["assets"], self.lock["assets"])
+
+    def test_mirror_preserves_the_accepted_native_digests(self):
+        self.assertEqual(self.lock["assets"]["android"]["sha256"], "7ea92f0c868e048612465ce74acaa836600c7e28eb62c365268de03b13498dc5")
+        self.assertEqual(self.lock["assets"]["windows"]["sha256"], "ed3251c348b15ad804b4e7d8f9e528b1006dc8ed5b08f8323204b820f7ca28f5")
 
     def test_core_script_supports_offline_verification(self):
         script = read("scripts/haoze_core.py")

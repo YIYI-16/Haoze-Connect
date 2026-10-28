@@ -44,6 +44,9 @@ CHUNK = 1024 * 1024
 CORE_RELEASE_PREFIX = (
     "https://github.com/hiddify/hiddify-core/releases/download/draft/"
 )
+MIRROR_RELEASE_PREFIX = (
+    "https://github.com/YIYI-16/Haoze-Connect/releases/download/native-a1104ab-20261027/"
+)
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -89,10 +92,15 @@ def load_lock(path: Path = DEFAULT_LOCK) -> dict:
         _require(isinstance(asset, dict), f"lock assets.{platform} missing")
         url = asset.get("url")
         _require(
-            isinstance(url, str) and url.startswith(CORE_RELEASE_PREFIX),
-            f"assets.{platform}.url must be under {CORE_RELEASE_PREFIX}",
+            isinstance(url, str) and url.startswith((CORE_RELEASE_PREFIX, MIRROR_RELEASE_PREFIX)),
+            f"assets.{platform}.url must use the upstream source or pinned first-party mirror",
         )
         archive = url.rsplit("/", 1)[-1]
+        if url.startswith(MIRROR_RELEASE_PREFIX):
+            _require(
+                asset.get("upstream_url") == CORE_RELEASE_PREFIX + archive,
+                f"assets.{platform}.upstream_url must preserve the original public asset source",
+            )
         _require(
             asset.get("archive") == archive,
             f"assets.{platform}.archive must match the URL filename ({archive})",
