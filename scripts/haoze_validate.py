@@ -121,6 +121,14 @@ class TestWindowsBranding(unittest.TestCase):
         self.assertIn('OutputBaseFilename=HaozeConnect-Windows-Setup-x64-{#APP_VERSION}', iss)
         self.assertIn('SetupIconFile=..\\windows\\runner\\resources\\app_icon.ico', iss)
         self.assertTrue(repo("windows/runner/resources/app_icon.ico").exists())
+        # A declared language must exist without relying on optional files in
+        # the compiler installation (the first Windows CI run exposed this).
+        for language_file in re.findall(r'MessagesFile:\s*"([^"]+)"', iss):
+            if not language_file.startswith("compiler:"):
+                self.assertTrue(
+                    (repo("scripts") / language_file.replace("\\", "/")).is_file(),
+                    f"Missing bundled installer language: {language_file}",
+                )
 
     def test_fastforge_exe_config(self):
         cfg = read("windows/packaging/exe/make_config.yaml")
