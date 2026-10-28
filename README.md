@@ -35,12 +35,14 @@
 > here about the legal sufficiency of this standalone source mirror. Verified
 > locally as described in `docs/DISTRIBUTION.md`: 201 related Flutter tests,
 > 38 distribution checks and strict `flutter analyze` pass. The Android ARM64
-> Release-mode test APK is about 54 MiB, API 24+, and signed with the Android
+> Release-mode APK is about 54 MiB, API 24+, and signed with the Android
 > debug certificate. The migrated Android/Windows workflow passed analysis,
 > 106 tests on each platform, Windows native launch and both packaging jobs:
 > [Migration build](https://github.com/YIYI-16/Haoze-Connect/actions/runs/40684285128).
 > [Released 5.0.3 assets](https://github.com/YIYI-16/Haoze-Connect/releases/tag/v5.0.3)
 > preserve the originally accepted binary bytes and signing.
+> Version 5.0.3 is published as a stable Release and marked Latest; APK asset
+> naming omits `test`, with the original Android Debug signing unchanged.
 > Downloaded Windows package contents and native-core hashes were verified.
 > The installed final package was tested on Windows Server 2022 in an elevated
 > session: account/quota restoration, real proxy and VPN egress, and subscription

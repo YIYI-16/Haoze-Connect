@@ -48,6 +48,11 @@ the new build results are recorded under `artifacts/5.0.3/verification/`.
 ## Current 5.0.3 validation
 
 Binary source commit: `50704d3df42e4fc118db824c5f6d4f601be6fe0b`.
+GitHub 5.0.3 is a stable Release marked Latest, available through
+`/releases/latest` and `/repos/YIYI-16/Haoze-Connect/releases/latest`. The
+Android Release asset is `HaozeConnect-Android-arm64-5.0.3.apk`; it retains the
+original Android Debug signing and byte hash. Historical test-build filenames
+below describe the earlier delivery, not the current GitHub Release status.
 The local suite passed 201 related Flutter tests, 38 distribution checks and
 strict analysis. The Android ARM64 Release-mode test APK passed v2 signature
 verification; it retains the same internal Android debug certificate.
