@@ -160,7 +160,7 @@ class TestWindowsBranding(unittest.TestCase):
         cmake = read("windows/CMakeLists.txt")
         self.assertIn('${CMAKE_CXX_COMPILER}', cmake)
         self.assertIn('${_haoze_vc_root}/Redist/MSVC/*', cmake)
-        self.assertIn('_version VERSION_GREATER_EQUAL _haoze_toolset_version', cmake)
+        self.assertIn('-MinimumVersion "${_haoze_toolset_version}"', cmake)
         self.assertIn('list(FILTER PLUGIN_BUNDLED_LIBRARIES EXCLUDE REGEX', cmake)
         self.assertIn('set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)', cmake)
         self.assertIn('set(CMAKE_INSTALL_DEBUG_LIBRARIES FALSE)', cmake)

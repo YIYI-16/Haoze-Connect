@@ -126,8 +126,9 @@ file(GLOB _haoze_redist_candidates LIST_DIRECTORIES TRUE
 set(_haoze_redist_version "0")
 foreach(_candidate IN LISTS _haoze_redist_candidates)
   get_filename_component(_version "${_candidate}" NAME)
+  # Servicing can update DLL versions without renaming the redist directory.
+  # Select the newest directory here; verify actual PE versions below.
   if(_version MATCHES "^14\\.[0-9]+\\.[0-9]+$" AND
-     _version VERSION_GREATER_EQUAL _haoze_toolset_version AND
      _version VERSION_GREATER _haoze_redist_version)
     set(MSVC_REDIST_DIR "${_candidate}")
     set(_haoze_redist_version "${_version}")
