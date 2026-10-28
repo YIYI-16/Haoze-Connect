@@ -109,7 +109,8 @@ void main() {
     native.settingsJson = '{"enable-tun":false}';
     final restart = core.startManaged('managed-config', 'Managed', false);
     await native.restartEntered.future;
-    expect(jsonDecode(native.settingsJson)['enable-tun'], isTrue);
+    final settings = jsonDecode(native.settingsJson) as Map<String, dynamic>;
+    expect(settings['enable-tun'], isTrue);
     expect(core.useAdminBgService, isFalse);
     native.emit(CoreStates.STARTING);
     native.emit(CoreStates.WAITING);
