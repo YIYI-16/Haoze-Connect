@@ -1,6 +1,7 @@
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
@@ -9,6 +10,9 @@ import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
+import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
+import 'package:hiddify/features/xboard/widget/xboard_home_card.dart';
+import 'package:hiddify/features/xboard/widget/xboard_ui_common.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -22,6 +26,7 @@ class HomePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
     final activeProfile = ref.watch(activeProfileProvider);
+    final session = ref.watch(xboardSessionProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,20 +59,22 @@ class HomePage extends HookConsumerWidget {
           //     material: (context, platform) => MaterialIconButtonData(
           //           tooltip: t.config.quickSettings,
           //         )),
-          // IconButton(
-          //     onPressed: () => const AddProfileRoute().push(context),
-          //     icon: const Icon(FluentIcons.add_circle_24_filled),
-          //     material: (context, platform) => MaterialIconButtonData(
-          //           tooltip: t.profile.add.buttonText,
-          //         )),
-          Semantics(
-            key: const ValueKey("profile_add_button"),
-            label: t.pages.profiles.add,
-            child: IconButton(
-              icon: Icon(Icons.add_rounded, color: theme.colorScheme.primary),
-              onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+          // The subscription comes from the panel now and the app adds it by
+          // itself, so the manual add entry is gone from the home screen.
+          if (session.isAuthenticated)
+            IconButton(
+              key: const ValueKey("xboard_account_button"),
+              tooltip: session.email ?? '我的账户',
+              icon: const Icon(Icons.account_circle_rounded),
+              onPressed: () => context.go(xboardAccountRoute),
+            )
+          else
+            TextButton.icon(
+              key: const ValueKey("xboard_login_button"),
+              onPressed: () => context.go(xboardLoginRoute),
+              icon: const Icon(Icons.person_outline_rounded),
+              label: const Text('登录'),
             ),
-          ),
           const Gap(8),
         ],
       ),
@@ -132,6 +139,9 @@ class HomePage extends HookConsumerWidget {
                           ),
                           _ => const Text(""),
                         },
+                        const SliverToBoxAdapter(
+                          child: Padding(padding: EdgeInsets.fromLTRB(16, 4, 16, 12), child: XboardHomeCard()),
+                        ),
                         const SliverFillRemaining(
                           hasScrollBody: false,
                           child: Column(

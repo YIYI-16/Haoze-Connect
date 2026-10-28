@@ -11,6 +11,7 @@ import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/model/startup_connection.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
+import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
 import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
 import 'package:hiddify/singbox/model/core_status.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -48,10 +49,10 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
 
     ref.listen(activeProfileProvider.select((value) => value.asData?.value), (previous, next) async {
       if (previous == null) return;
-      final shouldReconnect = next == null || previous.id != next.id;
-      if (shouldReconnect) {
-        await reconnect(next);
-      }
+      if (next == null) await reconnect(null);
+      // Managed activations are reloaded once by the session controller after
+      // it commits ownership. A database event can arrive before or after
+      // that commit, so it must never independently start the new profile.
     });
     // Do not watch coreRestartSignal here. A mid-connect client switch (macOS stop-before-start)
     // increments that signal, rebuilds this stream to Disconnected, and leaves SingleCall locked so
@@ -76,14 +77,25 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
   ConnectionRepository get _connectionRepo => ref.read(connectionRepositoryProvider);
 
   Future<void> mayConnect() async {
+    if (!_xboardAllowsConnect) return;
     if (state case AsyncData(:final value)) {
       if (value case Disconnected()) return _connect();
     }
   }
 
+  /// Whether the managed account allows a tunnel to start.
+  ///
+  /// A managed app owns one subscription, so the panel decides whether it may
+  /// be used. Disconnecting is never blocked, only starting.
+  bool get _xboardAllowsConnect => ref.read(xboardConnectionAllowedProvider);
+
   /// Restores the tunnel on desktop start when the user had it running before quitting,
   /// so a session started manually survives a reboot or an autostart login.
   Future<void> restoreConnectionOnStartup() async {
+    if (!_xboardAllowsConnect) {
+      loggy.info("xboard session does not allow a connection right now, not restoring");
+      return;
+    }
     final startedByUser = ref.read(Preferences.startedByUser);
     final activeProfile = await ref.read(activeProfileProvider.future);
     // macOS can restore a running system VPN during core setup. Reconnecting
@@ -111,11 +123,19 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
   Future<void> toggleConnection() async {
     final haptic = ref.read(hapticServiceProvider.notifier);
     if (state case AsyncError()) {
+      if (!_xboardAllowsConnect) {
+        loggy.warning("xboard session does not allow a connection right now");
+        return;
+      }
       await haptic.lightImpact();
       await _connect();
     } else if (state case AsyncData(:final value)) {
       switch (value) {
         case Disconnected():
+          if (!_xboardAllowsConnect) {
+            loggy.warning("xboard session does not allow a connection right now");
+            return;
+          }
           await haptic.lightImpact();
           await ref.read(Preferences.startedByUser.notifier).update(true);
           await _connect();
@@ -131,7 +151,15 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     }
   }
 
-  Future<void> reconnect(ProfileEntity? profile) async {
+  Future<void> reconnect(ProfileEntity? profile, {bool throwOnFailure = false}) async {
+    if (profile != null && (!_xboardAllowsConnect || profile.id != ref.read(xboardManagedProfileIdProvider))) {
+      loggy.warning("refusing to reconnect a profile outside the managed account");
+      if (throwOnFailure) throw const ConnectionFailure.invalidConfig('托管订阅尚未就绪');
+      return;
+    }
+    if (throwOnFailure && (state.hasError || state.valueOrNull?.isSwitching == true)) {
+      throw const ConnectionFailure.invalidConfig('当前连接状态无法确认，请先断开后重试');
+    }
     if (state case AsyncData(:final value) when value.isRunning) {
       if (profile == null) {
         loggy.info("no active profile, disconnecting");
@@ -139,13 +167,16 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
       }
       loggy.info("active profile changed, reconnecting");
       await ref.read(Preferences.startedByUser.notifier).update(true);
-      await _connectionRepo.reconnect(profile, ref.read(Preferences.disableMemoryLimit)).mapLeft((err) async {
-        loggy.warning("error reconnecting", err);
-        state = AsyncError(err, StackTrace.current);
+      final result = await _connectionRepo.reconnect(profile, ref.read(Preferences.disableMemoryLimit)).run();
+      final failure = result.fold((error) => error, (_) => null);
+      if (failure != null) {
+        loggy.warning("error reconnecting", failure);
+        state = AsyncError(failure, StackTrace.current);
+        if (throwOnFailure) throw failure;
         await ref
             .read(dialogNotifierProvider.notifier)
-            .showCustomAlertFromErr(err.present(ref.read(translationsProvider).requireValue));
-      }).run();
+            .showCustomAlertFromErr(failure.present(ref.read(translationsProvider).requireValue));
+      }
     }
   }
 
@@ -160,12 +191,36 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     }
   }
 
+  /// Account cleanup must stop the native tunnel even after a previous UI
+  /// error, and must report a failed stop before any credentials are removed.
+  Future<void> stopForAccount() async {
+    _connectEpoch++;
+    _singleStart.reset();
+    state = const AsyncData(Disconnecting());
+    final result = await _connectionRepo.disconnect().run();
+    result.fold(
+      (error) {
+        state = AsyncError(error, StackTrace.current);
+        throw error;
+      },
+      (_) {
+        state = const AsyncData(Disconnected());
+      },
+    );
+  }
+
   final _singleStart = SingleCall();
 
   /// Bumped on disconnect / stuck-retry so a superseded in-flight connect cannot overwrite UI.
   int _connectEpoch = 0;
 
   Future<void> _connect() async {
+    // The last line of defense: every start goes through here, so a profile
+    // that survived a failed cleanup cannot be used to bypass the panel.
+    if (!_xboardAllowsConnect) {
+      loggy.warning("xboard session does not allow a connection right now");
+      return;
+    }
     // UI can show Disconnected while a native start is still blocked on the macOS
     // serial queue. Stacking another start made that worse; cancel once, then retry.
     if (_singleStart.isRunning && (state.valueOrNull is Disconnected || _singleStart.isStale)) {
@@ -194,6 +249,10 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
       return;
     }
     if (epoch != _connectEpoch) return;
+    if (!_xboardAllowsConnect || activeProfile.id != ref.read(xboardManagedProfileIdProvider)) {
+      loggy.warning("refusing to connect a profile outside the managed account");
+      return;
+    }
     // Read before connecting: a failed start sends the core restart signal, which marks this
     // notifier out of date until the next frame, and debug builds refuse any ref call until then.
     final dialogs = ref.read(dialogNotifierProvider.notifier);

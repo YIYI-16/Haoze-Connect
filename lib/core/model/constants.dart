@@ -3,17 +3,70 @@ import 'package:flutter/services.dart';
 import 'package:hiddify/utils/utils.dart';
 
 abstract class Constants {
-  static const appName = "Hiddify";
+  /// User-facing app brand. Overridable at build time via
+  /// `--dart-define=XBOARD_APP_NAME=...` (defaults to the Haoze Connect brand).
+  static const appName = String.fromEnvironment(
+    "XBOARD_APP_NAME",
+    defaultValue: "Haoze Connect",
+  );
+
+  /// Base URL of the self-hosted Xboard panel. Set at build time via
+  /// `--dart-define=XBOARD_BASE_URL=...`; empty when not provided.
+  static const xboardBaseUrl = String.fromEnvironment("XBOARD_BASE_URL");
+
+  /// Explicit self-hosted update channel. Set at build time via
+  /// `--dart-define=XBOARD_UPDATE_URL=...`.
+  ///
+  /// ONLY an HTTPS `appcast.xml` feed counts as a channel (the upgrader
+  /// consumes it directly). GitHub repository URLs are explicitly rejected —
+  /// they are not appcast feeds and must not be misinterpreted as one.
+  /// URLs that look like upstream Hiddify update endpoints (hiddify.com,
+  /// GitHub-hosted hiddify appcast/releases under the hiddify org) are rejected
+  /// too: this build must never be pointed at them.
+  ///
+  /// When no valid channel is configured there is NO update mechanism at all:
+  /// the updater never performs any network request and the manual
+  /// "check for update" action reports updates as disabled.
+  static const xboardUpdateUrl = String.fromEnvironment("XBOARD_UPDATE_URL");
+
+  static bool get hasUpdateChannel => updateUrl != null;
+
+  /// Validated [xboardUpdateUrl], or `null` when unset or invalid/untrusted.
+  static Uri? get updateUrl {
+    final raw = xboardUpdateUrl.trim();
+    if (raw.isEmpty) return null;
+    final uri = Uri.tryParse(raw);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+
+    final host = uri.host.toLowerCase();
+    final path = uri.path.toLowerCase();
+    final isUpstreamEndpoint =
+        host.endsWith('hiddify.com') ||
+        host.endsWith('hiddify.org') ||
+        host == 'github.com' || // a GitHub repo URL is not an appcast feed
+        (host == 'raw.githubusercontent.com' && path.startsWith('/hiddify/')) ||
+        (host == 'api.github.com' && path.startsWith('/repos/hiddify/'));
+    return isUpstreamEndpoint ? null : uri;
+  }
+
+  // Genuine upstream attribution links (unchanged from Hiddify, as required by
+  // the project license, see LICENSE.md).
   static const githubUrl = "https://github.com/hiddify/hiddify-next";
-  static const licenseUrl = "https://github.com/hiddify/hiddify-next?tab=License-1-ov-file#readme";
-  static const githubReleasesApiUrl = "https://api.github.com/repos/hiddify/hiddify-next/releases";
-  static const githubLatestReleaseUrl = "https://github.com/hiddify/hiddify-app/releases/latest";
-  static const appCastUrl = "https://raw.githubusercontent.com/hiddify/hiddify-next/main/appcast.xml";
+  static const licenseUrl =
+      "https://github.com/hiddify/hiddify-next?tab=License-1-ov-file#readme";
   static const telegramChannelUrl = "https://t.me/hiddify";
   static const privacyPolicyUrl = "https://hiddify.com/privacy-policy/";
   static const termsAndConditionsUrl = "https://hiddify.com/terms/";
-  static const cfWarpPrivacyPolicy = "https://www.cloudflare.com/application/privacypolicy/";
-  static const cfWarpTermsOfService = "https://www.cloudflare.com/application/terms/";
+  static const cfWarpPrivacyPolicy =
+      "https://www.cloudflare.com/application/privacypolicy/";
+  static const cfWarpTermsOfService =
+      "https://www.cloudflare.com/application/terms/";
+
+  // NOTE: upstream Hiddify update endpoints (api.github.com/repos/hiddify/...,
+  // hiddify appcast.xml, github.com/hiddify/.../releases/latest) were removed:
+  // without XBOARD_UPDATE_URL this app must not query Hiddify release
+  // channels, and updates must only point at distribution endpoints the
+  // maintainer explicitly configured.
 }
 
 const kAnimationDuration = Duration(milliseconds: 250);
@@ -34,7 +87,10 @@ abstract class AddProfileModalConst {
 abstract class AlertDialogConst {
   static const minWidth = 280.0;
   static const maxWidth = 560.0;
-  static const boxConstraints = BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);
+  static const boxConstraints = BoxConstraints(
+    minWidth: minWidth,
+    maxWidth: maxWidth,
+  );
 }
 
 abstract class BottomSheetConst {
@@ -60,13 +116,19 @@ abstract class ProfileTileConst {
 
   /// [squareBottom] zeroes this side's bottom corner — used when a chip
   /// (profile-web-page-url / support-url) is attached flush below the card.
-  static BorderRadius startBorderRadius(TextDirection direction, {bool squareBottom = false}) {
+  static BorderRadius startBorderRadius(
+    TextDirection direction, {
+    bool squareBottom = false,
+  }) {
     final ltr = direction == TextDirection.ltr;
     if (squareBottom) return ltr ? topLeftOnly : topRightOnly;
     return ltr ? borderRadiusLeft : borderRadiusRight;
   }
 
-  static BorderRadius endBorderRadius(TextDirection direction, {bool squareBottom = false}) {
+  static BorderRadius endBorderRadius(
+    TextDirection direction, {
+    bool squareBottom = false,
+  }) {
     final ltr = direction == TextDirection.ltr;
     if (squareBottom) return ltr ? topRightOnly : topLeftOnly;
     return ltr ? borderRadiusRight : borderRadiusLeft;
@@ -114,9 +176,19 @@ abstract class KeyboardConst {
     LogicalKeyboardKey.arrowLeft,
     LogicalKeyboardKey.arrowRight,
   };
-  static final horizontalArrows = {LogicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowRight};
-  static final verticalArrows = {LogicalKeyboardKey.arrowUp, LogicalKeyboardKey.arrowDown};
-  static final select = {LogicalKeyboardKey.select, LogicalKeyboardKey.enter, LogicalKeyboardKey.tab};
+  static final horizontalArrows = {
+    LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.arrowRight,
+  };
+  static final verticalArrows = {
+    LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.arrowDown,
+  };
+  static final select = {
+    LogicalKeyboardKey.select,
+    LogicalKeyboardKey.enter,
+    LogicalKeyboardKey.tab,
+  };
 }
 
 abstract class ChainConst {
@@ -129,7 +201,9 @@ abstract class ChainConst {
   }
 
   static Color finalIpColor(ThemeData theme) =>
-      theme.brightness == Brightness.dark ? const Color(0xFF99AD7A) : const Color.fromARGB(255, 87, 136, 13);
+      theme.brightness == Brightness.dark
+      ? const Color(0xFF99AD7A)
+      : const Color.fromARGB(255, 87, 136, 13);
   static const warpColor = Color(0xFFF6821F);
   static const psiphonColor = Color(0xFFD52027);
   static const profileColor = Color(0xFF3282B8);

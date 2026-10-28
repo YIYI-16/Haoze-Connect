@@ -14,6 +14,7 @@ on:
 
 jobs:
   upload-store-msix-to-release:
+    if: github.repository == 'hiddify/hiddify-app'
     runs-on: ubuntu-latest
 
     steps:

@@ -36,6 +36,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/artifacts/
+/android/.kotlin/
 
 # generated files
 **/*.g.dart

@@ -2,9 +2,11 @@
 cmake_minimum_required(VERSION 3.14)
 project(hiddify LANGUAGES CXX)
 
-# The name of the executable created for the application. Change this to change
-# the on-disk name of your application.
-set(BINARY_NAME "Hiddify")
+# The name of the executable created for the application. Haoze Connect keeps
+# its own on-disk binary name, independent of upstream Hiddify ("Hiddify.exe").
+# Keep this in sync with windows/runner/Runner.rc (OriginalFilename) and the
+# installer/zip packaging in windows/packaging + scripts/haoze-*.
+set(BINARY_NAME "HaozeConnect")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

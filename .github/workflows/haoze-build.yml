@@ -1,0 +1,226 @@
+name: Haoze Connect Build (artifacts only)
+
+# Internal distribution build for the Haoze Connect fork (Xboard panel client).
+#
+# Scope by design:
+# - manual `workflow_dispatch` only (no push / release triggers),
+# - NEVER publishes anything: it only uploads build artifacts that must be
+#   downloaded from the Actions run page,
+# - does not touch upstream release channels or upstream secrets; the only
+#   optional secret is the own Android release keystore (ANDROID_SIGNING_KEY).
+# - native core comes only from hiddify-core.lock.json (URL + SHA256 pinned);
+#   `dependencies.properties` core.version is stale and is not used here.
+#
+# Android signing rule: when ANDROID_SIGNING_KEY is absent the APK is built
+# with the Gradle default debug signed release layout and the artifact name is
+# explicitly suffixed `-debug-signed-test` — it must never be distributed to
+# end users as an official build.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        type: choice
+        required: true
+        default: windows
+        options:
+          - windows
+          - android
+          - all
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.38.5"
+  TARGET: lib/main_prod.dart
+  XBOARD_BASE_URL: https://www.haoze.cyou
+  XBOARD_APP_NAME: Haoze Connect
+
+jobs:
+  android-apk:
+    if: ${{ inputs.platform == 'android' || inputs.platform == 'all' }}
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate pinned core lock
+        run: python3 scripts/haoze_core.py show
+
+      - name: Validate distribution config
+        run: python3 scripts/haoze_validate.py
+
+      # Native core comes only from hiddify-core.lock.json: exact draft URL +
+      # SHA256 + release-API timestamp. A draft drift is a hard failure and is
+      # never trusted automatically. The stable core.version=4.1.0 in
+      # dependencies.properties is incompatible with this app tree.
+      - name: Fetch hash-verified Android core
+        run: python3 scripts/haoze_core.py fetch --platform android --cache "$RUNNER_TEMP/hiddify-core-cache"
+
+      - name: Prepare (pub get + codegen + slang)
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          dart run slang
+
+      - name: Analyze and test
+        run: |
+          flutter analyze
+          flutter test test/features/xboard test/features/xboard_ui \
+            test/features/profile/data/profile_repository_test.dart \
+            test/features/connection/model/startup_connection_test.dart
+
+      - name: Determine Android signing
+        env:
+          SIGNING_KEY_B64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+        run: |
+          if [ -n "$SIGNING_KEY_B64" ]; then
+            missing=0
+            for v in "$SIGNING_STORE_PASSWORD" "$SIGNING_KEY_PASSWORD" "$SIGNING_KEY_ALIAS"; do
+              if [ -z "$v" ]; then missing=1; fi
+            done
+            if [ "$missing" != "0" ]; then
+              echo "::error::Android signing secret incomplete: ANDROID_SIGNING_KEY is set but one of ANDROID_SIGNING_STORE_PASSWORD / ANDROID_SIGNING_KEY_PASSWORD / ANDROID_SIGNING_KEY_ALIAS is missing."
+              exit 1
+            fi
+            # Secrets are passed via step env and written with printf '%s\n'
+            # (format fixed, arguments never re-parsed) so passwords containing
+            # $, quotes or parentheses cannot be executed by the shell.
+            printf '%s' "$SIGNING_KEY_B64" | base64 --decode > android/key.jks
+            {
+              printf 'storeFile=%s\n' "$(pwd)/android/key.jks"
+              printf 'keyPassword=%s\n' "$SIGNING_KEY_PASSWORD"
+              printf 'keyAlias=%s\n' "$SIGNING_KEY_ALIAS"
+              printf 'storePassword=%s\n' "$SIGNING_STORE_PASSWORD"
+            } > android/key.properties
+            echo "ARTIFACT_NAME=HaozeConnect-Android-release-signed" >> "$GITHUB_ENV"
+          else
+            echo "::warning::ANDROID_SIGNING_KEY not configured — building an explicitly marked debug-signed test APK. Do not distribute."
+            echo "ARTIFACT_NAME=HaozeConnect-Android-debug-signed-test" >> "$GITHUB_ENV"
+          fi
+
+      # Keep the split layout of the default gradle build (x86_64, armeabi-v7a,
+      # arm64-v8a + universal); a debug-signed run is purpose-named above.
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --target lib/main_prod.dart \
+            --dart-define='XBOARD_BASE_URL=https://www.haoze.cyou' \
+            --dart-define='XBOARD_APP_NAME=Haoze Connect'
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+  windows:
+    if: ${{ inputs.platform == 'windows' || inputs.platform == 'all' }}
+    name: Windows ZIP + EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate pinned core lock
+        run: python scripts/haoze_core.py show
+
+      - name: Validate distribution config
+        run: python scripts/haoze_validate.py
+
+      # Native core comes only from hiddify-core.lock.json (exact draft URL +
+      # SHA256 + timestamp); drift fails the build. The downloaded binaries are
+      # never executed here, only extracted beside the app.
+      - name: Fetch hash-verified Windows core
+        shell: pwsh
+        run: python scripts/haoze_core.py fetch --platform windows --cache "$env:RUNNER_TEMP\hiddify-core-cache"
+
+      - name: Prepare (pub get + codegen + slang)
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dart run build_runner build --delete-conflicting-outputs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dart run slang
+
+      - name: Analyze and test
+        run: |
+          flutter analyze
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test test/features/xboard test/features/xboard_ui test/features/profile/data/profile_repository_test.dart test/features/connection/model/startup_connection_test.dart
+
+      - name: Setup Inno Setup (required by EXE installer packaging)
+        run: choco install innosetup -y --no-progress
+
+      - name: Build Windows Release
+        shell: pwsh
+        run: |
+          flutter build windows --release `
+            --target lib/main_prod.dart `
+            --dart-define="XBOARD_BASE_URL=https://www.haoze.cyou" `
+            --dart-define="XBOARD_APP_NAME=Haoze Connect"
+
+      # Produces dist\HaozeConnect\HaozeConnect-Windows-Standalone-x64.zip and
+      # HaozeConnect-Windows-Setup-x64-<version>.exe. No signing secrets are
+      # used; artifacts are left unsigned on purpose (internal distribution).
+      - name: Package Windows ZIP and EXE
+        shell: pwsh
+        run: .\scripts\haoze-package-windows.ps1
+
+      - name: Upload standalone ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: HaozeConnect-Windows-Standalone-x64-unsigned
+          path: dist\HaozeConnect\HaozeConnect-Windows-Standalone-x64.zip
+          if-no-files-found: error
+
+      - name: Upload setup EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: HaozeConnect-Windows-Setup-x64-unsigned
+          path: dist\HaozeConnect\*Setup-x64*.exe
+          if-no-files-found: error

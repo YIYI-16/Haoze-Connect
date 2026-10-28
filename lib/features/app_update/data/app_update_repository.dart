@@ -15,7 +15,9 @@ abstract interface class AppUpdateRepository {
   });
 }
 
-class AppUpdateRepositoryImpl with ExceptionHandler, InfraLogger implements AppUpdateRepository {
+class AppUpdateRepositoryImpl
+    with ExceptionHandler, InfraLogger
+    implements AppUpdateRepository {
   AppUpdateRepositoryImpl({required this.httpClient});
 
   final DioHttpClient httpClient;
@@ -26,16 +28,29 @@ class AppUpdateRepositoryImpl with ExceptionHandler, InfraLogger implements AppU
     Release release = Release.general,
   }) {
     return exceptionHandler(() async {
+      if (!Constants.hasUpdateChannel) {
+        throw Exception(
+          "no update channel configured (XBOARD_UPDATE_URL not set)",
+        );
+      }
+      final apiUrl = _releasesApiUrl();
+      if (apiUrl == null) {
+        throw Exception(
+          "XBOARD_UPDATE_URL manual check only supports GitHub repository URLs",
+        );
+      }
       if (!release.allowCustomUpdateChecker) {
         throw Exception("custom update checkers are not supported");
       }
-      final response = await httpClient.get<List>(Constants.githubReleasesApiUrl);
+      final response = await httpClient.get<List>(apiUrl);
       if (response.statusCode != 200 || response.data == null) {
         loggy.warning("failed to fetch latest version info");
         return left(const AppUpdateFailure.unexpected());
       }
 
-      final releases = response.data!.map((e) => GithubReleaseParser.parse(e as Map<String, dynamic>));
+      final releases = response.data!.map(
+        (e) => GithubReleaseParser.parse(e as Map<String, dynamic>),
+      );
       late RemoteVersionEntity latest;
       if (includePreReleases) {
         latest = releases.first;
@@ -44,5 +59,22 @@ class AppUpdateRepositoryImpl with ExceptionHandler, InfraLogger implements AppU
       }
       return right(latest);
     }, AppUpdateFailure.unexpected);
+  }
+
+  /// Derives the GitHub releases API endpoint from the configured
+  /// [Constants.xboardUpdateUrl]. Returns `null` when the configured URL is not
+  /// a GitHub repository URL (e.g. an appcast feed, which the automatic
+  /// upgrader consumes directly). Only the maintainer-configured repository is
+  /// ever queried — never upstream Hiddify endpoints.
+  String? _releasesApiUrl() {
+    final uri = Uri.tryParse(Constants.xboardUpdateUrl);
+    if (uri == null || uri.host != 'github.com') return null;
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    if (segments.length < 2) return null;
+    final owner = segments[0];
+    final repo = segments[1].endsWith('.git')
+        ? segments[1].substring(0, segments[1].length - 4)
+        : segments[1];
+    return "https://api.github.com/repos/$owner/$repo/releases";
   }
 }

@@ -6,6 +6,7 @@ import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
+import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:meta/meta.dart';
 import 'package:neat_periodic_task/neat_periodic_task.dart';
@@ -38,11 +39,17 @@ class ForegroundProfilesUpdateNotifier extends _$ForegroundProfilesUpdateNotifie
       _scheduler = null;
     });
 
-    if (ref.watch(Preferences.introCompleted)) {
+    // In Xboard managed mode the session controller is the only owner of the
+    // managed subscription profile. Running this scheduler as well would make
+    // two profile validations race on the single native core.
+    final legacySchedulerAllowed = ref.watch(
+      xboardSessionProvider.select((session) => session.initialized && !session.isAuthenticated),
+    );
+    if (ref.watch(Preferences.introCompleted) && legacySchedulerAllowed) {
       loggy.debug("intro done, starting");
       _scheduler?.start();
     } else {
-      loggy.debug("intro in process, skipping");
+      loggy.debug("intro in process or xboard managed mode, skipping");
     }
     return const Stream.empty();
   }
@@ -58,6 +65,11 @@ class ForegroundProfilesUpdateNotifier extends _$ForegroundProfilesUpdateNotifie
 
   @visibleForTesting
   Future<void> updateProfiles() async {
+    final xboardSession = ref.read(xboardSessionProvider);
+    if (!xboardSession.initialized || xboardSession.isAuthenticated || xboardSession.busy) {
+      loggy.debug("xboard session owns subscriptions; skipping legacy profile update");
+      return;
+    }
     var force = false;
     if (_forceNextRun) {
       force = true;

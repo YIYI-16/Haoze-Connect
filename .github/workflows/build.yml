@@ -38,6 +38,7 @@ env:
 
 jobs:
   test:
+    if: github.repository == 'hiddify/hiddify-app'
     permissions:
       contents: read
     outputs:
@@ -69,6 +70,7 @@ jobs:
 
 
   build:
+    if: github.repository == 'hiddify/hiddify-app'
     needs: test
     permissions:
       contents: read
@@ -514,7 +516,7 @@ jobs:
           rm -rf ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles || true
   update-draft:
     # Always refresh the moving `draft` tag/release to this build's commit and assets.
-    if: ${{ inputs.upload-artifact }}
+    if: ${{ github.repository == 'hiddify/hiddify-app' && (inputs.upload-artifact) }}
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
@@ -572,7 +574,7 @@ jobs:
           fail_on_unmatched_files: false
 
   virustotal-draft:
-    if: ${{ inputs.upload-artifact }}
+    if: ${{ github.repository == 'hiddify/hiddify-app' && (inputs.upload-artifact) }}
     needs: [update-draft]
     uses: ./.github/workflows/virustotal_scan.yml
     secrets: inherit
@@ -582,7 +584,7 @@ jobs:
       release_tag: draft
 
   upload-release:
-    if: ${{ inputs.upload-artifact && inputs.tag-name != 'draft' }}
+    if: ${{ github.repository == 'hiddify/hiddify-app' && (inputs.upload-artifact && inputs.tag-name != 'draft') }}
     needs: [build]
     runs-on: ubuntu-latest
     steps:
@@ -634,7 +636,7 @@ jobs:
           track: 'beta'
 
   virustotal-release:
-    if: ${{ inputs.upload-artifact && inputs.tag-name != 'draft' }}
+    if: ${{ github.repository == 'hiddify/hiddify-app' && (inputs.upload-artifact && inputs.tag-name != 'draft') }}
     needs: [upload-release]
     uses: ./.github/workflows/virustotal_scan.yml
     secrets: inherit
@@ -649,7 +651,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    if: ${{ inputs.upload-artifact }}
+    if: ${{ github.repository == 'hiddify/hiddify-app' && (inputs.upload-artifact) }}
     runs-on: macos-26
     timeout-minutes: 60
     steps:

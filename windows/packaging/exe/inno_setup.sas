@@ -62,76 +62,7 @@ Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 Name: "{userstartup}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; WorkingDir: "{app}"; Tasks: launchAtStartup
 [Run]
-Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: runasoriginaluser nowait postinstall skipifsilent
 
-[UninstallDelete]
-Type: filesandordirs; Name: "{userappdata}\Hiddify"
-
-[Code]
-// Stop/remove services via the Service Control Manager API.
-// Do not shell out to net.exe / taskkill.exe / sc.exe — those command lines match
-// common Sigma rules and drive VirusTotal sandbox false positives.
-
-type
-  TServiceStatus = record
-    dwServiceType: DWORD;
-    dwCurrentState: DWORD;
-    dwControlsAccepted: DWORD;
-    dwWin32ExitCode: DWORD;
-    dwServiceSpecificExitCode: DWORD;
-    dwCheckPoint: DWORD;
-    dwWaitHint: DWORD;
-  end;
-
-const
-  SC_MANAGER_CONNECT = $0001;
-  SERVICE_QUERY_STATUS = $0004;
-  SERVICE_STOP = $0020;
-  SERVICE_CONTROL_STOP = $0001;
-  DELETE_ACCESS = $10000;
-
-function OpenSCManager(lpMachineName, lpDatabaseName: string; dwDesiredAccess: DWORD): THandle;
-  external 'OpenSCManagerW@advapi32.dll stdcall';
-function OpenService(hSCManager: THandle; lpServiceName: string; dwDesiredAccess: DWORD): THandle;
-  external 'OpenServiceW@advapi32.dll stdcall';
-function ControlService(hService: THandle; dwControl: DWORD; var lpServiceStatus: TServiceStatus): Boolean;
-  external 'ControlService@advapi32.dll stdcall';
-function DeleteService(hService: THandle): Boolean;
-  external 'DeleteService@advapi32.dll stdcall';
-function CloseServiceHandle(hSCObject: THandle): Boolean;
-  external 'CloseServiceHandle@advapi32.dll stdcall';
-
-procedure StopServiceByName(const ServiceName: string; const Remove: Boolean);
-var
-  hSCM, hService: THandle;
-  Access: DWORD;
-  Status: TServiceStatus;
-begin
-  hSCM := OpenSCManager('', '', SC_MANAGER_CONNECT);
-  if hSCM = 0 then
-    Exit;
-
-  Access := SERVICE_STOP or SERVICE_QUERY_STATUS;
-  if Remove then
-    Access := Access or DELETE_ACCESS;
-
-  hService := OpenService(hSCM, ServiceName, Access);
-  if hService <> 0 then
-  begin
-    ControlService(hService, SERVICE_CONTROL_STOP, Status);
-    if Remove then
-      DeleteService(hService);
-    CloseServiceHandle(hService);
-  end;
-
-  CloseServiceHandle(hSCM);
-end;
-
-function InitializeSetup(): Boolean;
-begin
-  // Current elevated core service — stop only so binaries can be replaced on upgrade.
-  StopServiceByName('HiddifyAdminBG', False);
-  // Legacy name from older builds — stop and remove if still present.
-  StopServiceByName('HiddifyTunnelService', True);
-  Result := True;
-end;
+; Preserve all user data and core services shared with upstream Hiddify.
+; This template deliberately has no global uninstall deletion or service actions.

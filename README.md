@@ -1,3 +1,45 @@
+> **Haoze Connect — internal fork notice (2026)**
+> This repository is a self-hosted (Xboard panel) internal distribution fork of
+> the upstream [Hiddify app](https://github.com/hiddify/hiddify-app), built as
+> documented below. Changes include account integration, branding and builds:
+>
+> - Xboard login and registration, automatically managed subscriptions,
+>   panel-reported remaining traffic, expiry and account status. Users do not
+>   need to enter a panel address or copy a subscription URL.
+> - Android package id `com.haoze.connect` (Kotlin/native namespaces left as
+>   upstream), display name **Haoze Connect**; original "Haoze" vector launcher
+>   mark; `android:allowBackup=false` for the Flutter secure-storage prefs.
+> - Windows exe/install identity renamed to `HaozeConnect.exe` with its own
+>   Inno Setup AppId, publisher domain and install directory. Core-side file
+>   and service names owned by the hiddify-lib Go core (`hiddify-core.dll`,
+>   `HiddifyCli.exe`, `HiddifyAdminBG`) are intentionally NOT renamed.
+> - In-app updates default to **disabled**: no upstream Hiddify release/appcast
+>   endpoint is contacted. An own HTTPS appcast feed can be enabled per build
+>   via `--dart-define=XBOARD_UPDATE_URL=...` (see `docs/DISTRIBUTION.md`).
+> - New manual build workflow `.github/workflows/haoze-build.yml`
+>   (`workflow_dispatch` only, artifacts only, never publishes).
+> - Native core assets are hash-pinned in `hiddify-core.lock.json`; CI rejects
+>   draft drift instead of trusting a changed digest automatically.
+> - Validation: `python3 scripts/haoze_validate.py`.
+>
+> No public fork exists yet. The user authorized the private
+> `HaozeZane/Haoze-Connect` repository for Windows test builds; Android test
+> packages are built locally. Before anything is distributed publicly, a public fork has to be
+> created under the conditions stated in `LICENSE.md` (source published as a
+> public fork, releases produced through that fork's GitHub Actions,
+> attribution kept). No claim is made here about the legal sufficiency of that
+> interpretation. No public release or store submission has been made. Verified
+> locally as described in `docs/DISTRIBUTION.md`: 140 related Flutter tests,
+> 37 distribution checks and strict `flutter analyze` pass. A real Android
+> arm64 debug APK build succeeded
+> (about 202 MiB, API 24+, local debug build). Windows build/runtime is still
+> unverified and no downloaded Windows binary was executed; the Windows icon
+> remains the upstream placeholder.
+> The final local delivery also includes an ARM64 Release-mode test APK
+> (about 54 MiB, signed with the Android debug certificate). Real-device login
+> and node connectivity still need testing. Source remains private; the
+> Windows workflow only creates test artifacts and does not publish releases.
+
 <div dir="ltr" align=center>
     
 [**![Lang_farsi](https://user-images.githubusercontent.com/125398461/234186932-52f1fa82-52c6-417f-8b37-08fe9250a55f.png) فارسی**](README_fa.md) / [**Русский 🇷🇺**](README_ru.md) / [**简体中文 🇨🇳**](README_cn.md) / [**日本語 🇯🇵**](README_ja.md) / [**Portugês-BR 🇧🇷**](README_br.md)

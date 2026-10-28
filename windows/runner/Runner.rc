@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Hiddify" "\0"
-            VALUE "FileDescription", "Hiddify" "\0"
+            VALUE "CompanyName", "Haoze" "\0"
+            VALUE "FileDescription", "Haoze Connect" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "hiddify" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 Hiddify.com. All rights reserved." "\0"
-            VALUE "OriginalFilename", "Hiddify.exe" "\0"
-            VALUE "ProductName", "hiddify" "\0"
+            VALUE "InternalName", "haozeconnect" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 Hiddify.com. All rights reserved. Portions copyright (C) 2026 Haoze Connect contributors, distributed under the Hiddify Extended GNU GPL v3." "\0"
+            VALUE "OriginalFilename", "HaozeConnect.exe" "\0"
+            VALUE "ProductName", "Haoze Connect" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

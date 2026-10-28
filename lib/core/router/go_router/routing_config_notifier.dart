@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/notification/in_app_notification_controller.dart';
-import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/router/adaptive_layout/my_adaptive_layout.dart';
-import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/custom_transition.dart';
 import 'package:hiddify/core/router/go_router/refresh_listenable.dart';
@@ -13,9 +11,7 @@ import 'package:hiddify/features/app_based_routing/overview/app_list_page.dart';
 import 'package:hiddify/features/home/widget/home_page.dart';
 import 'package:hiddify/features/intro/widget/intro_page.dart';
 import 'package:hiddify/features/log/overview/logs_page.dart';
-import 'package:hiddify/features/profile/details/profile_details_page.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/profile/overview/profiles_page.dart';
 import 'package:hiddify/features/proxy/overview/proxies_overview_page.dart';
 import 'package:hiddify/features/route_rules/notifier/rule_notifier.dart';
 import 'package:hiddify/features/route_rules/overview/generic_list_page.dart';
@@ -28,6 +24,10 @@ import 'package:hiddify/features/settings/overview/sections/inbound_options_page
 import 'package:hiddify/features/settings/overview/sections/routing_options_page.dart';
 import 'package:hiddify/features/settings/overview/sections/tls_tricks_page.dart';
 import 'package:hiddify/features/settings/overview/settings_page.dart';
+import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
+import 'package:hiddify/features/xboard/widget/xboard_account_page.dart';
+import 'package:hiddify/features/xboard/widget/xboard_login_page.dart';
+import 'package:hiddify/features/xboard/widget/xboard_register_page.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -60,12 +60,12 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
   @override
   RoutingConfig build() {
     final isMobileBreakpoint = ref.watch(isMobileBreakpointProvider);
-    final bool showProfilesAction;
-    if (isMobileBreakpoint == true) {
-      showProfilesAction = false;
-    } else {
-      showProfilesAction = ref.watch(hasAnyProfileProvider).value ?? false;
-    }
+    final xboard = ref.watch(
+      xboardSessionProvider.select(
+        (session) => (initialized: session.initialized, authenticated: session.isAuthenticated),
+      ),
+    );
+    const showProfilesAction = false;
     if (isMobileBreakpoint == null) return loadingConfig;
     return RoutingConfig(
       redirect: (context, state) {
@@ -83,31 +83,33 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
           url = state.uri.queryParameters['url'];
         }
 
-        if (!ref.read(Preferences.introCompleted)) {
-          // Intro is not completed
-          return url != null ? '/intro?url=$url' : '/intro';
-        } else if (state.matchedLocation == '/intro') {
-          // Intro is completed
-          // Current page in '/intro'
-          if (url != null && Uri.parse(url).host == 'import') {
-            WidgetsBinding.instance.addPostFrameCallback(
-              (_) =>
-                  ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(url: url, triggeredByDeepLink: true),
-            );
-          }
+        final matched = state.matchedLocation;
+        final isAuthEntry = matched == '/login' || matched == '/register';
+        final isImportDeepLink = url != null && Uri.tryParse(url)?.host == 'import';
+
+        if (!xboard.initialized) {
+          // The managed app always lands on login first; never expose /home or
+          // a stale active profile while the secure session is still loading.
+          return isAuthEntry ? null : '/login';
+        }
+        if (!xboard.authenticated) {
+          if (isAuthEntry) return null;
+          // Old import deep links cannot bypass the managed subscription.
+          return '/login';
+        }
+        if (isAuthEntry) return '/home';
+        if (matched == '/intro') return '/home';
+        if (isImportDeepLink) {
+          // A managed account owns the only subscription profile. Ignore legacy
+          // import links instead of creating a second, unmanaged profile.
           return '/home';
-        } else if (url != null && Uri.parse(url).host == 'import') {
-          // Auto import profile from url
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(url: url, triggeredByDeepLink: true),
-          );
-          return '/home';
-        } else if (url != null) {
+        }
+        if (url != null) {
           final uri = Uri.parse(url);
           final path = uri.path + (uri.hasQuery ? "?${uri.query}" : "");
           return path;
-        } else if (state.matchedLocation.contains('chain-options') &&
-            (ref.watch(hasAnyProfileProvider).value == false)) {
+        }
+        if (matched.contains('chain-options') && (ref.watch(hasAnyProfileProvider).value == false)) {
           // Prevent showing chainOptions while hasAnyProfile == false
           return '/settings';
         }
@@ -134,41 +136,10 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
                       pageBuilder: (_, state) =>
                           customTransition(TransitionType.fade, state.pageKey, const ProxiesOverviewPage()),
                     ),
-                    if (isMobileBreakpoint)
-                      GoRoute(
-                        name: 'profileDetails',
-                        path: 'profile-details/:id',
-                        pageBuilder: (_, state) => customTransition(
-                          TransitionType.fade,
-                          state.pageKey,
-                          ProfileDetailsPage(id: state.pathParameters['id']!),
-                        ),
-                      ),
                   ],
                 ),
               ],
             ),
-            if (showProfilesAction)
-              StatefulShellBranch(
-                routes: <GoRoute>[
-                  GoRoute(
-                    name: 'profiles',
-                    path: '/profiles',
-                    builder: (_, _) => FocusScope(node: branchesScope['profiles'], child: const ProfilesPage()),
-                    routes: <GoRoute>[
-                      GoRoute(
-                        name: 'profileDetails',
-                        path: 'profile-details/:id',
-                        pageBuilder: (_, state) => customTransition(
-                          TransitionType.fade,
-                          state.pageKey,
-                          ProfileDetailsPage(id: state.pathParameters['id']!),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             StatefulShellBranch(
               routes: <GoRoute>[
                 GoRoute(
@@ -311,6 +282,9 @@ class RoutingConfigNotifier extends _$RoutingConfigNotifier {
             ],
           ],
         ),
+        GoRoute(name: 'login', path: '/login', builder: (_, _) => const XboardLoginPage()),
+        GoRoute(name: 'register', path: '/register', builder: (_, _) => const XboardRegisterPage()),
+        GoRoute(name: 'account', path: '/account', builder: (_, _) => const XboardAccountPage()),
         GoRoute(name: 'intro', path: '/intro', builder: (_, _) => const IntroPage()),
       ],
     );

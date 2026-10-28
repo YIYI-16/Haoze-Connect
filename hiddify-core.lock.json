@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "purpose": "Hash-pinned native Hiddify core assets used by the Haoze Connect build. The app/core source commits are recorded for provenance; native binaries are consumed only from the exact URLs and SHA256 digests below.",
+  "app": {
+    "repository": "https://github.com/hiddify/hiddify-app",
+    "commit": "2ab88d922bb478c73d7867abe707180b7e1c96bb",
+    "source": "upstream app baseline for private development and test builds; no public fork exists yet"
+  },
+  "core": {
+    "repository": "https://github.com/hiddify/hiddify-core",
+    "gitlink": "a1104ab7fc518fafa0246f484fc91b07412a69a4",
+    "release_channel": "draft",
+    "release_api": "https://api.github.com/repos/hiddify/hiddify-core/releases/tags/draft",
+    "note": "hiddify-core draft native assets are newer than dependencies.properties core.version=4.1.0. The 4.1.0 stable AAR is incompatible with the app's main-branch PlatformInterface (missing NeighborUpdateListener/PlatformUser), so builds must use these pinned draft assets. Never auto-accept a changed draft digest: re-verify via the release API and update this file deliberately."
+  },
+  "assets": {
+    "android": {
+      "url": "https://github.com/hiddify/hiddify-core/releases/download/draft/hiddify-lib-android.tar.gz",
+      "sha256": "7ea92f0c868e048612465ce74acaa836600c7e28eb62c365268de03b13498dc5",
+      "asset_updated_at": "2026-10-27T14:14:53Z",
+      "archive": "hiddify-lib-android.tar.gz",
+      "extract_to": "android/app/libs",
+      "required": [
+        "hiddify-core.aar"
+      ]
+    },
+    "windows": {
+      "url": "https://github.com/hiddify/hiddify-core/releases/download/draft/hiddify-lib-windows-amd64.tar.gz",
+      "sha256": "ed3251c348b15ad804b4e7d8f9e528b1006dc8ed5b08f8323204b820f7ca28f5",
+      "asset_updated_at": "2026-10-27T14:14:48Z",
+      "archive": "hiddify-lib-windows-amd64.tar.gz",
+      "extract_to": "hiddify-core/bin",
+      "required": [
+        "hiddify-core.dll",
+        "HiddifyCli.exe",
+        "libcronet.dll"
+      ]
+    }
+  }
+}

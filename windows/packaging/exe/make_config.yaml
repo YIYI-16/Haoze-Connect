@@ -1,9 +1,12 @@
-app_id: 6L903538-42B1-4596-G479-BJ779F21A65D
-publisher: Hiddify
-publisher_url: https://github.com/hiddify/hiddify-app
-display_name: Hiddify
+# Haoze Connect installer configuration. Kept structurally identical to the
+# upstream Hiddify one, but with its own AppId (install identity), publisher
+# domain and install directory so both apps can be installed side by side.
+app_id: c20913cb-7ffa-4db4-b003-b5944d757d21
+publisher: Haoze
+publisher_url: https://www.haoze.cyou
+display_name: Haoze Connect
 create_desktop_icon: true
-install_dir_name: "{autopf64}\\Hiddify"
+install_dir_name: "{autopf64}\\HaozeConnect"
 setup_icon_file: windows\runner\resources\app_icon.ico
 locales:
   - ar

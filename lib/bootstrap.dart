@@ -27,6 +27,8 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
 import 'package:hiddify/features/window/notifier/window_notifier.dart';
+import 'package:hiddify/features/xboard/data/xboard_startup_restore.dart';
+import 'package:hiddify/features/xboard/notifier/xboard_session_controller.dart';
 import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
 import 'package:hiddify/riverpod_observer.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -121,10 +123,22 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
 
   if (!kIsWeb) {
     if (PlatformUtils.isDesktop) {
-      await _safeInit(
-        "restore previous connection",
-        () => container.read(connectionNotifierProvider.notifier).restoreConnectionOnStartup(),
-        timeout: 5000,
+      // Online initialization owns the profile. Wait for it in the background:
+      // an early restore would fail the account gate and never be retried.
+      final xboard = container.read(xboardSessionProvider.notifier);
+      unawaited(
+        restoreXboardConnectionOnStartup(
+          session: xboard,
+          connectionAllowed: () => container.read(xboardConnectionAllowedProvider),
+          activeProfileId: () async => (await container.read(activeProfileProvider.future))?.id,
+          restoreConnection: () => _safeInit(
+            "restore previous connection",
+            () => container.read(connectionNotifierProvider.notifier).restoreConnectionOnStartup(),
+            timeout: 5000,
+          ),
+        ).catchError((Object error, StackTrace stackTrace) {
+          Logger.bootstrap.error("managed connection restore failed", error, stackTrace);
+        }),
       );
       await _safeInit("system tray", () => container.read(systemTrayNotifierProvider.future), timeout: 1000);
     }
