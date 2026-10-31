@@ -22,11 +22,15 @@ env:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.snapshot.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_ref }}
           submodules: recursive
+      - id: snapshot
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2.21.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -47,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_ref }}
+          ref: ${{ needs.checks.outputs.source_sha }}
           submodules: recursive
       - uses: subosito/flutter-action@v2.21.0
         with:
@@ -94,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_ref }}
+          ref: ${{ needs.checks.outputs.source_sha }}
           submodules: recursive
       - uses: subosito/flutter-action@v2.21.0
         with:
@@ -107,6 +111,11 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
+      - name: Pin the NDK used by Flutter native assets
+        run: |
+          sdkmanager 'ndk;28.2.13676358'
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
       - uses: actions/setup-go@v5
         with:
           go-version: '1.27.1'
