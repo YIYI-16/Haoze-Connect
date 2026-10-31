@@ -1,0 +1,121 @@
+name: Haoze FlClash prototype (artifacts only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        options: [windows, android, all]
+        default: windows
+      source_ref:
+        type: string
+        default: flclash-prototype
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.47.6'
+  RUSTUP_TOOLCHAIN: '1.99.0'
+  GOFLAGS: '-buildvcs=false'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
+          submodules: recursive
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - working-directory: packages/haoze_xboard
+        run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-pub
+      - working-directory: packages/haoze_xboard
+        run: |
+          flutter analyze --no-fatal-infos --no-pub
+          flutter test --no-pub --reporter expanded
+
+  windows:
+    if: inputs.platform == 'windows' || inputs.platform == 'all'
+    needs: checks
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
+          submodules: recursive
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: core/go.sum
+      - run: rustup toolchain install 1.99.0 --profile minimal
+      - run: flutter pub get
+      - name: Build upstream UI and native baseline
+        run: flutter build windows --release --no-pub --dart-define=APP_ENV=pre
+      - name: Compile isolated panel probe
+        working-directory: packages/haoze_xboard
+        run: |
+          flutter pub get
+          dart compile exe bin/panel_probe.dart -o "$env:RUNNER_TEMP\HaozePanelProbe.exe"
+      - name: Probe Windows native HTTPS
+        continue-on-error: true
+        run: .\tool\haoze_panel_probe_windows.ps1 -OutputPath "$env:RUNNER_TEMP\haoze-panel-native.json"
+      - name: Probe standalone Dart HTTPS
+        continue-on-error: true
+        run: '& "$env:RUNNER_TEMP\HaozePanelProbe.exe" | Out-File -Encoding utf8 "$env:RUNNER_TEMP\haoze-panel-dart.json"'
+      - name: Package baseline
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\FlClash-Upstream-Baseline-Windows-x64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FlClash-upstream-Windows-baseline
+          path: ${{ runner.temp }}/FlClash-Upstream-Baseline-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Haoze-isolated-panel-probes
+          path: |
+            ${{ runner.temp }}/HaozePanelProbe.exe
+            ${{ runner.temp }}/haoze-panel-native.json
+            ${{ runner.temp }}/haoze-panel-dart.json
+            tool/haoze_panel_probe_windows.ps1
+
+  android:
+    if: inputs.platform == 'android' || inputs.platform == 'all'
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
+          submodules: recursive
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: core/go.sum
+      - run: rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android
+      - run: flutter pub get
+      - name: Build upstream Android baseline
+        run: flutter build apk --release --no-pub --target-platform android-arm64 --split-per-abi --dart-define=APP_ENV=pre
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FlClash-upstream-Android-baseline-debug-signed
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk

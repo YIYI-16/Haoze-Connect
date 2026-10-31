@@ -28,12 +28,38 @@ Map<String, String> _bindgenEnvironment(BuildInput input) {
     return const {};
   }
   final llvmRoot = File.fromUri(compiler).parent.parent;
+  final (
+    rustTarget,
+    includeTarget,
+  ) = switch (input.config.code.targetArchitecture) {
+    Architecture.arm64 => ('aarch64_linux_android', 'aarch64-linux-android'),
+    Architecture.arm => ('armv7_linux_androideabi', 'arm-linux-androideabi'),
+    Architecture.x64 => ('x86_64_linux_android', 'x86_64-linux-android'),
+    _ => throw UnsupportedError('Unsupported Android architecture'),
+  };
+  final resource = Process.runSync(compiler.toFilePath(), [
+    '-print-resource-dir',
+  ]);
+  final resourcePath = (resource.stdout as String).trim();
+  if (resource.exitCode != 0 ||
+      !File('$resourcePath/include/stdbool.h').existsSync()) {
+    throw StateError('NDK clang resource headers are unavailable');
+  }
+  final sysroot = '${llvmRoot.path}/sysroot';
+  final args = [
+    '--sysroot="$sysroot"',
+    '-I"$sysroot/usr/include/$includeTarget"',
+    '-resource-dir="$resourcePath"',
+  ].join(' ').replaceAll(r'\', '/');
   for (final name in const ['lib', 'lib64']) {
     final directory = Directory(
       '${llvmRoot.path}${Platform.pathSeparator}$name',
     );
     if (directory.existsSync() && directory.listSync().any(_isLibclang)) {
-      return {'LIBCLANG_PATH': directory.path};
+      return {
+        'LIBCLANG_PATH': directory.path,
+        'BINDGEN_EXTRA_CLANG_ARGS_$rustTarget': args,
+      };
     }
   }
   throw StateError(
