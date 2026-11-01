@@ -102,6 +102,10 @@ Tests on the build server cannot establish a fix on that device.
 
 ## Account integration and current limits
 
+First launch opens the managed account screen without the upstream
+no-service restatement gate; no upstream consent version is silently accepted.
+The GPL license and upstream attribution remain available.
+
 Login/registration automatically obtains a Meta subscription, downloads it over
 an isolated strictly verified transport, validates it with the core, and selects
 one account-owned file profile. The URL is not retained in ordinary profile
@@ -110,7 +114,7 @@ not reapply profiles. A failed file/metadata commit retains the old content, and
 node selections edited during the download win at commit time.
 
 Only the secure store retains email, panel origin, Bearer credential,
-subscription token and managed profile id. Passwords are never persisted.
+subscription token, managed profile id and subscription host. Passwords are never persisted.
 Account origins cannot cross-restore. Logout locks further refresh/connection
 attempts immediately, stops the tunnel and removes only the managed profile.
 A secure-store failure remains visible and requires a cleanup retry; the locked
