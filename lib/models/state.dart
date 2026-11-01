@@ -8,6 +8,7 @@ import 'clash_config.dart';
 import 'common.dart';
 import 'core.dart';
 import 'profile.dart';
+import 'managed_routing.dart';
 
 part 'generated/state.freezed.dart';
 part 'generated/state.g.dart';
@@ -215,6 +216,7 @@ abstract class ComputeGroupsState with _$ComputeGroupsState {
 @freezed
 abstract class MakeRealProfileState with _$MakeRealProfileState {
   const factory MakeRealProfileState({
+    ManagedRoutingPolicy? routingPolicy,
     required String profilesPath,
     required int profileId,
     required Map<String, dynamic> rawConfig,

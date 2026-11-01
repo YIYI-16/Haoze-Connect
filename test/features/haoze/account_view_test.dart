@@ -7,6 +7,7 @@ import 'package:fl_clash/features/haoze/account_view.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haoze_xboard/account.dart';
 import 'package:haoze_xboard/haoze_xboard.dart';
 import 'package:material_ui/material_ui.dart';
@@ -97,6 +98,33 @@ class _Account extends HaozeAccount {
     ref.onDispose(engine.close);
     return engine.state;
   }
+}
+
+class _NoTraffic extends CommonAction {
+  @override
+  Future<void> updateTraffic() async {}
+}
+
+class _FailedProfileSetup extends SetupAction {
+  final events = <String>[];
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool force = false,
+    Future<void> Function()? preloadInvoke,
+  }) async {
+    events.add('apply');
+    return false;
+  }
+
+  @override
+  Future<bool> setCoreRunning(bool running) async {
+    events.add(running ? 'start' : 'stop');
+    return true;
+  }
+
+  @override
+  void resetCoreTraffic() {}
 }
 
 void main() {
@@ -334,6 +362,30 @@ void main() {
       expect(transport.registrationBody?['invite_code'], 'invite');
     },
   );
+  test(
+    'managed tunnel never starts while applying its profile fails',
+    () async {
+      await engine.login('user@example.com', 'example-password');
+      final setup = _FailedProfileSetup();
+      final container = ProviderContainer(
+        overrides: [
+          haozeAccountProvider.overrideWith(() => _Account(engine)),
+          setupActionProvider.overrideWith(() => setup),
+          commonActionProvider.overrideWith(_NoTraffic.new),
+          currentProfileIdProvider.overrideWithBuild((_, _) => 42),
+          initProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(haozeAccountProvider);
+      expect(
+        await container.read(setupActionProvider.notifier).setRunning(true),
+        false,
+      );
+      expect(setup.events, ['apply', 'stop']);
+    },
+  );
+
   for (final dark in [false, true]) {
     for (final size in [const Size(390, 844), const Size(1200, 900)]) {
       testWidgets('login layout fits ${size.width} dp, dark=$dark', (

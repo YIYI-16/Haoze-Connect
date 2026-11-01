@@ -139,3 +139,41 @@ light/dark at phone/desktop widths, storage revocation, profile validation and
 rollback, and Android JVM lifecycle transitions. They do not establish successful
 VPN routing, IPv6 containment, Smart App Control compatibility or panel access on
 the user's affected Windows/Android devices. Those remain UNKNOWN.
+
+
+## China routing and IPv6 policy
+
+The managed subscription and final generated configuration both apply the same
+policy after user/configuration overlays. API and subscription hosts go DIRECT;
+Chinese domain/IP sets go DIRECT; other destinations retain the subscription's
+proxy rules and selected groups. This is China split routing by default: DIRECT
+uses the device's own country/IP, not a Chinese server selected by the client.
+
+Country domain/IP MRS data is bundled from MetaCubeX/meta-rules-dat commit
+cf25ccf5046dd902befc64bff21c0047244796a9. The manifest in assets/data records
+immutable source URLs, Git object ids, sizes and SHA256 values; the GPLv3 license
+is bundled alongside it. Startup does not need to fetch this CN rule data.
+The default template's GEOIP,CN rule and GeoIP DNS fallback are replaced by the
+local policy so they do not force an initial MMDB download.
+
+In the default rule mode, engine IPv6 remains enabled to keep IPv6 inside the TUN. DNS AAAA replies are
+disabled, and an IPv6 REJECT rule precedes all direct/country rules. The TUN
+captures both default routes, uses a separate ULA address and enables strict
+routing. New installations enable Windows TUN and Android IPv6 capture, with
+Android application bypass disabled. The existing platform lifecycle owners
+still decide when to create or stop the tunnel; policy generation never starts
+one. A managed connection applies its configuration successfully before starting
+listeners, so a failed apply cannot briefly use the core's default DIRECT state.
+
+The native test consumes the actual Dart-generated fixture, parses it using the
+pinned Mihomo version and reads the bundled MRS data. It checks panel/subscription
+DIRECT, Baidu/China DIRECT, YouTube Proxy, and rejection of Chinese/international
+IPv6 destinations. These are configuration/rule decisions, not measured public
+IP egress. Windows Server IPv4, true dual-stack Windows/Android, QUIC/WebRTC,
+connect/disconnect cleanup, user proxy-only modes and Smart App Control remain
+separate runtime acceptance requirements. No device leak fix is claimed here.
+
+The Windows preview installer uses its own AppId and user-local program folder.
+It does not install, delete or stop a shared FlClash helper during install or
+uninstall, and keeps user data. Helper/UAC behavior still requires platform
+acceptance. All preview Windows binaries are unsigned.

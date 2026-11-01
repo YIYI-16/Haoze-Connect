@@ -43,7 +43,9 @@ class _GeneralOverrideSpec
   String title(AppLocalizations l) => l.core;
 
   @override
-  List<GeneralOverrideKey> get values => GeneralOverrideKey.values;
+  List<GeneralOverrideKey> get values => GeneralOverrideKey.values
+      .where((key) => key != GeneralOverrideKey.ipv6)
+      .toList();
 
   @override
   NullStatusIllustration get illustration => NullStatusIllustration.data;

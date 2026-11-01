@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fl_clash/common/managed_routing.dart';
+import 'package:fl_clash/common/yaml_writer.dart';
+import 'package:yaml/yaml.dart';
+import 'routing_resources.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -74,6 +78,7 @@ class SecureAccountStore implements XboardAccountStore {
         subscriptionToken: data['subscriptionToken'] as String,
       ),
       profileId: data['profileId'] as int?,
+      subscriptionHost: data['subscriptionHost'] as String?,
     );
   }
 
@@ -86,6 +91,7 @@ class SecureAccountStore implements XboardAccountStore {
       'authorization': account.session.authorization,
       'subscriptionToken': account.session.subscriptionToken,
       'profileId': account.profileId,
+      'subscriptionHost': account.subscriptionHost,
     }),
   );
 
@@ -124,7 +130,15 @@ class HaozeManagedProfile implements XboardManagedProfile {
       url: '',
       autoUpdate: false,
     );
-    final bytes = await downloads.download(uri);
+    final downloaded = await downloads.download(uri);
+    final policy = await HaozeRoutingResources().ensure({
+      Uri.parse(haozePanelUrl).host,
+      uri.host,
+    });
+    final bytes = await compute(_protectSubscription, (
+      bytes: downloaded,
+      policy: policy,
+    ));
     final path = await appPath.getProfilePath('${profile.id}');
     final file = File(path);
     final original = await file.exists() ? await file.readAsBytes() : null;
@@ -209,4 +223,18 @@ class HaozeManagedProfile implements XboardManagedProfile {
     _changed.remove(id);
     await ref.read(profilesActionProvider.notifier).deleteProfile(id);
   }
+}
+
+Uint8List _protectSubscription(
+  ({Uint8List bytes, ManagedRoutingPolicy policy}) data,
+) {
+  final config = jsonDecode(jsonEncode(loadYaml(utf8.decode(data.bytes))));
+  if (config is! Map<String, dynamic> ||
+      (!(config['proxies'] is List && (config['proxies'] as List).isNotEmpty) &&
+          !(config['proxy-providers'] is Map &&
+              (config['proxy-providers'] as Map).isNotEmpty))) {
+    throw const FormatException('Subscription contains no proxies');
+  }
+  final protected = applyManagedRouting(config, data.policy);
+  return Uint8List.fromList(utf8.encode(writeYaml(protected)));
 }

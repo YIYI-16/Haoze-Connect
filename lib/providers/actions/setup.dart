@@ -175,7 +175,10 @@ class SetupAction extends _$SetupAction {
     if (running && !initialize && !ref.read(initProvider)) {
       return Future.value(true);
     }
-    return _run(running, initialize: running && initialize);
+    return _run(
+      running,
+      initialize: running && (initialize || ref.exists(haozeAccountProvider)),
+    );
   }
 
   Future<bool> _run(
@@ -504,7 +507,14 @@ class SetupAction extends _$SetupAction {
         ? await setupState.script?.content
         : null;
     final hasScript = scriptContent?.isNotEmpty == true;
-    final profileBase = !isCustom && !hasScript
+    final account = ref.exists(haozeAccountProvider)
+        ? ref.read(haozeAccountProvider.notifier).controller
+        : null;
+    final managed = account?.ownsProfile(profileId) ?? false;
+    final routingPolicy = managed
+        ? await HaozeRoutingResources().ensure(account!.directHosts)
+        : null;
+    final profileBase = !isCustom && !hasScript && !managed
         ? await _core.getProfileBase(profileId)
         : null;
     Map<String, dynamic> rawConfig = isCustom
@@ -529,6 +539,7 @@ class SetupAction extends _$SetupAction {
     );
     final res = await makeRealProfileTask(
       MakeRealProfileState(
+        routingPolicy: routingPolicy,
         rules: rules,
         proxyGroups: proxyGroups,
         injectedProxyProviders: injected.proxies,
@@ -637,6 +648,20 @@ class SetupAction extends _$SetupAction {
   }
 
   PatchClashConfig _effectivePatchConfig(PatchClashConfig patchConfig) {
+    final id = ref.read(currentProfileIdProvider);
+    final managed =
+        id != null &&
+        ref.exists(haozeAccountProvider) &&
+        ref.read(haozeAccountProvider.notifier).controller.ownsProfile(id);
+    if (managed) {
+      patchConfig = patchConfig.copyWith(
+        ipv6: true,
+        generalOverrideKeys: {
+          ...patchConfig.generalOverrideKeys,
+          GeneralOverrideKey.ipv6,
+        },
+      );
+    }
     if (ref.read(safeModeProvider)) {
       return patchConfig.copyWith(
         tun: patchConfig.tun.copyWith(enable: false),

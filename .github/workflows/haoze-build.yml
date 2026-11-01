@@ -46,7 +46,12 @@ jobs:
           rustup toolchain install 1.99.0 --profile minimal
           rustup default 1.99.0
       - run: flutter analyze --no-fatal-infos --no-pub
-      - run: flutter test --no-pub test/features/haoze test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart
+      - run: flutter test --no-pub test/features/haoze test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
+      - name: Generate native routing fixture
+        run: dart --packages=.dart_tool/package_config.json tool/haoze_route_fixture.dart "$RUNNER_TEMP/haoze-routing.yaml"
+      - name: Test offline routing with the pinned Mihomo core
+        working-directory: core
+        run: HAOZE_ROUTING_FIXTURE="$RUNNER_TEMP/haoze-routing.yaml" CGO_ENABLED=0 go test -run TestHaozeOfflineRoutingFixture -v .
       - working-directory: packages/haoze_xboard
         run: |
           flutter analyze --no-fatal-infos --no-pub
@@ -92,6 +97,18 @@ jobs:
         with:
           name: HaozeConnect-Mihomo-Preview-Windows-x64
           path: ${{ runner.temp }}/HaozeConnect-Mihomo-Preview-Windows-x64.zip
+      - name: Build Windows preview installer
+        run: |
+          $haozeIscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $haozeIscc)) {
+            choco install innosetup --yes --no-progress
+          }
+          & $haozeIscc tool\haoze_preview_installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HaozeConnect-Mihomo-Preview-Windows-Setup-x64-unsigned
+          path: build/haoze-installer/HaozeConnect-Mihomo-Preview-Setup-x64-unsigned.exe
       - uses: actions/upload-artifact@v4
         with:
           name: Haoze-isolated-panel-probes
@@ -149,7 +166,7 @@ jobs:
           chmod +x gradlew
       - name: Test Android account lifecycle gate
         working-directory: android
-        run: ./gradlew :app:testDebugUnitTest -Ptarget-platform=android-arm64 -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
+        run: ./gradlew :common:testDebugUnitTest :service:testDebugUnitTest :app:testDebugUnitTest -Ptarget-platform=android-arm64 -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
       - name: Build Android integration preview
         run: flutter build apk --release --no-pub --target-platform android-arm64 --split-per-abi --dart-define=APP_ENV=pre
       - uses: actions/upload-artifact@v4

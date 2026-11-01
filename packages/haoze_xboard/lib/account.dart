@@ -14,19 +14,25 @@ class XboardSavedAccount {
     required this.email,
     required this.session,
     this.profileId,
+    this.subscriptionHost,
   });
 
   final String origin;
   final String email;
   final XboardSession session;
   final int? profileId;
+  final String? subscriptionHost;
 
-  XboardSavedAccount withProfile(int? id) => XboardSavedAccount(
-    origin: origin,
-    email: email,
-    session: session,
-    profileId: id,
-  );
+  XboardSavedAccount withProfile(int? id, {String? subscriptionHost}) =>
+      XboardSavedAccount(
+        origin: origin,
+        email: email,
+        session: session,
+        profileId: id,
+        subscriptionHost: id == null
+            ? null
+            : subscriptionHost ?? this.subscriptionHost,
+      );
 
   @override
   String toString() => 'XboardSavedAccount(<private>)';
@@ -126,6 +132,10 @@ class XboardAccountController {
   bool _closed = false;
   bool _revoked = false;
   bool _profileRecoveryRequired = false;
+
+  bool ownsProfile(int id) => !_revoked && _account?.profileId == id;
+
+  Set<String> get directHosts => {origin.host, ?_account?.subscriptionHost};
 
   bool canResumeProfile(int? id) =>
       !_revoked &&
@@ -344,7 +354,7 @@ class XboardAccountController {
       final uri = subscription.metaSubscriptionUri(coreVersion: coreVersion);
       if (uri == null) throw const XboardException(XboardFailure.protocol);
       prepared = await profiles.prepare(uri, account.profileId);
-      final updated = account.withProfile(prepared);
+      final updated = account.withProfile(prepared, subscriptionHost: uri.host);
       await store.write(updated);
       _account = updated;
       if (_revoked) return;

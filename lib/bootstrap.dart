@@ -102,7 +102,22 @@ class Bootstrap {
   ) async {
     await _claimDataDirectory();
     globalState.packageInfo = await PackageInfo.fromPlatform();
+    final freshInstall = await preferences.getConfigMap() == null;
     var config = await migration.run();
+    if (freshInstall) {
+      config = config.copyWith(
+        vpnProps: config.vpnProps.copyWith(ipv6: true, allowBypass: false),
+        patchClashConfig: config.patchClashConfig.copyWith(
+          tun: config.patchClashConfig.tun.copyWith(
+            enable: true,
+            device: 'HaozeMihomo',
+          ),
+        ),
+      );
+      if (!await preferences.saveConfig(config)) {
+        throw StateError('Unable to persist protected network defaults');
+      }
+    }
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,
     );

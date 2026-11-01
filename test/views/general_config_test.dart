@@ -70,21 +70,20 @@ void main() {
         .read(patchClashConfigProvider.notifier)
         .update(
           (state) => state.copyWith(
-            ipv6: true,
-            generalOverrideKeys: {GeneralOverrideKey.ipv6},
+            tcpConcurrent: false,
+            generalOverrideKeys: {GeneralOverrideKey.tcpConcurrent},
           ),
         );
     await pumpGeneralView(tester);
     final l = currentAppLocalizations;
-    expect(find.text('IPv6'), findsOneWidget);
-    expect(find.textContaining(l.ipv6Desc), findsOneWidget);
+    expect(find.text(l.tcpConcurrent), findsOneWidget);
 
     await tester.tap(find.byTooltip(l.remove));
     await tester.pumpAndSettle();
 
     expect(config().generalOverrideKeys, isEmpty);
-    expect(config().ipv6, defaultClashConfig.ipv6);
-    expect(find.text('IPv6'), findsNothing);
+    expect(config().tcpConcurrent, defaultClashConfig.tcpConcurrent);
+    expect(find.text(l.tcpConcurrent), findsNothing);
   });
 
   testWidgets('the test URL takes only a URL', (tester) async {

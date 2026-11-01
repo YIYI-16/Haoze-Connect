@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/managed_routing.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
@@ -370,8 +371,14 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
         .toList();
   }
   rawConfig['rules'] = rules;
-  final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
-  return (yaml: yaml, md5: yaml.toMd5(), counts: configCountsOf(rawConfig));
+  final output = data.routingPolicy == null
+      ? Map<String, dynamic>.from(rawConfig)
+      : applyManagedRouting(
+          Map<String, dynamic>.from(rawConfig),
+          data.routingPolicy!,
+        );
+  final yaml = await _encodeYaml(output);
+  return (yaml: yaml, md5: yaml.toMd5(), counts: configCountsOf(output));
 }
 
 typedef ShakingStoreArgs = ({

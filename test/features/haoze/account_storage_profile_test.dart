@@ -17,6 +17,16 @@ import 'package:yaml/yaml.dart';
 
 import '../../helpers/app_paths.dart';
 
+const _subscription = '''
+proxies:
+  - {name: Node, type: ss, server: 192.0.2.1, port: 443, cipher: aes-128-gcm, password: unit}
+proxy-groups:
+  - {name: Proxy, type: select, proxies: [Node]}
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+''';
+
 class _Storage extends Mock implements FlutterSecureStorage {}
 
 class _Downloads extends Mock implements StrictIoXboardTransport {}
@@ -93,6 +103,7 @@ void main() {
           'authorization',
           'subscriptionToken',
           'profileId',
+          'subscriptionHost',
         });
         final loaded = await store.read();
         expect(loaded?.profileId, 42);
@@ -161,7 +172,7 @@ void main() {
       profiles = _Profiles([old]);
       when(
         () => downloads.download(uri),
-      ).thenAnswer((_) async => Uint8List.fromList([1, 2, 3]));
+      ).thenAnswer((_) async => Uint8List.fromList(utf8.encode(_subscription)));
       when(
         () => core.validateProfile(any(), any()),
       ).thenAnswer((_) async => '');
@@ -187,11 +198,12 @@ void main() {
       'download validates before replacing and preserves node selection',
       () async {
         expect(await bridge.prepare(uri, 42), 42);
-        expect(await File(await appPath.getProfilePath('42')).readAsBytes(), [
-          1,
-          2,
-          3,
-        ]);
+        final config =
+            loadYaml(
+                  await File(await appPath.getProfilePath('42')).readAsString(),
+                )
+                as YamlMap;
+        expect(config['proxies'][0]['name'], 'Node');
         final profile = container.read(profilesProvider).single;
         expect(profile.selectedMap, old.selectedMap);
         expect(profile.currentGroupName, 'Proxy');
@@ -262,7 +274,7 @@ void main() {
               currentGroupName: 'New group',
             ),
           );
-          return Uint8List.fromList([1, 2, 3]);
+          return Uint8List.fromList(utf8.encode(_subscription));
         });
         await bridge.prepare(uri, 42);
         final profile = container.read(profilesProvider).single;
@@ -273,7 +285,7 @@ void main() {
     test('a deletion during download cannot resurrect the profile', () async {
       when(() => downloads.download(uri)).thenAnswer((_) async {
         profiles.drop();
-        return Uint8List.fromList([1, 2, 3]);
+        return Uint8List.fromList(utf8.encode(_subscription));
       });
       await expectLater(bridge.prepare(uri, 42), throwsStateError);
       expect(container.read(profilesProvider), isEmpty);

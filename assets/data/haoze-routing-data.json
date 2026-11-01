@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/MetaCubeX/meta-rules-dat",
+  "commit": "cf25ccf5046dd902befc64bff21c0047244796a9",
+  "license": "GPL-3.0",
+  "files": [
+    {
+      "name": "haoze-cn-domain.mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/cf25ccf5046dd902befc64bff21c0047244796a9/geo/geosite/cn.mrs",
+      "git_blob_sha1": "f57532f0fdfbb0aa4fee71c9c18b253c06bc12ef",
+      "sha256": "0b8c7c4d9773471991dd65737fdb16f3bf1baf2512c8b764d4c235318f01b7c6",
+      "bytes": 532882
+    },
+    {
+      "name": "haoze-cn-ip.mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/cf25ccf5046dd902befc64bff21c0047244796a9/geo/geoip/cn.mrs",
+      "git_blob_sha1": "a66205846c27b0be7bc7d59df0d3433423423856",
+      "sha256": "1cd97d734afafcac0708895cefa931ed19aeac28933458afdc4f9c13e915fcb5",
+      "bytes": 38572
+    }
+  ],
+  "license_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+}
