@@ -48,6 +48,7 @@ class Profiles implements XboardManagedProfile {
 
 class Transport implements XboardTransport {
   int userStatus = 200;
+  int authStatus = 200;
   bool networkFailure = false;
   int total = 100;
   Completer<void>? pending;
@@ -61,7 +62,7 @@ class Transport implements XboardTransport {
   ) async {
     requests.add(uri.path);
     if (uri.path.endsWith('/login') || uri.path.endsWith('/register')) {
-      return const XboardResponse(200, {
+      return XboardResponse(authStatus, {
         'data': {'auth_data': 'Bearer example', 'token': 'subscription'},
       });
     }
@@ -134,6 +135,23 @@ void main() {
       expect(controller.state.subscription?.remaining, 70);
       expect(store.value?.profileId, 42);
       expect(profiles.events, ['prepare', 'activate:42']);
+    },
+  );
+  test(
+    'Xboard rejected login is a credential error and permits retry',
+    () async {
+      for (final status in [400, 401, 403, 422]) {
+        transport.authStatus = status;
+        await controller.login('user@example.com', 'incorrect');
+        expect(controller.state.issue, XboardAccountIssue.credentials);
+        expect(controller.state.authenticated, false);
+        expect(store.value, isNull);
+        expect(profiles.events, isEmpty);
+      }
+      transport.authStatus = 200;
+      await controller.login('user@example.com', 'correct');
+      expect(controller.state.authenticated, true);
+      expect(controller.state.profileReady, true);
     },
   );
   test('ordinary quota refresh never reapplies profile', () async {

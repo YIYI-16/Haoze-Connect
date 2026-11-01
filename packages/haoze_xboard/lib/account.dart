@@ -241,7 +241,7 @@ class XboardAccountController {
         state.copy(
           issue:
               error.kind == XboardFailure.unauthorized ||
-                  error.statusCode == 422 ||
+                  [400, 422].contains(error.statusCode) ||
                   error.kind == XboardFailure.configuration
               ? XboardAccountIssue.credentials
               : XboardAccountIssue.network,

@@ -980,7 +980,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Abonnement non prêt",
     ),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "Panneau inaccessible. Le compte et les dernières données sont conservés.",
+      "Impossible de terminer la requête. Vérifiez le réseau ou réessayez plus tard.",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "Compte chargé, mais la configuration a échoué. Relancez la synchronisation.",

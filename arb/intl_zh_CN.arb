@@ -979,7 +979,7 @@
   "haozeWebsite": "打开网站",
   "haozeCaptchaWebsite": "面板启用了安全验证，请先在网站注册，再回到此处登录。",
   "haozeInvalidForm": "请检查邮箱、密码及必填项。",
-  "haozePanelUnavailable": "暂时无法连接面板，已保留登录状态和最近的流量数据。",
+  "haozePanelUnavailable": "暂时无法完成面板请求，请检查网络或稍后重试。",
   "haozeCredentialsError": "登录或注册被拒绝，请检查账号信息及面板要求。",
   "haozeSessionExpired": "登录已失效，请重新登录。",
   "haozeStorageError": "无法更新安全存储，请重试。",

@@ -765,7 +765,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeNoUsage": MessageLookupByLibrary.simpleMessage("아직 사용량 정보가 없습니다."),
     "haozeNotReady": MessageLookupByLibrary.simpleMessage("구독 준비 중"),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "패널에 연결할 수 없습니다. 계정과 최근 사용량은 유지됩니다.",
+      "패널 요청을 완료할 수 없습니다. 네트워크를 확인하거나 나중에 다시 시도하세요.",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "계정은 불러왔지만 구독 설정에 실패했습니다. 동기화를 다시 시도하세요.",

@@ -979,7 +979,7 @@
   "haozeWebsite": "Abrir sitio web",
   "haozeCaptchaWebsite": "Se requiere una verificación. Regístrate en el sitio e inicia sesión aquí.",
   "haozeInvalidForm": "Revisa el correo, la contraseña y los campos obligatorios.",
-  "haozePanelUnavailable": "No se puede acceder al panel. Se conservan la cuenta y los últimos datos.",
+  "haozePanelUnavailable": "No se pudo completar la solicitud al panel. Revisa la red o inténtalo más tarde.",
   "haozeCredentialsError": "Acceso o registro rechazado. Revisa los datos.",
   "haozeSessionExpired": "La sesión ha caducado. Inicia sesión de nuevo.",
   "haozeStorageError": "No se pudo actualizar el almacenamiento seguro. Reinténtalo.",

@@ -8173,10 +8173,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Cannot reach the panel. Your saved account and last usage data are retained.`
+  /// `Cannot complete the panel request. Check your network or try again later.`
   String get haozePanelUnavailable {
     return Intl.message(
-      'Cannot reach the panel. Your saved account and last usage data are retained.',
+      'Cannot complete the panel request. Check your network or try again later.',
       name: 'haozePanelUnavailable',
       desc: '',
       args: [],

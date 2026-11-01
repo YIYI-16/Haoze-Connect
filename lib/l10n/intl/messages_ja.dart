@@ -776,7 +776,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeNoUsage": MessageLookupByLibrary.simpleMessage("使用量をまだ取得していません。"),
     "haozeNotReady": MessageLookupByLibrary.simpleMessage("設定の準備待ち"),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "パネルに接続できません。アカウントと前回の使用量を保持しています。",
+      "パネルへのリクエストを完了できません。ネットワークを確認するか、後でもう一度お試しください。",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "アカウントは読み込まれましたが、設定の同期に失敗しました。",

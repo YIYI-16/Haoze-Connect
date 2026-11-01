@@ -952,7 +952,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNotReady": MessageLookupByLibrary.simpleMessage("Подписка не готова"),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "Панель недоступна. Аккаунт и последние данные сохранены.",
+      "Не удалось выполнить запрос к панели. Проверьте сеть или повторите позже.",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "Аккаунт загружен, но настройка подписки не удалась. Повторите синхронизацию.",

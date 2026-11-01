@@ -979,7 +979,7 @@
   "haozeWebsite": "Ouvrir le site",
   "haozeCaptchaWebsite": "Un contrôle est requis. Inscrivez-vous sur le site, puis connectez-vous ici.",
   "haozeInvalidForm": "Vérifiez l’e-mail, le mot de passe et les champs requis.",
-  "haozePanelUnavailable": "Panneau inaccessible. Le compte et les dernières données sont conservés.",
+  "haozePanelUnavailable": "Impossible de terminer la requête. Vérifiez le réseau ou réessayez plus tard.",
   "haozeCredentialsError": "Connexion ou inscription refusée. Vérifiez les informations.",
   "haozeSessionExpired": "Session expirée. Reconnectez-vous.",
   "haozeStorageError": "Impossible de mettre à jour le stockage sécurisé. Réessayez.",

@@ -979,7 +979,7 @@
   "haozeWebsite": "サイトを開く",
   "haozeCaptchaWebsite": "このパネルは認証が必要です。サイトで登録後、ここでログインしてください。",
   "haozeInvalidForm": "メール、パスワードと必須項目をご確認ください。",
-  "haozePanelUnavailable": "パネルに接続できません。アカウントと前回の使用量を保持しています。",
+  "haozePanelUnavailable": "パネルへのリクエストを完了できません。ネットワークを確認するか、後でもう一度お試しください。",
   "haozeCredentialsError": "ログインまたは登録が拒否されました。入力内容をご確認ください。",
   "haozeSessionExpired": "セッションが切れました。再度ログインしてください。",
   "haozeStorageError": "安全な保存領域を更新できません。再試行してください。",

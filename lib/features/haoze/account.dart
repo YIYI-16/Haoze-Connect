@@ -145,6 +145,7 @@ class HaozeManagedProfile implements XboardManagedProfile {
     if (original != null && listEquals(original, bytes)) {
       return profile.id;
     }
+    await file.parent.create(recursive: true);
     final staged = File('$path.haoze-${snowflake.id}.tmp');
     try {
       await staged.writeAsBytes(bytes, flush: true);

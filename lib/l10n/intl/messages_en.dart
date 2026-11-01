@@ -918,7 +918,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription not ready",
     ),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "Cannot reach the panel. Your saved account and last usage data are retained.",
+      "Cannot complete the panel request. Check your network or try again later.",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "Account loaded, but subscription setup failed. Retry subscription synchronization.",

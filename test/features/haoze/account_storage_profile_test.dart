@@ -184,6 +184,7 @@ void main() {
         ],
       );
       container.listen(profilesProvider, (_, _) {});
+      container.listen(currentProfileIdProvider, (_, _) {});
       final holder = Provider((ref) => HaozeManagedProfile(ref, downloads));
       bridge = container.read(holder);
       final file = File(await appPath.getProfilePath('42'));
@@ -194,6 +195,20 @@ void main() {
       container.dispose();
       await directory.delete(recursive: true);
     });
+    test(
+      'fresh installation downloads and selects a first managed profile',
+      () async {
+        profiles.drop();
+        final folder = Directory(await appPath.profilesPath);
+        await folder.delete(recursive: true);
+        final id = await bridge.prepare(uri, null);
+        await bridge.activate(id);
+        expect(await File(await appPath.getProfilePath('$id')).exists(), true);
+        expect(container.read(profilesProvider).single.id, id);
+        expect(container.read(currentProfileIdProvider), id);
+        expect(profiles.writes, 1);
+      },
+    );
     test(
       'download validates before replacing and preserves node selection',
       () async {

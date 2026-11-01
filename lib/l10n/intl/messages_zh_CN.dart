@@ -707,7 +707,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeNoUsage": MessageLookupByLibrary.simpleMessage("暂未获取到流量信息。"),
     "haozeNotReady": MessageLookupByLibrary.simpleMessage("订阅尚未就绪"),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "暂时无法连接面板，已保留登录状态和最近的流量数据。",
+      "暂时无法完成面板请求，请检查网络或稍后重试。",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "账号已加载，但订阅配置失败，请重试同步订阅。",

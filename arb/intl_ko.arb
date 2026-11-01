@@ -979,7 +979,7 @@
   "haozeWebsite": "웹사이트 열기",
   "haozeCaptchaWebsite": "보안 확인이 필요합니다. 웹사이트에서 가입한 후 여기서 로그인하세요.",
   "haozeInvalidForm": "이메일, 비밀번호 및 필수 항목을 확인하세요.",
-  "haozePanelUnavailable": "패널에 연결할 수 없습니다. 계정과 최근 사용량은 유지됩니다.",
+  "haozePanelUnavailable": "패널 요청을 완료할 수 없습니다. 네트워크를 확인하거나 나중에 다시 시도하세요.",
   "haozeCredentialsError": "로그인 또는 가입이 거부되었습니다. 정보를 확인하세요.",
   "haozeSessionExpired": "세션이 만료되었습니다. 다시 로그인하세요.",
   "haozeStorageError": "보안 저장소를 업데이트하지 못했습니다. 다시 시도하세요.",

@@ -979,7 +979,7 @@
   "haozeWebsite": "Open website",
   "haozeCaptchaWebsite": "This panel requires a security check. Create your account on the website, then sign in here.",
   "haozeInvalidForm": "Check your email, password and required fields.",
-  "haozePanelUnavailable": "Cannot reach the panel. Your saved account and last usage data are retained.",
+  "haozePanelUnavailable": "Cannot complete the panel request. Check your network or try again later.",
   "haozeCredentialsError": "Sign-in or registration was rejected. Check the account details and panel requirements.",
   "haozeSessionExpired": "Your session expired. Please sign in again.",
   "haozeStorageError": "Secure storage could not be updated. Please retry.",

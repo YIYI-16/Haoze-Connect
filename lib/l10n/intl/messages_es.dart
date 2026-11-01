@@ -981,7 +981,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Suscripción pendiente",
     ),
     "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
-      "No se puede acceder al panel. Se conservan la cuenta y los últimos datos.",
+      "No se pudo completar la solicitud al panel. Revisa la red o inténtalo más tarde.",
     ),
     "haozeProfileError": MessageLookupByLibrary.simpleMessage(
       "Cuenta cargada, pero falló la configuración. Sincroniza de nuevo.",
