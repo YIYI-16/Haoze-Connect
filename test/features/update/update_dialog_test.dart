@@ -13,6 +13,7 @@ import '../../helpers/test_app.dart';
 class PreviewService extends HaozeUpdateService {
   PreviewService()
     : super(
+        panelOrigin: Uri.https('panel.example'),
         transport: IoUpdateTransport(),
         platform: UpdatePlatform.windows,
         identity: const UpdateIdentity(version: '6.0.3', versionCode: 62003),
@@ -21,6 +22,7 @@ class PreviewService extends HaozeUpdateService {
   int checks = 0;
   int downloads = 0;
   bool failCheck = false;
+  UpdateFailure checkFailure = UpdateFailure.network;
   bool upToDate = false;
   bool pendingDownload = false;
   UpdateCancellation? token;
@@ -29,7 +31,7 @@ class PreviewService extends HaozeUpdateService {
   @override
   Future<UpdateRelease?> check(UpdateCancellation cancellation) async {
     checks++;
-    if (failCheck) throw const UpdateException(UpdateFailure.network);
+    if (failCheck) throw UpdateException(checkFailure);
     if (upToDate) return null;
     return parseManifest({
       'schema': 1,
@@ -164,6 +166,27 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
   });
+  for (final entry in {
+    UpdateFailure.panelAccess:
+        'The panel version endpoint denied access. Ask the administrator to enable public update checks.',
+    UpdateFailure.panelConfiguration:
+        'The panel has not configured a valid version and download URL for this platform. Contact the administrator.',
+  }.entries) {
+    testWidgets(
+      '${entry.key.name} explains the panel problem without claiming current',
+      (tester) async {
+        service.failCheck = true;
+        service.checkFailure = entry.key;
+        await open(tester);
+        expect(find.text(entry.value), findsOneWidget);
+        expect(find.text('The app is up to date'), findsNothing);
+        expect(find.text('Retry'), findsOneWidget);
+        expect(installer.installs, 0);
+        await tester.tap(find.text('Close'));
+        await tester.pumpAndSettle();
+      },
+    );
+  }
   testWidgets(
     'progress is shown and cancellation never launches an installer',
     (tester) async {

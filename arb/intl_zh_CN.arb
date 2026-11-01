@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "更新包校验未通过，已拒绝安装。",
   "haozeUpdateUnsupported": "此平台暂不支持应用内安装更新。",
   "haozeUpdateOpening": "正在打开系统安装程序…",
+  "haozeUpdatePanelAccess": "面板版本接口拒绝访问，请联系管理员开放更新检查接口。",
+  "haozeUpdatePanelConfiguration": "面板尚未正确配置此平台的版本号或下载地址，请联系管理员。",
   "haozeUpdateInstallFailed": "无法启动安装程序，请重试或检查安装权限。"
 }

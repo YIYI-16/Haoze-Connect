@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "更新の検証に失敗したため、インストールを中止しました。",
   "haozeUpdateUnsupported": "このプラットフォームはアプリ内更新に対応していません。",
   "haozeUpdateOpening": "システムのインストーラーを開いています…",
+  "haozeUpdatePanelAccess": "パネルのバージョン API へのアクセスが拒否されました。公開更新チェックを有効にするよう管理者に連絡してください。",
+  "haozeUpdatePanelConfiguration": "このプラットフォームのバージョンとダウンロード URL が正しく設定されていません。管理者に連絡してください。",
   "haozeUpdateInstallFailed": "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。"
 }

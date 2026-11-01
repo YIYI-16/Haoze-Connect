@@ -1033,6 +1033,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
       "Abriendo el instalador del sistema…",
     ),
+    "haozeUpdatePanelAccess": MessageLookupByLibrary.simpleMessage(
+      "El panel denegó el acceso a la API de versiones. Solicita al administrador que habilite la búsqueda pública de actualizaciones.",
+    ),
+    "haozeUpdatePanelConfiguration": MessageLookupByLibrary.simpleMessage(
+      "El panel no tiene una versión y una URL de descarga válidas para esta plataforma. Contacta con el administrador.",
+    ),
     "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
       "Permite que esta aplicación instale actualizaciones, luego vuelve e inténtalo de nuevo.",
     ),

@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "업데이트 확인에 실패하여 설치가 차단되었습니다.",
   "haozeUpdateUnsupported": "이 플랫폼에서는 앱 내 업데이트 설치를 지원하지 않습니다.",
   "haozeUpdateOpening": "시스템 설치 프로그램을 여는 중…",
+  "haozeUpdatePanelAccess": "패널 버전 API 접근이 거부되었습니다. 관리자에게 공개 업데이트 확인을 허용하도록 요청하세요.",
+  "haozeUpdatePanelConfiguration": "패널에 이 플랫폼의 버전 또는 다운로드 URL이 올바르게 설정되지 않았습니다. 관리자에게 문의하세요.",
   "haozeUpdateInstallFailed": "설치 프로그램을 열 수 없습니다. 다시 시도하거나 설치 권한을 확인하세요."
 }

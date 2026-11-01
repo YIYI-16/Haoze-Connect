@@ -820,6 +820,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
       "システムのインストーラーを開いています…",
     ),
+    "haozeUpdatePanelAccess": MessageLookupByLibrary.simpleMessage(
+      "パネルのバージョン API へのアクセスが拒否されました。公開更新チェックを有効にするよう管理者に連絡してください。",
+    ),
+    "haozeUpdatePanelConfiguration": MessageLookupByLibrary.simpleMessage(
+      "このプラットフォームのバージョンとダウンロード URL が正しく設定されていません。管理者に連絡してください。",
+    ),
     "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
       "このアプリからのインストールを許可してから、戻って再試行してください。",
     ),

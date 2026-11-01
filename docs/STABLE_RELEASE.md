@@ -33,11 +33,16 @@ is promised, and their data is not deleted automatically.
 ## Update contract
 
 The login page and About page expose the same update dialog without requiring a
-panel session. The updater reads stable GitHub Latest in
+panel session. From 6.0.4, the updater reads XBoard's public
+`/api/v1/client/app/getVersion` endpoint and uses the platform's APP version and
+download URL. It verifies the corresponding tag-specific release in
 `YIYI-16/Haoze-Connect`, then its `UPDATE-MANIFEST.json`. It rejects prereleases,
 unexpected filenames, insecure URLs, inconsistent package/certificate/version,
-and incorrect lengths or SHA-256 hashes. GitHub API failures can fall back to
-the repository's HTTPS Latest redirect and the same verified manifest.
+and incorrect lengths or SHA-256 hashes. GitHub API failures can fall back only
+to the same version's manifest. Panel failures never fall back to GitHub Latest.
+The panel must explicitly select a newer version before the client offers it.
+See [XBOARD_APP_UPDATES.md](XBOARD_APP_UPDATES.md) for the panel configuration and
+the narrowly scoped backend route patch.
 
 Downloads stay in the application's temporary `haoze-updates` directory. Users
 can cancel or retry; a successful download still requires an explicit Install
@@ -65,6 +70,9 @@ Windows, Android, and manifest jobs must all succeed. Publish these six assets:
 
 Use the workflow-generated manifest without changing its artifact hashes.
 Compare asset digests and source SHA before setting the release as Latest.
+After publishing, update the Windows/Android versions and versioned download
+URLs in XBoard's System Settings → APP Settings. Existing 6.0.3 clients discover
+the first 6.0.4 upgrade through GitHub Latest; 6.0.4 uses panel settings thereafter.
 The workflow's 6.0.2 Windows upgrade-baseline artifact is acceptance material,
 not a public release asset. Do not upload keystores, recovery credentials,
 test-account data, or an aggregate download ZIP.

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/haoze/account.dart' show haozePanelUrl;
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -35,8 +36,11 @@ Future<void> showHaozeUpdateDialog(BuildContext context) async {
         serviceFactory: () async {
           final package = globalState.packageInfo;
           final native = system.isAndroid ? await app!.updateIdentity() : null;
+          final panelOrigin = Uri.parse(haozePanelUrl);
           return HaozeUpdateService(
+            panelOrigin: panelOrigin,
             transport: IoUpdateTransport(
+              panelOrigin: panelOrigin,
               findProxy: (uri) =>
                   FlClashHttpOverrides.findProxyFor(container, uri),
             ),
@@ -243,6 +247,8 @@ class _HaozeUpdateDialogState extends State<HaozeUpdateDialog> {
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     final failureText = switch (_error) {
+      UpdateFailure.panelAccess => l10n.haozeUpdatePanelAccess,
+      UpdateFailure.panelConfiguration => l10n.haozeUpdatePanelConfiguration,
       UpdateFailure.metadata ||
       UpdateFailure.integrity => l10n.haozeUpdateInvalid,
       UpdateFailure.install => l10n.haozeUpdateInstallFailed,

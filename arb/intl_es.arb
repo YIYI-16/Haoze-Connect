@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "La verificación falló. Se bloqueó la instalación.",
   "haozeUpdateUnsupported": "Esta plataforma no admite la instalación de actualizaciones desde la aplicación.",
   "haozeUpdateOpening": "Abriendo el instalador del sistema…",
+  "haozeUpdatePanelAccess": "El panel denegó el acceso a la API de versiones. Solicita al administrador que habilite la búsqueda pública de actualizaciones.",
+  "haozeUpdatePanelConfiguration": "El panel no tiene una versión y una URL de descarga válidas para esta plataforma. Contacta con el administrador.",
   "haozeUpdateInstallFailed": "No se pudo abrir el instalador. Reinténtalo o comprueba los permisos de instalación."
 }

@@ -739,6 +739,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage("允许安装更新"),
     "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage("正在打开系统安装程序…"),
+    "haozeUpdatePanelAccess": MessageLookupByLibrary.simpleMessage(
+      "面板版本接口拒绝访问，请联系管理员开放更新检查接口。",
+    ),
+    "haozeUpdatePanelConfiguration": MessageLookupByLibrary.simpleMessage(
+      "面板尚未正确配置此平台的版本号或下载地址，请联系管理员。",
+    ),
     "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
       "请允许此应用安装更新，然后返回重试。",
     ),

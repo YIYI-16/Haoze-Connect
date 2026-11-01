@@ -17,6 +17,8 @@ enum UpdatePlatform { android, windows }
 
 enum UpdateFailure {
   network,
+  panelAccess,
+  panelConfiguration,
   metadata,
   integrity,
   cancelled,
@@ -82,12 +84,16 @@ bool updateUrlAllowed(Uri uri) {
 }
 
 class IoUpdateTransport implements UpdateTransport {
-  IoUpdateTransport({this.findProxy});
+  IoUpdateTransport({this.findProxy, Uri? panelOrigin})
+    : panelEndpoint = panelOrigin == null
+          ? null
+          : panelAppVersionUri(panelOrigin);
   final String Function(Uri)? findProxy;
+  final Uri? panelEndpoint;
 
   @override
   Future<UpdateResponse> open(Uri uri, UpdateCancellation cancellation) async {
-    if (!updateUrlAllowed(uri)) {
+    if (!updateUrlAllowed(uri) && uri != panelEndpoint) {
       throw const UpdateException(UpdateFailure.metadata);
     }
     final client =
@@ -97,7 +103,11 @@ class IoUpdateTransport implements UpdateTransport {
           ..connectionTimeout = const Duration(seconds: 25)
           ..autoUncompress = false
           ..userAgent = 'Haoze-Connect-Updater';
-    if (findProxy != null) client.findProxy = findProxy;
+    if (uri == panelEndpoint) {
+      client.findProxy = (_) => 'DIRECT';
+    } else if (findProxy != null) {
+      client.findProxy = findProxy;
+    }
     cancellation.onCancel(() => client.close(force: true));
     try {
       cancellation.check();
@@ -191,17 +201,36 @@ Uri updateAssetUri(String version, String name) => Uri.https(
   '/$updateRepository/releases/download/v$version/$name',
 );
 
+Uri panelAppVersionUri(Uri origin) {
+  if (origin.scheme != 'https' ||
+      origin.host.isEmpty ||
+      origin.userInfo.isNotEmpty ||
+      origin.hasQuery ||
+      origin.hasFragment ||
+      (origin.path.isNotEmpty && origin.path != '/')) {
+    throw const UpdateException(UpdateFailure.panelConfiguration);
+  }
+  return origin.replace(path: '/api/v1/client/app/getVersion');
+}
+
+String updateInstallerName(UpdatePlatform platform, String version) =>
+    platform == UpdatePlatform.android
+    ? 'HaozeConnect-Android-arm64-$version.apk'
+    : 'HaozeConnect-Windows-Setup-x64-$version.exe';
+
 class HaozeUpdateService {
   HaozeUpdateService({
     required this.transport,
     required this.platform,
     required this.identity,
     required this.directory,
-  });
+    required Uri panelOrigin,
+  }) : panelEndpoint = panelAppVersionUri(panelOrigin);
   final UpdateTransport transport;
   final UpdatePlatform platform;
   final UpdateIdentity identity;
   final Future<Directory> Function() directory;
+  final Uri panelEndpoint;
 
   Future<UpdateResponse> _open(Uri uri, UpdateCancellation cancellation) async {
     for (var redirects = 0; redirects <= 5; redirects++) {
@@ -225,6 +254,14 @@ class HaozeUpdateService {
     int limit = 256 * 1024,
   }) async {
     final response = await _open(uri, cancellation);
+    return _responseJson(response, cancellation, limit: limit);
+  }
+
+  Future<Map<String, dynamic>> _responseJson(
+    UpdateResponse response,
+    UpdateCancellation cancellation, {
+    int limit = 256 * 1024,
+  }) async {
     if (response.status != 200) {
       await response.body.drain<void>();
       throw const UpdateException(UpdateFailure.network);
@@ -246,40 +283,55 @@ class HaozeUpdateService {
 
   Future<UpdateRelease?> check(UpdateCancellation cancellation) async {
     try {
+      final response = await transport.open(panelEndpoint, cancellation);
+      if (response.status == 401 || response.status == 403) {
+        await response.body.drain<void>();
+        throw const UpdateException(UpdateFailure.panelAccess);
+      }
+      if ([301, 302, 303, 307, 308].contains(response.status)) {
+        await response.body.drain<void>();
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      }
+      final Map<String, dynamic> panel;
+      try {
+        panel = await _responseJson(response, cancellation);
+      } on FormatException {
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      } on UpdateException catch (error) {
+        if (error.failure != UpdateFailure.metadata) rethrow;
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      }
+      final data = panel['data'];
+      if (panel['status'] != 'success' || data is! Map) {
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      }
+      final value = data['${platform.name}_version'];
+      final link = data['${platform.name}_download_url'];
+      if (value is! String || link is! String) {
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      }
+      final version = value.trim();
+      if (!_version.hasMatch(version) ||
+          link.trim() !=
+              updateAssetUri(
+                version,
+                updateInstallerName(platform, version),
+              ).toString()) {
+        throw const UpdateException(UpdateFailure.panelConfiguration);
+      }
+      if (compareUpdateVersions(version, identity.version) <= 0) return null;
       final Map<String, dynamic> release;
       try {
         release = await _json(
           Uri.https(
             'api.github.com',
-            '/repos/$updateRepository/releases/latest',
+            '/repos/$updateRepository/releases/tags/v$version',
           ),
           cancellation,
           limit: 2 * 1024 * 1024,
         );
       } on UpdateException catch (error) {
         if (error.failure != UpdateFailure.network) rethrow;
-        final response = await transport.open(
-          Uri.https('github.com', '/$updateRepository/releases/latest'),
-          cancellation,
-        );
-        await response.body.drain<void>();
-        final uri = Uri.https(
-          'github.com',
-          '/',
-        ).resolve(response.headers['location'] ?? '');
-        final segments = uri.pathSegments;
-        if (![301, 302, 303, 307, 308].contains(response.status) ||
-            uri.host != 'github.com' ||
-            !updateUrlAllowed(uri) ||
-            uri.query.isNotEmpty ||
-            segments.length != 5 ||
-            segments.take(4).join('/') != '$updateRepository/releases/tag' ||
-            !segments.last.startsWith('v') ||
-            !_version.hasMatch(segments.last.substring(1))) {
-          throw const UpdateException(UpdateFailure.metadata);
-        }
-        final version = segments.last.substring(1);
-        if (compareUpdateVersions(version, identity.version) <= 0) return null;
         final manifest = await _json(
           updateAssetUri(version, updateManifestName),
           cancellation,
@@ -290,13 +342,9 @@ class HaozeUpdateService {
         throw const UpdateException(UpdateFailure.metadata);
       }
       final tag = release['tag_name'];
-      if (tag is! String ||
-          !tag.startsWith('v') ||
-          !_version.hasMatch(tag.substring(1))) {
+      if (tag != 'v$version') {
         throw const UpdateException(UpdateFailure.metadata);
       }
-      final version = tag.substring(1);
-      if (compareUpdateVersions(version, identity.version) <= 0) return null;
       final assets = release['assets'];
       if (assets is! List) throw const UpdateException(UpdateFailure.metadata);
       final manifests = assets
@@ -355,9 +403,7 @@ class HaozeUpdateService {
       throw const UpdateException(UpdateFailure.metadata);
     }
     final asset = platforms[platform.name] as Map;
-    final name = platform == UpdatePlatform.android
-        ? 'HaozeConnect-Android-arm64-$version.apk'
-        : 'HaozeConnect-Windows-Setup-x64-$version.exe';
+    final name = updateInstallerName(platform, version);
     final bytes = asset['bytes'];
     final digest = asset['sha256'];
     if (asset['name'] != name ||

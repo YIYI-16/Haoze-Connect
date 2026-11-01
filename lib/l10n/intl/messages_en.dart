@@ -968,6 +968,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
       "Opening the system installer…",
     ),
+    "haozeUpdatePanelAccess": MessageLookupByLibrary.simpleMessage(
+      "The panel version endpoint denied access. Ask the administrator to enable public update checks.",
+    ),
+    "haozeUpdatePanelConfiguration": MessageLookupByLibrary.simpleMessage(
+      "The panel has not configured a valid version and download URL for this platform. Contact the administrator.",
+    ),
     "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
       "Allow this app to install updates, then return and try again.",
     ),

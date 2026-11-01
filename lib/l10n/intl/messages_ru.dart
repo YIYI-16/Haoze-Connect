@@ -1004,6 +1004,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
       "Открытие системного установщика…",
     ),
+    "haozeUpdatePanelAccess": MessageLookupByLibrary.simpleMessage(
+      "Доступ к API версий панели запрещён. Попросите администратора разрешить публичную проверку обновлений.",
+    ),
+    "haozeUpdatePanelConfiguration": MessageLookupByLibrary.simpleMessage(
+      "В панели не настроены корректные версия и ссылка для этой платформы. Обратитесь к администратору.",
+    ),
     "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
       "Разрешите установку обновлений из этого приложения, затем вернитесь и повторите попытку.",
     ),

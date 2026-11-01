@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "La vérification a échoué. L’installation a été bloquée.",
   "haozeUpdateUnsupported": "La mise à jour intégrée n’est pas prise en charge sur cette plateforme.",
   "haozeUpdateOpening": "Ouverture du programme d’installation système…",
+  "haozeUpdatePanelAccess": "L’accès à l’API de version du panneau a été refusé. Demandez à l’administrateur d’activer la vérification publique des mises à jour.",
+  "haozeUpdatePanelConfiguration": "La version et l’URL de téléchargement de cette plateforme ne sont pas correctement configurées. Contactez l’administrateur.",
   "haozeUpdateInstallFailed": "Impossible d’ouvrir le programme d’installation. Réessayez ou vérifiez les autorisations."
 }

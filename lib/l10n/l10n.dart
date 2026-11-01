@@ -8523,6 +8523,26 @@ class AppLocalizations {
     );
   }
 
+  /// `The panel version endpoint denied access. Ask the administrator to enable public update checks.`
+  String get haozeUpdatePanelAccess {
+    return Intl.message(
+      'The panel version endpoint denied access. Ask the administrator to enable public update checks.',
+      name: 'haozeUpdatePanelAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The panel has not configured a valid version and download URL for this platform. Contact the administrator.`
+  String get haozeUpdatePanelConfiguration {
+    return Intl.message(
+      'The panel has not configured a valid version and download URL for this platform. Contact the administrator.',
+      name: 'haozeUpdatePanelConfiguration',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The installer could not be opened. Retry or check installation permissions.`
   String get haozeUpdateInstallFailed {
     return Intl.message(

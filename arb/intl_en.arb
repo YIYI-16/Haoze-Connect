@@ -1015,5 +1015,7 @@
   "haozeUpdateInvalid": "Update verification failed. Installation was blocked.",
   "haozeUpdateUnsupported": "In-app update installation is not supported on this platform.",
   "haozeUpdateOpening": "Opening the system installer…",
+  "haozeUpdatePanelAccess": "The panel version endpoint denied access. Ask the administrator to enable public update checks.",
+  "haozeUpdatePanelConfiguration": "The panel has not configured a valid version and download URL for this platform. Contact the administrator.",
   "haozeUpdateInstallFailed": "The installer could not be opened. Retry or check installation permissions."
 }

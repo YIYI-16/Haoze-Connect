@@ -1,0 +1,37 @@
+--- a/app/Http/Routes/V1/ClientRoute.php
++++ b/app/Http/Routes/V1/ClientRoute.php
+@@ -9,6 +9,8 @@
+ {
+     public function map(Registrar $router)
+     {
++        $router->get('client/app/getVersion', [AppController::class, 'getVersion']);
++
+         $router->group([
+             'prefix' => 'client',
+             'middleware' => 'client'
+@@ -17,7 +19,6 @@
+             $router->get('/subscribe', [ClientController::class, 'subscribe'])->name('client.subscribe.legacy');
+             // App
+             $router->get('/app/getConfig', [AppController::class, 'getConfig']);
+-            $router->get('/app/getVersion', [AppController::class, 'getVersion']);
+         });
+     }
+ }
+--- a/app/Http/Routes/V2/ClientRoute.php
++++ b/app/Http/Routes/V2/ClientRoute.php
+@@ -8,13 +8,14 @@
+ {
+     public function map(Registrar $router)
+     {
++        $router->get('client/app/getVersion', [AppController::class, 'getVersion']);
++
+         $router->group([
+             'prefix' => 'client',
+             'middleware' => 'client'
+         ], function ($router) {
+             // App
+             $router->get('/app/getConfig', [AppController::class, 'getConfig']);
+-            $router->get('/app/getVersion', [AppController::class, 'getVersion']);
+         });
+     }
+ }

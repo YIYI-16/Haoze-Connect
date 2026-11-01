@@ -62,10 +62,31 @@ void main() {
   late Directory directory;
   late FakeTransport transport;
   late HaozeUpdateService service;
+  void panel({
+    String version = '6.0.4',
+    String? url,
+    UpdatePlatform platform = UpdatePlatform.windows,
+  }) {
+    transport.json(panelAppVersionUri(Uri.https('panel.example')), {
+      'status': 'success',
+      'data': {
+        '${platform.name}_version': version,
+        '${platform.name}_download_url':
+            url ??
+            updateAssetUri(
+              version,
+              updateInstallerName(platform, version),
+            ).toString(),
+      },
+    });
+  }
+
   setUp(() {
     directory = Directory.systemTemp.createTempSync('haoze-update');
     transport = FakeTransport();
+    panel();
     service = HaozeUpdateService(
+      panelOrigin: Uri.https('panel.example'),
       transport: transport,
       platform: UpdatePlatform.windows,
       identity: const UpdateIdentity(version: '6.0.3', versionCode: 62003),
@@ -101,7 +122,10 @@ void main() {
   };
   void serve(Map<String, dynamic> data) {
     transport.json(
-      Uri.https('api.github.com', '/repos/$updateRepository/releases/latest'),
+      Uri.https(
+        'api.github.com',
+        '/repos/$updateRepository/releases/tags/v6.0.4',
+      ),
       data,
     );
     transport.json(updateAssetUri('6.0.4', updateManifestName), manifest());
@@ -111,8 +135,206 @@ void main() {
       isA<UpdateException>().having((e) => e.failure, 'failure', value);
   UpdateRelease candidate() => service.parseManifest(manifest(), '6.0.4');
 
+  test('panel choice stays authoritative when GitHub Latest differs', () async {
+    serve(release());
+    transport.json(
+      Uri.https('api.github.com', '/repos/$updateRepository/releases/latest'),
+      release()..['tag_name'] = 'v6.0.9',
+    );
+    final update = await service.check(UpdateCancellation());
+    expect(update!.version, '6.0.4');
+    expect(
+      transport.requests.first,
+      panelAppVersionUri(Uri.https('panel.example')),
+    );
+    expect(
+      transport.requests.any((uri) => uri.path.contains('/latest')),
+      false,
+    );
+    expect(transport.requests.first.hasQuery, false);
+  });
+
+  test('panel current and older versions need no GitHub connection', () async {
+    for (final version in ['6.0.3', '6.0.2']) {
+      transport.requests.clear();
+      panel(version: version);
+      expect(await service.check(UpdateCancellation()), isNull);
+      expect(transport.requests, [
+        panelAppVersionUri(Uri.https('panel.example')),
+      ]);
+    }
+  });
+
   test(
-    'latest stable release and exact asset are bound to the public manifest',
+    'missing or invalid panel settings cannot claim already current',
+    () async {
+      final endpoint = panelAppVersionUri(Uri.https('panel.example'));
+      for (final data in [
+        <String, dynamic>{},
+        {'status': 'fail', 'data': <String, dynamic>{}},
+        {'status': 'success', 'data': <String, dynamic>{}},
+        {
+          'status': 'success',
+          'data': {'windows_version': null, 'windows_download_url': null},
+        },
+      ]) {
+        transport.json(endpoint, data);
+        await expectLater(
+          service.check(UpdateCancellation()),
+          throwsA(failure(UpdateFailure.panelConfiguration)),
+        );
+      }
+      for (final url in [
+        'http://github.com/YIYI-16/Haoze-Connect/releases/download/v6.0.4/HaozeConnect-Windows-Setup-x64-6.0.4.exe',
+        'https://downloads.example/setup.exe',
+        updateAssetUri(
+          '6.0.5',
+          updateInstallerName(UpdatePlatform.windows, '6.0.5'),
+        ).toString(),
+        'https://github.com/YIYI-16/Haoze-Connect/releases/latest',
+        '',
+      ]) {
+        panel(url: url);
+        await expectLater(
+          service.check(UpdateCancellation()),
+          throwsA(failure(UpdateFailure.panelConfiguration)),
+        );
+      }
+      for (final version in ['', 'v6.0.4', '6.0.4-pre', '../6.0.4']) {
+        panel(version: version);
+        await expectLater(
+          service.check(UpdateCancellation()),
+          throwsA(failure(UpdateFailure.panelConfiguration)),
+        );
+      }
+      expect(transport.requests.every((uri) => uri == endpoint), true);
+    },
+  );
+
+  test(
+    'panel authentication and redirect errors never bypass rollout control',
+    () async {
+      final endpoint = panelAppVersionUri(Uri.https('panel.example'));
+      for (final status in [401, 403]) {
+        transport.responses[endpoint.toString()] = () =>
+            UpdateResponse(status, {}, const Stream.empty());
+        await expectLater(
+          service.check(UpdateCancellation()),
+          throwsA(failure(UpdateFailure.panelAccess)),
+        );
+      }
+      transport.responses[endpoint
+          .toString()] = () => const UpdateResponse(302, {
+        'location':
+            'https://api.github.com/repos/YIYI-16/Haoze-Connect/releases/latest',
+      }, Stream.empty());
+      await expectLater(
+        service.check(UpdateCancellation()),
+        throwsA(failure(UpdateFailure.panelConfiguration)),
+      );
+      expect(transport.requests.every((uri) => uri == endpoint), true);
+    },
+  );
+
+  test('malformed panel JSON remains a configuration error', () async {
+    transport.responses[panelAppVersionUri(
+      Uri.https('panel.example'),
+    ).toString()] = () => UpdateResponse(
+      200,
+      {},
+      Stream.value(utf8.encode('<html>login</html>')),
+    );
+    await expectLater(
+      service.check(UpdateCancellation()),
+      throwsA(failure(UpdateFailure.panelConfiguration)),
+    );
+  });
+
+  test('the release tag must equal the panel-selected version', () async {
+    serve(release()..['tag_name'] = 'v6.0.5');
+    await expectLater(
+      service.check(UpdateCancellation()),
+      throwsA(failure(UpdateFailure.metadata)),
+    );
+  });
+
+  test(
+    'Android selects its own panel fields and verifies the same trusted release',
+    () async {
+      panel(platform: UpdatePlatform.android);
+      final android = HaozeUpdateService(
+        panelOrigin: Uri.https('panel.example'),
+        transport: transport,
+        platform: UpdatePlatform.android,
+        identity: const UpdateIdentity(
+          version: '6.0.3',
+          versionCode: 64003,
+          package: 'com.haoze.connect.mihomo',
+          certificate: pin,
+        ),
+        directory: () async => directory,
+      );
+      final data = release();
+      final name = updateInstallerName(UpdatePlatform.android, '6.0.4');
+      (data['assets'] as List).last['name'] = name;
+      (data['assets'] as List).last['browser_download_url'] = updateAssetUri(
+        '6.0.4',
+        name,
+      ).toString();
+      transport.json(
+        Uri.https(
+          'api.github.com',
+          '/repos/$updateRepository/releases/tags/v6.0.4',
+        ),
+        data,
+      );
+      transport.json(
+        updateAssetUri('6.0.4', updateManifestName),
+        manifest(platform: UpdatePlatform.android),
+      );
+      final update = await android.check(UpdateCancellation());
+      expect(update!.platform, UpdatePlatform.android);
+      expect(update.versionCode, 64004);
+      expect(update.certificate, pin);
+    },
+  );
+
+  test(
+    'only the configured public panel endpoint extends transport access',
+    () async {
+      final client = IoUpdateTransport(panelOrigin: Uri.https('panel.example'));
+      expect(
+        client.panelEndpoint,
+        panelAppVersionUri(Uri.https('panel.example')),
+      );
+      for (final uri in [
+        Uri.https('panel.example', '/api/v1/admin/config/fetch'),
+        Uri.https('panel.example', '/api/v1/client/app/getVersion', {
+          'token': 'must-not-be-sent',
+        }),
+        Uri.https('other.example', '/api/v1/client/app/getVersion'),
+      ]) {
+        await expectLater(
+          client.open(uri, UpdateCancellation()),
+          throwsA(failure(UpdateFailure.metadata)),
+        );
+      }
+      for (final uri in [
+        Uri.parse('http://panel.example'),
+        Uri.parse('https://user@panel.example'),
+        Uri.parse('https://panel.example/path'),
+        Uri.parse('https://panel.example?token=bad'),
+      ]) {
+        expect(
+          () => panelAppVersionUri(uri),
+          throwsA(failure(UpdateFailure.panelConfiguration)),
+        );
+      }
+    },
+  );
+
+  test(
+    'panel-selected stable release and exact asset are bound to the public manifest',
     () async {
       serve(release());
       final update = await service.check(UpdateCancellation());
@@ -125,8 +347,7 @@ void main() {
     },
   );
   test('an older release is current without fetching a manifest', () async {
-    final data = release()..['tag_name'] = 'v6.0.2';
-    serve(data);
+    panel(version: '6.0.2');
     expect(await service.check(UpdateCancellation()), isNull);
     expect(transport.requests.length, 1);
   });
@@ -172,24 +393,24 @@ void main() {
     );
   });
   test(
-    'API rate limits may use only the exact Latest tag and its verified manifest',
+    'API failure uses only the panel-selected manifest, never Latest',
     () async {
       transport
-              .responses['https://github.com/$updateRepository/releases/latest'] =
-          () => const UpdateResponse(302, {
-            'location':
-                'https://github.com/YIYI-16/Haoze-Connect/releases/tag/v6.0.4',
-          }, Stream.empty());
+              .responses['https://api.github.com/repos/$updateRepository/releases/tags/v6.0.4'] =
+          () => const UpdateResponse(403, {}, Stream.empty());
       transport.json(updateAssetUri('6.0.4', updateManifestName), manifest());
       expect(
         (await service.check(UpdateCancellation()))!.sha256,
         payloadDigest,
       );
-      transport
-              .responses['https://github.com/$updateRepository/releases/latest'] =
-          () => const UpdateResponse(302, {
-            'location': 'https://github.com/other/repo/releases/tag/v6.0.4',
-          }, Stream.empty());
+      expect(
+        transport.requests.any((uri) => uri.path.contains('/latest')),
+        false,
+      );
+      transport.json(
+        updateAssetUri('6.0.4', updateManifestName),
+        manifest()..['version'] = '6.0.5',
+      );
       await expectLater(
         service.check(UpdateCancellation()),
         throwsA(failure(UpdateFailure.metadata)),
@@ -225,6 +446,7 @@ void main() {
     'Android requires the installed production package, certificate and a newer code',
     () {
       final android = HaozeUpdateService(
+        panelOrigin: Uri.https('panel.example'),
         transport: transport,
         platform: UpdatePlatform.android,
         identity: const UpdateIdentity(

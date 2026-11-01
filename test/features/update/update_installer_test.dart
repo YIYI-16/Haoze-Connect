@@ -14,6 +14,7 @@ void main() {
     await file.writeAsString('verified');
     final digest = sha256.convert(await file.readAsBytes()).toString();
     final service = HaozeUpdateService(
+      panelOrigin: Uri.https('panel.example'),
       transport: IoUpdateTransport(),
       platform: UpdatePlatform.windows,
       identity: const UpdateIdentity(version: '6.0.3', versionCode: 62003),
