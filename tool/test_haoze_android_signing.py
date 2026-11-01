@@ -69,6 +69,20 @@ class SigningPreparationTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             manifest.build_manifest(apk, exe, proof, 'a' * 40)
 
+    def test_numbered_and_sdk_ranged_certificate_output(self):
+        pin = signing.pinned_certificate()
+        prefix = 'Number of signers: 1\nVerified using v2 scheme (APK Signature Scheme v2): true\n'
+        signing.verify_signature_output(prefix + f'Signer #1 certificate SHA-256 digest: {pin}\n')
+        ranges = ''.join(f'Signer (minSdkVersion={start}, maxSdkVersion={end}) certificate SHA-256 digest: {pin}\n'
+                         for start, end in [(33, 2147483647), (24, 32)])
+        signing.verify_signature_output(prefix + ranges)
+        for invalid in [prefix + ranges.replace(pin, 'b' * 64, 1),
+                        prefix.replace('signers: 1', 'signers: 2') + ranges,
+                        prefix + ranges + f'Signer #2 certificate SHA-256 digest: {pin}\n',
+                        prefix, ranges]:
+            with self.assertRaises(ValueError):
+                signing.verify_signature_output(invalid)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -85,14 +85,25 @@ def android_tools():
     raise ValueError('Android signing and metadata tools are missing')
 
 
+def verify_signature_output(signatures):
+    lines = [line for line in signatures.splitlines()
+             if line.startswith('Signer ') and ' certificate SHA-256 digest:' in line]
+    pattern = re.compile(r'^Signer (?:#1|\(minSdkVersion=\d+(?: \(dev release=true\))?, maxSdkVersion=\d+\)) certificate SHA-256 digest: ([0-9a-fA-F]{64})$')
+    matches = [pattern.fullmatch(line) for line in lines]
+    certificates = [match[1].lower() for match in matches if match]
+    if ('Number of signers: 1' not in signatures.splitlines() or not lines or
+            len(certificates) != len(lines) or
+            any(value != pinned_certificate() for value in certificates)):
+        raise ValueError('APK signer does not match the fixed release identity; observed certificates: ' +
+                         ','.join(certificates or ['unrecognized output']))
+    if 'Verified using v2 scheme (APK Signature Scheme v2): true' not in signatures:
+        raise ValueError('APK v2 verification failed')
+
+
 def verify(apk, output, expected_code=None):
     signer, aapt = android_tools()
     signatures = run_checked([str(signer), 'verify', '--verbose', '--print-certs', str(apk)])
-    matches = re.findall(r'Signer #(\d+) certificate SHA-256 digest: ([0-9a-f]+)', signatures)
-    if matches != [('1', pinned_certificate())]:
-        raise ValueError('APK signer does not match the fixed release identity')
-    if 'Verified using v2 scheme (APK Signature Scheme v2): true' not in signatures:
-        raise ValueError('APK v2 verification failed')
+    verify_signature_output(signatures)
     metadata = run_checked([str(aapt), 'dump', 'badging', str(apk)])
     package = re.search(r"package: name='([^']+)' versionCode='(\d+)' versionName='([^']+)'", metadata)
     version = re.search(r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)',
