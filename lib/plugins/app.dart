@@ -156,6 +156,35 @@ class App {
     return methodChannel.invokeMethod<bool>('openAppSettings');
   }
 
+  Future<Map<String, dynamic>> updateIdentity() async =>
+      await methodChannel.invokeMapMethod<String, dynamic>(
+        'getUpdateIdentity',
+      ) ??
+      (throw StateError('Missing installed update identity'));
+
+  Future<bool> canInstallUpdate() async =>
+      await methodChannel.invokeMethod<bool>('canInstallUpdate') ?? false;
+
+  Future<bool> requestUpdateInstallPermission() async =>
+      await methodChannel.invokeMethod<bool>(
+        'requestUpdateInstallPermission',
+      ) ??
+      false;
+
+  Future<bool> installUpdate({
+    required String path,
+    required String version,
+    required int versionCode,
+    required String sha256,
+  }) async =>
+      await methodChannel.invokeMethod<bool>('installUpdate', {
+        'path': path,
+        'version': version,
+        'versionCode': versionCode,
+        'sha256': sha256,
+      }) ??
+      false;
+
   Future<AppExitInfo?> getLastExitInfo() async {
     try {
       final raw = await methodChannel

@@ -1000,5 +1000,20 @@
   "haozeReady": "設定の準備完了",
   "haozeNotReady": "設定の準備待ち",
   "haozeNoUpdateInfo": "新しいダウンロード情報を取得できませんでした。パネルの設定を確認するか、後で再試行してください。",
-  "haozeWindowsTunAuthorizationFailed": "TUNの権限がありません。ポータブル版は管理者として実行し、インストール版ではシステムの権限要求を承認してください。"
+  "haozeWindowsTunAuthorizationFailed": "TUNの権限がありません。ポータブル版は管理者として実行し、インストール版ではシステムの権限要求を承認してください。",
+  "haozeUpdateChecking": "更新を確認しています…",
+  "haozeUpdateCurrent": "最新バージョンです",
+  "haozeUpdateDownloading": "更新をダウンロード中",
+  "haozeUpdateVerifying": "更新パッケージを検証中",
+  "haozeUpdateReady": "更新パッケージの検証が完了しました",
+  "haozeUpdateInstall": "更新をインストール",
+  "haozeUpdatePermission": "このアプリからのインストールを許可してから、戻って再試行してください。",
+  "haozeUpdateOpenPermission": "更新のインストールを許可",
+  "haozeUpdateHandedOff": "システムのインストーラーが開きました。そこでインストールを確認してください。",
+  "haozeUpdateWindowsHint": "Windows のインストーラーを開き、このアプリを終了します。",
+  "haozeUpdateFailed": "更新に失敗しました。ネットワークを確認して再試行してください。",
+  "haozeUpdateInvalid": "更新の検証に失敗したため、インストールを中止しました。",
+  "haozeUpdateUnsupported": "このプラットフォームはアプリ内更新に対応していません。",
+  "haozeUpdateOpening": "システムのインストーラーを開いています…",
+  "haozeUpdateInstallFailed": "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。"
 }

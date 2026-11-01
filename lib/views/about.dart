@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/features/haoze/account.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fl_clash/features/update/update_dialog.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -27,49 +26,8 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
-  Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final result = await globalState.loadingRun(
-      () async => (
-        version: await ref
-            .read(haozeAccountProvider.notifier)
-            .controller
-            .appVersion(
-              system.isAndroid
-                  ? 'android'
-                  : system.isWindows
-                  ? 'windows'
-                  : 'macos',
-            ),
-      ),
-      title: context.appLocalizations.checkUpdate,
-      tag: LoadingTag.checkUpdate,
-    );
-    if (result == null || !context.mounted) return;
-    final update = result.version;
-    final version = update?.version.replaceFirst(RegExp(r'^v'), '');
-    if (update?.downloadUri == null ||
-        version == null ||
-        !RegExp(r'^\d{1,9}\.\d{1,9}\.\d{1,9}$').hasMatch(version) ||
-        compareVersions(version, globalState.packageInfo.version) <= 0) {
-      await dialogs.showAlert(
-        title: context.appLocalizations.checkUpdate,
-        message: TextSpan(text: context.appLocalizations.haozeNoUpdateInfo),
-      );
-      return;
-    }
-    final accepted = await dialogs.showMessage(
-      title: context.appLocalizations.discoverNewVersion,
-      message: TextSpan(text: version),
-      confirmText: context.appLocalizations.goDownload,
-    );
-    if (accepted == true) {
-      await launchUrl(
-        update!.downloadUri!,
-        mode: LaunchMode.externalApplication,
-      );
-    }
-  }
+  Future<void> _checkUpdate(BuildContext context) =>
+      showHaozeUpdateDialog(context);
 
   Widget _buildLinkItem({
     required Glyph glyph,
@@ -104,7 +62,7 @@ class AboutView extends ConsumerWidget {
           _AboutHero(
             isCheckingUpdate: isLoading,
             onCheckUpdate: () {
-              _checkUpdate(context, ref);
+              _checkUpdate(context);
             },
             onEnterDeveloperMode: () {
               ref

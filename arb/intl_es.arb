@@ -1000,5 +1000,20 @@
   "haozeReady": "Suscripción lista",
   "haozeNotReady": "Suscripción pendiente",
   "haozeNoUpdateInfo": "No se obtuvo información de una nueva descarga. Revisa el panel o inténtalo más tarde.",
-  "haozeWindowsTunAuthorizationFailed": "Falta el permiso TUN. Ejecuta la versión portátil como administrador o autoriza la versión instalada."
+  "haozeWindowsTunAuthorizationFailed": "Falta el permiso TUN. Ejecuta la versión portátil como administrador o autoriza la versión instalada.",
+  "haozeUpdateChecking": "Buscando actualizaciones…",
+  "haozeUpdateCurrent": "La aplicación está actualizada",
+  "haozeUpdateDownloading": "Descargando actualización",
+  "haozeUpdateVerifying": "Verificando el paquete de actualización",
+  "haozeUpdateReady": "El paquete de actualización se ha verificado",
+  "haozeUpdateInstall": "Instalar actualización",
+  "haozeUpdatePermission": "Permite que esta aplicación instale actualizaciones, luego vuelve e inténtalo de nuevo.",
+  "haozeUpdateOpenPermission": "Permitir instalación",
+  "haozeUpdateHandedOff": "Se ha abierto el instalador del sistema. Confirma allí la instalación.",
+  "haozeUpdateWindowsHint": "Windows abrirá el instalador y cerrará esta aplicación.",
+  "haozeUpdateFailed": "La actualización falló. Comprueba la red e inténtalo de nuevo.",
+  "haozeUpdateInvalid": "La verificación falló. Se bloqueó la instalación.",
+  "haozeUpdateUnsupported": "Esta plataforma no admite la instalación de actualizaciones desde la aplicación.",
+  "haozeUpdateOpening": "Abriendo el instalador del sistema…",
+  "haozeUpdateInstallFailed": "No se pudo abrir el instalador. Reinténtalo o comprueba los permisos de instalación."
 }

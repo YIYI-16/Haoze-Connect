@@ -796,6 +796,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTerms": MessageLookupByLibrary.simpleMessage("規約を読む"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("総容量"),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("無期限"),
+    "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("更新を確認しています…"),
+    "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("最新バージョンです"),
+    "haozeUpdateDownloading": MessageLookupByLibrary.simpleMessage(
+      "更新をダウンロード中",
+    ),
+    "haozeUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "更新に失敗しました。ネットワークを確認して再試行してください。",
+    ),
+    "haozeUpdateHandedOff": MessageLookupByLibrary.simpleMessage(
+      "システムのインストーラーが開きました。そこでインストールを確認してください。",
+    ),
+    "haozeUpdateInstall": MessageLookupByLibrary.simpleMessage("更新をインストール"),
+    "haozeUpdateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。",
+    ),
+    "haozeUpdateInvalid": MessageLookupByLibrary.simpleMessage(
+      "更新の検証に失敗したため、インストールを中止しました。",
+    ),
+    "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage(
+      "更新のインストールを許可",
+    ),
+    "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
+      "システムのインストーラーを開いています…",
+    ),
+    "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
+      "このアプリからのインストールを許可してから、戻って再試行してください。",
+    ),
+    "haozeUpdateReady": MessageLookupByLibrary.simpleMessage(
+      "更新パッケージの検証が完了しました",
+    ),
+    "haozeUpdateUnsupported": MessageLookupByLibrary.simpleMessage(
+      "このプラットフォームはアプリ内更新に対応していません。",
+    ),
+    "haozeUpdateVerifying": MessageLookupByLibrary.simpleMessage("更新パッケージを検証中"),
+    "haozeUpdateWindowsHint": MessageLookupByLibrary.simpleMessage(
+      "Windows のインストーラーを開き、このアプリを終了します。",
+    ),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("プランと使用量"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("サイトを開く"),
     "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(

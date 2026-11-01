@@ -308,7 +308,7 @@ class Windows {
 
     final shellExecute = _shell32
         .lookupFunction<
-          Int32 Function(
+          IntPtr Function(
             Pointer<Utf16> hwnd,
             Pointer<Utf16> lpOperation,
             Pointer<Utf16> lpFile,

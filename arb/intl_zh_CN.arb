@@ -1000,5 +1000,20 @@
   "haozeReady": "订阅已就绪",
   "haozeNotReady": "订阅尚未就绪",
   "haozeNoUpdateInfo": "未获取到更新的下载信息，请检查面板配置或稍后重试。",
-  "haozeWindowsTunAuthorizationFailed": "未获得虚拟网卡权限。便携版请以管理员身份运行；安装版请完成系统权限授权。"
+  "haozeWindowsTunAuthorizationFailed": "未获得虚拟网卡权限。便携版请以管理员身份运行；安装版请完成系统权限授权。",
+  "haozeUpdateChecking": "正在检查更新…",
+  "haozeUpdateCurrent": "已是最新版本",
+  "haozeUpdateDownloading": "正在下载更新",
+  "haozeUpdateVerifying": "正在校验更新包",
+  "haozeUpdateReady": "更新包已通过校验",
+  "haozeUpdateInstall": "安装更新",
+  "haozeUpdatePermission": "请允许此应用安装更新，然后返回重试。",
+  "haozeUpdateOpenPermission": "允许安装更新",
+  "haozeUpdateHandedOff": "已打开系统安装程序，请按系统提示确认。",
+  "haozeUpdateWindowsHint": "Windows 将打开安装程序并关闭当前应用。",
+  "haozeUpdateFailed": "更新失败，请检查网络后重试。",
+  "haozeUpdateInvalid": "更新包校验未通过，已拒绝安装。",
+  "haozeUpdateUnsupported": "此平台暂不支持应用内安装更新。",
+  "haozeUpdateOpening": "正在打开系统安装程序…",
+  "haozeUpdateInstallFailed": "无法启动安装程序，请重试或检查安装权限。"
 }

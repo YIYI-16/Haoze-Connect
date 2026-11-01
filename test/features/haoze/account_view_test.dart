@@ -260,6 +260,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('updates are available before account login', (tester) async {
+    await open(tester);
+    expect(engine.state.authenticated, isFalse);
+    final update = find.byKey(const ValueKey('haoze-auth-update'));
+    expect(update, findsOneWidget);
+    expect(tester.widget<TextButton>(update).onPressed, isNotNull);
+  });
+
   testWidgets(
     'login activates automatic subscription without asking for a URL',
     (tester) async {

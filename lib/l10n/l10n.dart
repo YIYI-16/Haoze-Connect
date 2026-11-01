@@ -8382,6 +8382,156 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Checking for updates…`
+  String get haozeUpdateChecking {
+    return Intl.message(
+      'Checking for updates…',
+      name: 'haozeUpdateChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app is up to date`
+  String get haozeUpdateCurrent {
+    return Intl.message(
+      'The app is up to date',
+      name: 'haozeUpdateCurrent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading update`
+  String get haozeUpdateDownloading {
+    return Intl.message(
+      'Downloading update',
+      name: 'haozeUpdateDownloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verifying update package`
+  String get haozeUpdateVerifying {
+    return Intl.message(
+      'Verifying update package',
+      name: 'haozeUpdateVerifying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The update package has been verified`
+  String get haozeUpdateReady {
+    return Intl.message(
+      'The update package has been verified',
+      name: 'haozeUpdateReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install update`
+  String get haozeUpdateInstall {
+    return Intl.message(
+      'Install update',
+      name: 'haozeUpdateInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow this app to install updates, then return and try again.`
+  String get haozeUpdatePermission {
+    return Intl.message(
+      'Allow this app to install updates, then return and try again.',
+      name: 'haozeUpdatePermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow update installation`
+  String get haozeUpdateOpenPermission {
+    return Intl.message(
+      'Allow update installation',
+      name: 'haozeUpdateOpenPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system installer has opened. Confirm installation there.`
+  String get haozeUpdateHandedOff {
+    return Intl.message(
+      'The system installer has opened. Confirm installation there.',
+      name: 'haozeUpdateHandedOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Windows will open the installer and close this app.`
+  String get haozeUpdateWindowsHint {
+    return Intl.message(
+      'Windows will open the installer and close this app.',
+      name: 'haozeUpdateWindowsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The update failed. Check your network and try again.`
+  String get haozeUpdateFailed {
+    return Intl.message(
+      'The update failed. Check your network and try again.',
+      name: 'haozeUpdateFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update verification failed. Installation was blocked.`
+  String get haozeUpdateInvalid {
+    return Intl.message(
+      'Update verification failed. Installation was blocked.',
+      name: 'haozeUpdateInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In-app update installation is not supported on this platform.`
+  String get haozeUpdateUnsupported {
+    return Intl.message(
+      'In-app update installation is not supported on this platform.',
+      name: 'haozeUpdateUnsupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Opening the system installer…`
+  String get haozeUpdateOpening {
+    return Intl.message(
+      'Opening the system installer…',
+      name: 'haozeUpdateOpening',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installer could not be opened. Retry or check installation permissions.`
+  String get haozeUpdateInstallFailed {
+    return Intl.message(
+      'The installer could not be opened. Retry or check installation permissions.',
+      name: 'haozeUpdateInstallFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

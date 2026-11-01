@@ -1000,5 +1000,20 @@
   "haozeReady": "구독 준비 완료",
   "haozeNotReady": "구독 준비 중",
   "haozeNoUpdateInfo": "새 다운로드 정보를 가져오지 못했습니다. 패널 설정을 확인하거나 나중에 다시 시도하세요.",
-  "haozeWindowsTunAuthorizationFailed": "TUN 권한이 없습니다. 포터블 앱은 관리자 권한으로 실행하고, 설치 버전은 시스템 권한 요청을 승인하세요."
+  "haozeWindowsTunAuthorizationFailed": "TUN 권한이 없습니다. 포터블 앱은 관리자 권한으로 실행하고, 설치 버전은 시스템 권한 요청을 승인하세요.",
+  "haozeUpdateChecking": "업데이트 확인 중…",
+  "haozeUpdateCurrent": "최신 버전입니다",
+  "haozeUpdateDownloading": "업데이트 다운로드 중",
+  "haozeUpdateVerifying": "업데이트 패키지 확인 중",
+  "haozeUpdateReady": "업데이트 패키지 확인이 완료되었습니다",
+  "haozeUpdateInstall": "업데이트 설치",
+  "haozeUpdatePermission": "이 앱의 업데이트 설치를 허용한 다음 돌아와 다시 시도하세요.",
+  "haozeUpdateOpenPermission": "업데이트 설치 허용",
+  "haozeUpdateHandedOff": "시스템 설치 프로그램이 열렸습니다. 해당 화면에서 설치를 확인하세요.",
+  "haozeUpdateWindowsHint": "Windows 설치 프로그램을 열고 현재 앱을 종료합니다.",
+  "haozeUpdateFailed": "업데이트에 실패했습니다. 네트워크를 확인한 후 다시 시도하세요.",
+  "haozeUpdateInvalid": "업데이트 확인에 실패하여 설치가 차단되었습니다.",
+  "haozeUpdateUnsupported": "이 플랫폼에서는 앱 내 업데이트 설치를 지원하지 않습니다.",
+  "haozeUpdateOpening": "시스템 설치 프로그램을 여는 중…",
+  "haozeUpdateInstallFailed": "설치 프로그램을 열 수 없습니다. 다시 시도하거나 설치 권한을 확인하세요."
 }

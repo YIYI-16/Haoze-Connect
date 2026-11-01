@@ -1,26 +1,50 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.util.Properties
+import java.security.KeyStore
+import java.security.MessageDigest
 
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { load(it) }
+val releaseStorePath = providers.environmentVariable("HAOZE_ANDROID_KEYSTORE_PATH").orNull
+val releaseStorePassword = providers.environmentVariable("HAOZE_ANDROID_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("HAOZE_ANDROID_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("HAOZE_ANDROID_KEY_PASSWORD").orNull
+val releaseCertificatePin = rootProject.file("release-certificate.sha256").readText().trim()
+
+val verifyHaozeReleaseSigning by tasks.registering {
+    doLast {
+        if (listOf(releaseStorePath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
+                .any { it.isNullOrBlank() }) {
+            throw GradleException("Haoze release signing is required; debug signing fallback is disabled")
+        }
+        val expected = releaseCertificatePin
+        if (!expected.matches(Regex("[0-9a-f]{64}"))) {
+            throw GradleException("Invalid pinned release certificate")
+        }
+        try {
+            val store = KeyStore.getInstance("PKCS12")
+            file(releaseStorePath!!).inputStream().use {
+                store.load(it, releaseStorePassword!!.toCharArray())
+            }
+            val certificate = store.getCertificate(releaseKeyAlias)
+                ?: throw GradleException("Release certificate missing")
+            val fingerprint = MessageDigest.getInstance("SHA-256")
+                .digest(certificate.encoded).joinToString("") { "%02x".format(it) }
+            if (fingerprint != expected ||
+                store.getKey(releaseKeyAlias, releaseKeyPassword!!.toCharArray()) == null) {
+                throw GradleException("Release certificate does not match the pinned identity")
+            }
+        } catch (_: Exception) {
+            throw GradleException("Release signing validation failed; check the protected key and credentials")
+        }
     }
 }
 
-val releaseStoreFile = file("keystore.jks")
-val releaseStorePassword = localProperties.getProperty("storePassword")
-val releaseKeyAlias = localProperties.getProperty("keyAlias")
-val releaseKeyPassword = localProperties.getProperty("keyPassword")
-val hasReleaseSigning = releaseStoreFile.exists() &&
-    releaseStorePassword != null &&
-    releaseKeyAlias != null &&
-    releaseKeyPassword != null
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(verifyHaozeReleaseSigning)
+}
 
 android {
     namespace = "com.follow.clash"
@@ -38,12 +62,16 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        buildConfigField("String", "HAOZE_RELEASE_CERT_SHA256", "\"$releaseCertificatePin\"")
     }
 
+    buildFeatures { buildConfig = true }
+
     signingConfigs {
-        if (hasReleaseSigning) {
-            create("release") {
-                storeFile = releaseStoreFile
+        create("release") {
+            storeType = "PKCS12"
+            if (!releaseStorePath.isNullOrBlank()) {
+                storeFile = file(releaseStorePath)
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
@@ -66,12 +94,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
-                applicationIdSuffix = ".dev"
-            }
+            signingConfig = signingConfigs.getByName("release")
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

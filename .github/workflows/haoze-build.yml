@@ -1,4 +1,4 @@
-name: Haoze Connect Mihomo integration (artifacts only)
+name: Haoze Connect stable builds (artifacts only)
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       platform:
         type: choice
         options: [windows, android, all]
-        default: windows
+        default: all
       source_ref:
         type: string
         default: flclash-prototype
@@ -46,7 +46,9 @@ jobs:
           rustup toolchain install 1.99.0 --profile minimal
           rustup default 1.99.0
       - run: flutter analyze --no-fatal-infos --no-pub
-      - run: flutter test --no-pub test/features/haoze test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/common/system_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
+      - run: flutter test --no-pub test/features/haoze test/features/update test/manager/app_env_manager_test.dart test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/common/system_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
+      - name: Test signing and release metadata gates
+        run: python3 -m unittest discover -s tool -p "test_haoze_*.py"
       - name: Generate native routing fixture
         run: dart --packages=.dart_tool/package_config.json tool/haoze_route_fixture.dart "$RUNNER_TEMP/haoze-routing.yaml"
       - name: Test offline routing with the pinned Mihomo core
@@ -79,7 +81,7 @@ jobs:
           rustup default 1.99.0
       - run: flutter pub get
       - name: Build account UI and Windows native runtime
-        run: flutter build windows --release --no-pub --dart-define=APP_ENV=pre
+        run: flutter build windows --release --no-pub --dart-define=APP_ENV=stable
       - name: Verify Windows token elevation reader
         run: |
           & dart run tool/haoze_windows_privilege_probe.dart "$env:RUNNER_TEMP\haoze-privilege.json"
@@ -102,24 +104,26 @@ jobs:
       - name: Probe standalone Dart HTTPS
         continue-on-error: true
         run: '& "$env:RUNNER_TEMP\HaozePanelProbe.exe" | Out-File -Encoding utf8 "$env:RUNNER_TEMP\haoze-panel-dart.json"'
-      - name: Package integration preview
-        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\HaozeConnect-Mihomo-Preview-Windows-x64.zip"
+      - name: Package stable portable client
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\HaozeConnect-Stable-Windows-x64.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: HaozeConnect-Mihomo-Preview-Windows-x64
-          path: ${{ runner.temp }}/HaozeConnect-Mihomo-Preview-Windows-x64.zip
-      - name: Build Windows preview installer
+          name: HaozeConnect-Stable-Windows-x64
+          path: ${{ runner.temp }}/HaozeConnect-Stable-Windows-x64.zip
+      - name: Build stable Windows installer
         run: |
           $haozeIscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
           if (-not (Test-Path $haozeIscc)) {
             choco install innosetup --yes --no-progress
           }
-          & $haozeIscc tool\haoze_preview_installer.iss
+          $haozeVersion = (Select-String -Path pubspec.yaml -Pattern '^version:\s+(\d+\.\d+\.\d+)').Matches.Groups[1].Value
+          if (-not $haozeVersion) { throw 'Missing release version' }
+          & $haozeIscc "/DHaozeVersion=$haozeVersion" tool\haoze_preview_installer.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
-          name: HaozeConnect-Mihomo-Preview-Windows-Setup-x64-unsigned
-          path: build/haoze-installer/HaozeConnect-Mihomo-Preview-Setup-x64-unsigned.exe
+          name: HaozeConnect-Stable-Windows-Setup-x64-unsigned
+          path: build/haoze-installer/HaozeConnect-Windows-Setup-x64-unsigned.exe
       - uses: actions/upload-artifact@v4
         with:
           name: Haoze-isolated-panel-probes
@@ -128,6 +132,16 @@ jobs:
             ${{ runner.temp }}/haoze-panel-native.json
             ${{ runner.temp }}/haoze-panel-dart.json
             tool/haoze_panel_probe_windows.ps1
+
+      - name: Build updater acceptance baseline
+        run: |
+          flutter build windows --release --no-pub --build-name=6.0.2 --build-number=62002 --dart-define=APP_ENV=stable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\HaozeConnect-Windows-Upgrade-Baseline-x64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HaozeConnect-Windows-Upgrade-Baseline-x64
+          path: ${{ runner.temp }}/HaozeConnect-Windows-Upgrade-Baseline-x64.zip
 
   android:
     if: inputs.platform == 'android' || inputs.platform == 'all'
@@ -178,9 +192,67 @@ jobs:
       - name: Test Android account lifecycle gate
         working-directory: android
         run: ./gradlew :common:testDebugUnitTest :service:testDebugUnitTest :app:testDebugUnitTest -Ptarget-platform=android-arm64 -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
-      - name: Build Android integration preview
-        run: flutter build apk --release --no-pub --target-platform android-arm64 --split-per-abi --dart-define=APP_ENV=pre
+      - name: Reject unsigned release tasks without breaking debug tests
+        working-directory: android
+        run: |
+          if ./gradlew :app:preReleaseBuild -Ptarget-platform=android-arm64 > "$RUNNER_TEMP/unsigned-release.log" 2>&1; then
+            echo 'Unsigned release unexpectedly succeeded'
+            exit 1
+          fi
+          grep -q 'Haoze release signing is required' "$RUNNER_TEMP/unsigned-release.log"
+          ./gradlew :app:bundleRelease --dry-run -Ptarget-platform=android-arm64 > "$RUNNER_TEMP/bundle-tasks.log"
+          grep -q 'verifyHaozeReleaseSigning' "$RUNNER_TEMP/bundle-tasks.log"
+      - name: Prepare fixed Android release signing
+        env:
+          HAOZE_ANDROID_KEYSTORE_BASE64: ${{ secrets.HAOZE_ANDROID_KEYSTORE_BASE64 }}
+          HAOZE_ANDROID_STORE_PASSWORD: ${{ secrets.HAOZE_ANDROID_STORE_PASSWORD }}
+          HAOZE_ANDROID_KEY_ALIAS: ${{ secrets.HAOZE_ANDROID_KEY_ALIAS }}
+          HAOZE_ANDROID_KEY_PASSWORD: ${{ secrets.HAOZE_ANDROID_KEY_PASSWORD }}
+        run: python3 tool/haoze_android_signing.py prepare --directory "$RUNNER_TEMP/haoze-signing" --github-env "$GITHUB_ENV"
+      - name: Build signed stable Android app
+        env:
+          HAOZE_ANDROID_STORE_PASSWORD: ${{ secrets.HAOZE_ANDROID_STORE_PASSWORD }}
+          HAOZE_ANDROID_KEY_ALIAS: ${{ secrets.HAOZE_ANDROID_KEY_ALIAS }}
+          HAOZE_ANDROID_KEY_PASSWORD: ${{ secrets.HAOZE_ANDROID_KEY_PASSWORD }}
+        run: flutter build apk --release --no-pub --target-platform android-arm64 --split-per-abi --dart-define=APP_ENV=stable
+      - name: Verify production APK identity and version
+        run: |
+          mkdir -p "$RUNNER_TEMP/haoze-android-release"
+          python3 tool/haoze_android_signing.py verify --apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk --output "$RUNNER_TEMP/haoze-android-release/android-release.json"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "$RUNNER_TEMP/haoze-android-release/HaozeConnect-Android-arm64.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: HaozeConnect-Mihomo-Preview-Android-arm64-debug-signed
-          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          name: HaozeConnect-Stable-Android-arm64
+          path: ${{ runner.temp }}/haoze-android-release/*
+      - name: Remove transient signing file
+        if: always()
+        run: rm -f -- "$RUNNER_TEMP/haoze-signing/release.p12"
+
+  manifest:
+    if: inputs.platform == 'all'
+    needs: [checks, windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.checks.outputs.source_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: HaozeConnect-Stable-Android-arm64
+          path: release/android
+      - uses: actions/download-artifact@v4
+        with:
+          name: HaozeConnect-Stable-Windows-Setup-x64-unsigned
+          path: release/windows
+      - name: Generate verified stable updater manifest
+        env:
+          HAOZE_SOURCE_SHA: ${{ needs.checks.outputs.source_sha }}
+        run: |
+          apk=$(find release/android -name HaozeConnect-Android-arm64.apk -print -quit)
+          proof=$(find release/android -name android-release.json -print -quit)
+          setup=$(find release/windows -name HaozeConnect-Windows-Setup-x64-unsigned.exe -print -quit)
+          python3 tool/haoze_release_manifest.py --android "$apk" --windows "$setup" --verification "$proof" --source "$HAOZE_SOURCE_SHA" --output UPDATE-MANIFEST.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HaozeConnect-Stable-Update-Manifest
+          path: UPDATE-MANIFEST.json

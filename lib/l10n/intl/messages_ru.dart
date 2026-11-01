@@ -974,6 +974,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTerms": MessageLookupByLibrary.simpleMessage("Условия использования"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("Общий лимит"),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
+    "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(
+      "Проверка обновлений…",
+    ),
+    "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage(
+      "Установлена последняя версия",
+    ),
+    "haozeUpdateDownloading": MessageLookupByLibrary.simpleMessage(
+      "Загрузка обновления",
+    ),
+    "haozeUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось обновить. Проверьте сеть и повторите попытку.",
+    ),
+    "haozeUpdateHandedOff": MessageLookupByLibrary.simpleMessage(
+      "Открыт системный установщик. Подтвердите установку в нём.",
+    ),
+    "haozeUpdateInstall": MessageLookupByLibrary.simpleMessage(
+      "Установить обновление",
+    ),
+    "haozeUpdateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось открыть установщик. Повторите попытку или проверьте разрешения.",
+    ),
+    "haozeUpdateInvalid": MessageLookupByLibrary.simpleMessage(
+      "Проверка обновления не пройдена. Установка заблокирована.",
+    ),
+    "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage(
+      "Разрешить установку обновлений",
+    ),
+    "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
+      "Открытие системного установщика…",
+    ),
+    "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
+      "Разрешите установку обновлений из этого приложения, затем вернитесь и повторите попытку.",
+    ),
+    "haozeUpdateReady": MessageLookupByLibrary.simpleMessage(
+      "Пакет обновления проверен",
+    ),
+    "haozeUpdateUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Установка обновлений из приложения не поддерживается на этой платформе.",
+    ),
+    "haozeUpdateVerifying": MessageLookupByLibrary.simpleMessage(
+      "Проверка пакета обновления",
+    ),
+    "haozeUpdateWindowsHint": MessageLookupByLibrary.simpleMessage(
+      "Windows откроет установщик и закроет приложение.",
+    ),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("Тариф и трафик"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("Открыть сайт"),
     "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(

@@ -159,11 +159,17 @@ class CommonAction extends _$CommonAction {
         cancelText: isUser ? null : currentAppLocalizations.noLongerRemind,
       );
       if (res == true) {
-        unawaited(
-          launchUrl(
-            Uri.parse('https://github.com/$repository/releases/latest'),
-          ),
-        );
+        if (system.isAndroid || system.isWindows) {
+          if (context.mounted) {
+            await showHaozeUpdateDialog(context);
+          }
+        } else {
+          unawaited(
+            launchUrl(
+              Uri.parse('https://github.com/$repository/releases/latest'),
+            ),
+          );
+        }
       } else if (!isUser && res == false) {
         ref
             .read(appSettingProvider.notifier)

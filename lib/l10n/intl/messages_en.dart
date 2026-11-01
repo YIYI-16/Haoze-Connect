@@ -938,6 +938,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTerms": MessageLookupByLibrary.simpleMessage("Read terms"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("Total quota"),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("No expiry"),
+    "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(
+      "Checking for updates…",
+    ),
+    "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage(
+      "The app is up to date",
+    ),
+    "haozeUpdateDownloading": MessageLookupByLibrary.simpleMessage(
+      "Downloading update",
+    ),
+    "haozeUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "The update failed. Check your network and try again.",
+    ),
+    "haozeUpdateHandedOff": MessageLookupByLibrary.simpleMessage(
+      "The system installer has opened. Confirm installation there.",
+    ),
+    "haozeUpdateInstall": MessageLookupByLibrary.simpleMessage(
+      "Install update",
+    ),
+    "haozeUpdateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "The installer could not be opened. Retry or check installation permissions.",
+    ),
+    "haozeUpdateInvalid": MessageLookupByLibrary.simpleMessage(
+      "Update verification failed. Installation was blocked.",
+    ),
+    "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage(
+      "Allow update installation",
+    ),
+    "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
+      "Opening the system installer…",
+    ),
+    "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
+      "Allow this app to install updates, then return and try again.",
+    ),
+    "haozeUpdateReady": MessageLookupByLibrary.simpleMessage(
+      "The update package has been verified",
+    ),
+    "haozeUpdateUnsupported": MessageLookupByLibrary.simpleMessage(
+      "In-app update installation is not supported on this platform.",
+    ),
+    "haozeUpdateVerifying": MessageLookupByLibrary.simpleMessage(
+      "Verifying update package",
+    ),
+    "haozeUpdateWindowsHint": MessageLookupByLibrary.simpleMessage(
+      "Windows will open the installer and close this app.",
+    ),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("Plan and usage"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("Open website"),
     "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(

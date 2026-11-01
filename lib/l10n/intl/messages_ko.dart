@@ -785,6 +785,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTerms": MessageLookupByLibrary.simpleMessage("약관 보기"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("총 데이터"),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("만료 없음"),
+    "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("업데이트 확인 중…"),
+    "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("최신 버전입니다"),
+    "haozeUpdateDownloading": MessageLookupByLibrary.simpleMessage(
+      "업데이트 다운로드 중",
+    ),
+    "haozeUpdateFailed": MessageLookupByLibrary.simpleMessage(
+      "업데이트에 실패했습니다. 네트워크를 확인한 후 다시 시도하세요.",
+    ),
+    "haozeUpdateHandedOff": MessageLookupByLibrary.simpleMessage(
+      "시스템 설치 프로그램이 열렸습니다. 해당 화면에서 설치를 확인하세요.",
+    ),
+    "haozeUpdateInstall": MessageLookupByLibrary.simpleMessage("업데이트 설치"),
+    "haozeUpdateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "설치 프로그램을 열 수 없습니다. 다시 시도하거나 설치 권한을 확인하세요.",
+    ),
+    "haozeUpdateInvalid": MessageLookupByLibrary.simpleMessage(
+      "업데이트 확인에 실패하여 설치가 차단되었습니다.",
+    ),
+    "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage(
+      "업데이트 설치 허용",
+    ),
+    "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage(
+      "시스템 설치 프로그램을 여는 중…",
+    ),
+    "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
+      "이 앱의 업데이트 설치를 허용한 다음 돌아와 다시 시도하세요.",
+    ),
+    "haozeUpdateReady": MessageLookupByLibrary.simpleMessage(
+      "업데이트 패키지 확인이 완료되었습니다",
+    ),
+    "haozeUpdateUnsupported": MessageLookupByLibrary.simpleMessage(
+      "이 플랫폼에서는 앱 내 업데이트 설치를 지원하지 않습니다.",
+    ),
+    "haozeUpdateVerifying": MessageLookupByLibrary.simpleMessage(
+      "업데이트 패키지 확인 중",
+    ),
+    "haozeUpdateWindowsHint": MessageLookupByLibrary.simpleMessage(
+      "Windows 설치 프로그램을 열고 현재 앱을 종료합니다.",
+    ),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("요금제 및 사용량"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("웹사이트 열기"),
     "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(

@@ -33,6 +33,7 @@ import com.follow.clash.common.registerReceiverCompat
 import com.follow.clash.common.shortcutId
 import com.follow.clash.getPackageIconPath
 import com.follow.clash.packages.PackageResolver
+import com.follow.clash.update.UpdateInstaller
 import com.follow.clash.showToast
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -47,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -144,6 +146,29 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "getUpdateIdentity" -> reply(result) {
+                UpdateInstaller.identityMap(GlobalState.application)
+            }
+            "canInstallUpdate" -> result.success(UpdateInstaller.canInstall(GlobalState.application))
+            "requestUpdateInstallPermission" -> onMainThread {
+                try {
+                    result.success(activity?.let(UpdateInstaller::requestPermission) ?: false)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
+            "installUpdate" -> reply(result) {
+                val file = UpdateInstaller.verify(
+                    GlobalState.application,
+                    requireNotNull(call.argument<String>("path")),
+                    requireNotNull(call.argument<Number>("versionCode")).toLong(),
+                    requireNotNull(call.argument<String>("version")),
+                    requireNotNull(call.argument<String>("sha256")),
+                )
+                withContext(Dispatchers.Main) {
+                    UpdateInstaller.launch(requireNotNull(activity), file)
+                }
+            }
             "moveTaskToBack" -> {
                 activity?.moveTaskToBack(true)
                 result.success(true)

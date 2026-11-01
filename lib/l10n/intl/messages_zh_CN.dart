@@ -723,6 +723,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTerms": MessageLookupByLibrary.simpleMessage("查看服务条款"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("总流量"),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("长期有效"),
+    "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("正在检查更新…"),
+    "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("已是最新版本"),
+    "haozeUpdateDownloading": MessageLookupByLibrary.simpleMessage("正在下载更新"),
+    "haozeUpdateFailed": MessageLookupByLibrary.simpleMessage("更新失败，请检查网络后重试。"),
+    "haozeUpdateHandedOff": MessageLookupByLibrary.simpleMessage(
+      "已打开系统安装程序，请按系统提示确认。",
+    ),
+    "haozeUpdateInstall": MessageLookupByLibrary.simpleMessage("安装更新"),
+    "haozeUpdateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "无法启动安装程序，请重试或检查安装权限。",
+    ),
+    "haozeUpdateInvalid": MessageLookupByLibrary.simpleMessage(
+      "更新包校验未通过，已拒绝安装。",
+    ),
+    "haozeUpdateOpenPermission": MessageLookupByLibrary.simpleMessage("允许安装更新"),
+    "haozeUpdateOpening": MessageLookupByLibrary.simpleMessage("正在打开系统安装程序…"),
+    "haozeUpdatePermission": MessageLookupByLibrary.simpleMessage(
+      "请允许此应用安装更新，然后返回重试。",
+    ),
+    "haozeUpdateReady": MessageLookupByLibrary.simpleMessage("更新包已通过校验"),
+    "haozeUpdateUnsupported": MessageLookupByLibrary.simpleMessage(
+      "此平台暂不支持应用内安装更新。",
+    ),
+    "haozeUpdateVerifying": MessageLookupByLibrary.simpleMessage("正在校验更新包"),
+    "haozeUpdateWindowsHint": MessageLookupByLibrary.simpleMessage(
+      "Windows 将打开安装程序并关闭当前应用。",
+    ),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("套餐与流量"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("打开网站"),
     "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(

@@ -12,6 +12,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/features/haoze/account.dart';
 import 'package:fl_clash/features/haoze/routing_resources.dart';
+import 'package:fl_clash/features/update/update_dialog.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/plugins/service.dart';
 import 'package:fl_clash/providers/actions/system_exit.dart';

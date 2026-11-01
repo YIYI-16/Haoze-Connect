@@ -1000,5 +1000,20 @@
   "haozeReady": "Subscription ready",
   "haozeNotReady": "Subscription not ready",
   "haozeNoUpdateInfo": "No newer download information was obtained. Check the panel configuration or retry later.",
-  "haozeWindowsTunAuthorizationFailed": "TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request."
+  "haozeWindowsTunAuthorizationFailed": "TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request.",
+  "haozeUpdateChecking": "Checking for updates…",
+  "haozeUpdateCurrent": "The app is up to date",
+  "haozeUpdateDownloading": "Downloading update",
+  "haozeUpdateVerifying": "Verifying update package",
+  "haozeUpdateReady": "The update package has been verified",
+  "haozeUpdateInstall": "Install update",
+  "haozeUpdatePermission": "Allow this app to install updates, then return and try again.",
+  "haozeUpdateOpenPermission": "Allow update installation",
+  "haozeUpdateHandedOff": "The system installer has opened. Confirm installation there.",
+  "haozeUpdateWindowsHint": "Windows will open the installer and close this app.",
+  "haozeUpdateFailed": "The update failed. Check your network and try again.",
+  "haozeUpdateInvalid": "Update verification failed. Installation was blocked.",
+  "haozeUpdateUnsupported": "In-app update installation is not supported on this platform.",
+  "haozeUpdateOpening": "Opening the system installer…",
+  "haozeUpdateInstallFailed": "The installer could not be opened. Retry or check installation permissions."
 }

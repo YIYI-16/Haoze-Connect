@@ -2,6 +2,10 @@
 *.class
 *.log
 *.pyc
+*.jks
+*.keystore
+*.p12
+*.pfx
 *.swp
 .DS_Store
 .atom/

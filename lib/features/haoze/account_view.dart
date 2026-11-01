@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/custom_issue.dart';
+import 'package:fl_clash/features/update/update_dialog.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -304,6 +305,11 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
                     TextButton(
                       onPressed: () => _openWebsite(haozePanelUrl),
                       child: Text(l10n.haozeWebsite),
+                    ),
+                    TextButton(
+                      key: const ValueKey('haoze-auth-update'),
+                      onPressed: () => showHaozeUpdateDialog(context),
+                      child: Text(l10n.checkUpdate),
                     ),
                   ],
                 ),
