@@ -145,7 +145,10 @@ the user's affected Windows/Android devices. Those remain UNKNOWN.
 
 The managed subscription and final generated configuration both apply the same
 policy after user/configuration overlays. API and subscription hosts go DIRECT;
-Chinese domain/IP sets go DIRECT; other destinations retain the subscription's
+Chinese domain/IP fallback rules go DIRECT while explicit subscription routes
+and rejections retain their priority. HTTP/TLS/QUIC name inspection also classifies real-IP
+connections whose DNS result was cached before VPN startup, without changing the
+destination or weakening HTTPS verification. Other destinations retain the subscription's
 proxy rules and selected groups. This is China split routing by default: DIRECT
 uses the device's own country/IP, not a Chinese server selected by the client.
 

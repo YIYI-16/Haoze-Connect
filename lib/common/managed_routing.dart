@@ -42,13 +42,18 @@ Map<String, dynamic> applyManagedRouting(
     }
     directRules.add('DOMAIN,$host,DIRECT');
   }
+  final catchAll = normalized.indexWhere(
+    (rule) => rule.split(',').first.trim().toUpperCase() == 'MATCH',
+  );
+  final split = catchAll < 0 ? normalized.length : catchAll;
   result['rules'] = [
     'IP-CIDR6,::/0,REJECT,no-resolve',
     ...directRules,
+    ...normalized.take(split),
     'RULE-SET,$managedDomainProvider,DIRECT',
     'DOMAIN-SUFFIX,cn,DIRECT',
     'RULE-SET,$managedIpProvider,DIRECT',
-    ...normalized,
+    ...normalized.skip(split),
   ];
   result['rule-providers'] = {
     if (config['rule-providers'] case final Map providers) ...providers,
@@ -76,6 +81,31 @@ Map<String, dynamic> applyManagedRouting(
           (config['dns'] as Map)['fallback-filter'] is Map)
         ...(config['dns'] as Map)['fallback-filter'] as Map,
       'geoip': false,
+    },
+  };
+  final existingSniffer = config['sniffer'] is Map
+      ? config['sniffer'] as Map
+      : const {};
+  result['sniffer'] = {
+    ...existingSniffer,
+    'enable': true,
+    'parse-pure-ip': true,
+    'force-dns-mapping': true,
+    'override-destination': false,
+    'sniff': {
+      if (existingSniffer['sniff'] case final Map protocols) ...protocols,
+      'HTTP': {
+        'ports': [80, 8080],
+        'override-destination': false,
+      },
+      'TLS': {
+        'ports': [443, 8443],
+        'override-destination': false,
+      },
+      'QUIC': {
+        'ports': [443, 8443],
+        'override-destination': false,
+      },
     },
   };
   result['tun'] = {

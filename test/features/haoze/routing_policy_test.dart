@@ -169,4 +169,43 @@ void main() {
       );
     },
   );
+  test(
+    'cached real IP connections retain TLS domain routing without replacing their destination',
+    () {
+      final result = applyManagedRouting(
+        source()..['sniffer'] = {'enable': false},
+        policy,
+      );
+      final sniffer = result['sniffer'] as Map;
+      expect(sniffer['enable'], true);
+      expect(sniffer['parse-pure-ip'], true);
+      expect(sniffer['override-destination'], false);
+      expect(sniffer['sniff']['TLS']['ports'], contains(443));
+      expect(sniffer['sniff']['QUIC']['ports'], contains(443));
+      expect(sniffer['sniff']['HTTP']['ports'], contains(80));
+    },
+  );
+  test(
+    'explicit international cn domains keep the subscription route before country defaults',
+    () {
+      final result = applyManagedRouting(
+        source()
+          ..['rules'] = [
+            'DOMAIN-SUFFIX,googleapis.cn,Proxy',
+            'DOMAIN,blocked.example,REJECT',
+            'MATCH,Proxy',
+          ],
+        policy,
+      );
+      final rules = result['rules'] as List;
+      expect(
+        rules.indexOf('DOMAIN-SUFFIX,googleapis.cn,Proxy'),
+        lessThan(rules.indexOf('DOMAIN-SUFFIX,cn,DIRECT')),
+      );
+      expect(
+        rules.indexOf('DOMAIN,blocked.example,REJECT'),
+        lessThan(rules.indexOf('MATCH,Proxy')),
+      );
+    },
+  );
 }

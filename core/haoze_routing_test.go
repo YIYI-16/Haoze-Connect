@@ -45,6 +45,9 @@ func TestHaozeOfflineRoutingFixture(t *testing.T) {
 	if configErr != nil {
 		t.Fatalf("generated configuration: %v", configErr)
 	}
+	if !parsedConfig.Sniffer.Enable || !parsedConfig.Sniffer.ParsePureIp {
+		t.Fatal("TLS domain routing must remain enabled for cached destination IPs")
+	}
 	if parsedConfig.General.Tun.Enable {
 		t.Fatal("configuration parser must not enable test TUN")
 	}
@@ -97,6 +100,7 @@ func TestHaozeOfflineRoutingFixture(t *testing.T) {
 	}
 	cases := []struct{ name, host, ip, want string }{
 		{"panel", "www.haoze.cyou", "203.0.113.1", "DIRECT"},
+		{"panel using observed TLS name", "www.haoze.cyou", "203.0.113.1", "DIRECT"},
 		{"subscription", "subscription.example.test", "203.0.113.2", "DIRECT"},
 		{"baidu", "www.baidu.com", "203.0.113.3", "DIRECT"},
 		{"qualcomm china", "www.qualcomm.cn", "203.0.113.4", "DIRECT"},
@@ -109,6 +113,10 @@ func TestHaozeOfflineRoutingFixture(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			metadata := &C.Metadata{Host: tc.host, DstIP: netip.MustParseAddr(tc.ip)}
+			if tc.name == "panel using observed TLS name" {
+				metadata.Host = ""
+				metadata.SniffHost = tc.host
+			}
 			got := ""
 			for _, rule := range parsed {
 				if matched, target := rule.Match(metadata, C.RuleMatchHelper{}); matched {
