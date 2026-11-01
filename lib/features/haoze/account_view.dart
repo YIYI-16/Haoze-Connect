@@ -4,6 +4,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/custom_issue.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/ui.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/dashboard/widgets/card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -429,14 +430,19 @@ class HaozeDashboardCard extends ConsumerWidget {
     final l10n = context.appLocalizations;
     final subscription = account.subscription;
     return DashboardCard(
+      semanticLabel: l10n.haozeUsage,
       onTap: () =>
           ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.account),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 8,
         children: [
-          Text(l10n.haozeUsage, style: AppTextStyle.headline.of(context)),
+          DashboardCardHeader(
+            glyph: AppGlyphs.profiles,
+            title: l10n.haozeUsage,
+            chevron: true,
+          ),
           Text(
             subscription == null
                 ? l10n.haozeNoUsage
