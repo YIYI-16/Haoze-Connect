@@ -2611,10 +2611,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The Software does not collect or upload your subscription URLs, node details, configuration content, visited websites, connection records, traffic content, or logs. This data stays on your device and the developers have no access to it.\n\nThe Software only reaches the network when you use a feature that needs it, such as fetching the subscription URL you provided when updating a profile, or contacting GitHub when checking for updates.\n\nThe Software includes no analytics or crash reporting service on any platform.`
+  /// `Sign-in and registration send the account information you enter over HTTPS to the configured Xboard panel. The app obtains your plan, usage and subscription from that panel. Proxied traffic passes through the node you select.\n\nCredentials use system secure storage; passwords are not saved on the device. Subscription configuration and local activity records remain on the device. The app includes no analytics or crash telemetry.\n\nUpdate checks read version and download information from the panel. Features such as rule-resource updates can also contact their configured remote addresses.`
   String get disclaimerPrivacyContent {
     return Intl.message(
-      'The Software does not collect or upload your subscription URLs, node details, configuration content, visited websites, connection records, traffic content, or logs. This data stays on your device and the developers have no access to it.\n\nThe Software only reaches the network when you use a feature that needs it, such as fetching the subscription URL you provided when updating a profile, or contacting GitHub when checking for updates.\n\nThe Software includes no analytics or crash reporting service on any platform.',
+      'Sign-in and registration send the account information you enter over HTTPS to the configured Xboard panel. The app obtains your plan, usage and subscription from that panel. Proxied traffic passes through the node you select.\n\nCredentials use system secure storage; passwords are not saved on the device. Subscription configuration and local activity records remain on the device. The app includes no analytics or crash telemetry.\n\nUpdate checks read version and download information from the panel. Features such as rule-resource updates can also contact their configured remote addresses.',
       name: 'disclaimerPrivacyContent',
       desc: '',
       args: [],
@@ -8050,6 +8050,326 @@ class AppLocalizations {
       name: 'alreadyInLocalProxies',
       desc: '',
       args: [name],
+    );
+  }
+
+  /// `Account`
+  String get haozeAccount {
+    return Intl.message('Account', name: 'haozeAccount', desc: '', args: []);
+  }
+
+  /// `Sign in`
+  String get haozeLogin {
+    return Intl.message('Sign in', name: 'haozeLogin', desc: '', args: []);
+  }
+
+  /// `Create account`
+  String get haozeRegister {
+    return Intl.message(
+      'Create account',
+      name: 'haozeRegister',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign out`
+  String get haozeLogout {
+    return Intl.message('Sign out', name: 'haozeLogout', desc: '', args: []);
+  }
+
+  /// `Email`
+  String get haozeEmail {
+    return Intl.message('Email', name: 'haozeEmail', desc: '', args: []);
+  }
+
+  /// `Confirm password`
+  String get haozeConfirmPassword {
+    return Intl.message(
+      'Confirm password',
+      name: 'haozeConfirmPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email code`
+  String get haozeEmailCode {
+    return Intl.message(
+      'Email code',
+      name: 'haozeEmailCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send code`
+  String get haozeSendCode {
+    return Intl.message('Send code', name: 'haozeSendCode', desc: '', args: []);
+  }
+
+  /// `Code sent. Please check your email.`
+  String get haozeCodeSent {
+    return Intl.message(
+      'Code sent. Please check your email.',
+      name: 'haozeCodeSent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invitation code`
+  String get haozeInviteCode {
+    return Intl.message(
+      'Invitation code',
+      name: 'haozeInviteCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I agree to the terms of service`
+  String get haozeAgreeTerms {
+    return Intl.message(
+      'I agree to the terms of service',
+      name: 'haozeAgreeTerms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Read terms`
+  String get haozeTerms {
+    return Intl.message('Read terms', name: 'haozeTerms', desc: '', args: []);
+  }
+
+  /// `Open website`
+  String get haozeWebsite {
+    return Intl.message(
+      'Open website',
+      name: 'haozeWebsite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This panel requires a security check. Create your account on the website, then sign in here.`
+  String get haozeCaptchaWebsite {
+    return Intl.message(
+      'This panel requires a security check. Create your account on the website, then sign in here.',
+      name: 'haozeCaptchaWebsite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check your email, password and required fields.`
+  String get haozeInvalidForm {
+    return Intl.message(
+      'Check your email, password and required fields.',
+      name: 'haozeInvalidForm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cannot reach the panel. Your saved account and last usage data are retained.`
+  String get haozePanelUnavailable {
+    return Intl.message(
+      'Cannot reach the panel. Your saved account and last usage data are retained.',
+      name: 'haozePanelUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign-in or registration was rejected. Check the account details and panel requirements.`
+  String get haozeCredentialsError {
+    return Intl.message(
+      'Sign-in or registration was rejected. Check the account details and panel requirements.',
+      name: 'haozeCredentialsError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your session expired. Please sign in again.`
+  String get haozeSessionExpired {
+    return Intl.message(
+      'Your session expired. Please sign in again.',
+      name: 'haozeSessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Secure storage could not be updated. Please retry.`
+  String get haozeStorageError {
+    return Intl.message(
+      'Secure storage could not be updated. Please retry.',
+      name: 'haozeStorageError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account loaded, but subscription setup failed. Retry subscription synchronization.`
+  String get haozeProfileError {
+    return Intl.message(
+      'Account loaded, but subscription setup failed. Retry subscription synchronization.',
+      name: 'haozeProfileError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Registration settings could not be loaded.`
+  String get haozeConfigError {
+    return Intl.message(
+      'Registration settings could not be loaded.',
+      name: 'haozeConfigError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plan and usage`
+  String get haozeUsage {
+    return Intl.message(
+      'Plan and usage',
+      name: 'haozeUsage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining`
+  String get haozeRemaining {
+    return Intl.message(
+      'Remaining',
+      name: 'haozeRemaining',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total quota`
+  String get haozeTotal {
+    return Intl.message('Total quota', name: 'haozeTotal', desc: '', args: []);
+  }
+
+  /// `Expires`
+  String get haozeExpiry {
+    return Intl.message('Expires', name: 'haozeExpiry', desc: '', args: []);
+  }
+
+  /// `No expiry`
+  String get haozeUnlimitedTime {
+    return Intl.message(
+      'No expiry',
+      name: 'haozeUnlimitedTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No active plan`
+  String get haozeNoPlan {
+    return Intl.message(
+      'No active plan',
+      name: 'haozeNoPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plan expired`
+  String get haozeExpired {
+    return Intl.message(
+      'Plan expired',
+      name: 'haozeExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quota exhausted`
+  String get haozeExhausted {
+    return Intl.message(
+      'Quota exhausted',
+      name: 'haozeExhausted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last refreshed`
+  String get haozeLastRefresh {
+    return Intl.message(
+      'Last refreshed',
+      name: 'haozeLastRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Usage data is not available yet.`
+  String get haozeNoUsage {
+    return Intl.message(
+      'Usage data is not available yet.',
+      name: 'haozeNoUsage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync subscription`
+  String get haozeSync {
+    return Intl.message(
+      'Sync subscription',
+      name: 'haozeSync',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh usage`
+  String get haozeRefresh {
+    return Intl.message(
+      'Refresh usage',
+      name: 'haozeRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription ready`
+  String get haozeReady {
+    return Intl.message(
+      'Subscription ready',
+      name: 'haozeReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription not ready`
+  String get haozeNotReady {
+    return Intl.message(
+      'Subscription not ready',
+      name: 'haozeNotReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No newer download information was obtained. Check the panel configuration or retry later.`
+  String get haozeNoUpdateInfo {
+    return Intl.message(
+      'No newer download information was obtained. Check the panel configuration or retry later.',
+      name: 'haozeNoUpdateInfo',
+      desc: '',
+      args: [],
     );
   }
 }

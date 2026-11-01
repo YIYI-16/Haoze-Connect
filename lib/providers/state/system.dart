@@ -172,6 +172,11 @@ bool shouldPatchSystemDns(Ref ref) {
 
 @riverpod
 SharedState sharedState(Ref ref) {
+  ref.watch(haozeAccountProvider);
+  final accountReady = ref
+      .read(haozeAccountProvider.notifier)
+      .controller
+      .canResumeProfile(ref.watch(currentProfileIdProvider));
   ref.watch(loadedLocaleProvider);
   final currentProfile = ref.watch(
     currentProfileProvider.select(
@@ -197,6 +202,7 @@ SharedState sharedState(Ref ref) {
     patchClashConfigProvider.select((state) => state.testUrl),
   );
   return SharedState(
+    accountReady: accountReady,
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
     showStopAction: appSetting.showStopAction,

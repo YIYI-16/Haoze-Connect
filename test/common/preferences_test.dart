@@ -124,6 +124,17 @@ void main() {
     );
   });
 
+  test(
+    'persistent shared state never grants headless account authority',
+    () async {
+      await preferences.saveShareState(
+        _sharedState.copyWith(accountReady: true),
+      );
+      final raw = store.getString('sharedState')!;
+      expect((jsonDecode(raw) as Map)['accountReady'], false);
+    },
+  );
+
   test('clearPreferences empties every stored key', () async {
     await preferences.setVersion(9);
     await preferences.saveConfig(const Config(themeProps: defaultThemeProps));

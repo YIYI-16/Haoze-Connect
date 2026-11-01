@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/window.dart';
 import 'package:fl_clash/bootstrap.dart';
 import 'package:fl_clash/common/system_dns.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -13,6 +12,7 @@ import 'package:fl_clash/manager/manager.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/features/haoze/account_view.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -79,39 +79,9 @@ class ApplicationState extends ConsumerState<Application> {
         exit(0);
       }
       _autoUpdateProfilesTask();
-      _initLink();
       if (!safeModeBuild) {
         unawaited(app?.initShortcuts());
       }
-    });
-  }
-
-  void _initLink() {
-    linkManager.initAppLinksListen((url) async {
-      unawaited(window?.show());
-      final message = currentAppLocalizations.createProfileFromUrlTip(url);
-      final parts = message.split(url);
-      final res = await dialogs.showMessage(
-        title: currentAppLocalizations.addProfile,
-        message: TextSpan(
-          children: [
-            TextSpan(text: parts.first),
-            TextSpan(
-              text: url,
-              style: TextStyle(
-                color: context.colorScheme.primary,
-                decoration: TextDecoration.underline,
-                decorationColor: context.colorScheme.primary,
-              ),
-            ),
-            if (parts.length > 1) TextSpan(text: parts.last),
-          ],
-        ),
-      );
-      if (res != true) return;
-      unawaited(
-        ref.read(profilesActionProvider.notifier).addProfileFromLink(url),
-      );
     });
   }
 
@@ -189,7 +159,7 @@ class ApplicationState extends ConsumerState<Application> {
           home: KeyboardInsetHold(child: child!),
         );
       },
-      child: const HomePage(),
+      child: const HaozeAccountGate(child: HomePage()),
     );
   }
 

@@ -17,6 +17,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/disclaimer.dart';
 import 'package:fl_clash/views/navigation.dart';
+import 'package:fl_clash/features/haoze/account.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -139,6 +140,7 @@ class Bootstrap {
         );
     final profiles = await database.profilesDao.query().get();
     container.read(profilesProvider.notifier).reorder(profiles);
+    await container.read(haozeAccountProvider.notifier).controller.restore();
     await AppLocalizations.load(
       getLocaleForString(config.appSettingProps.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
@@ -165,7 +167,6 @@ class Bootstrap {
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
     );
-    unawaited(_container.read(commonActionProvider.notifier).autoCheckUpdate());
     unawaited(
       autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
     );
@@ -180,10 +181,19 @@ class Bootstrap {
     }
     await _showCrashRecoveryTip();
     await _container.read(coreActionProvider.notifier).startCore();
-    if (!_bootDecision.isDegraded) {
+    final account = _container.read(haozeAccountProvider.notifier).controller;
+    if (_bootDecision.isDegraded) account.holdProfileRecovery();
+    if (!_bootDecision.isDegraded &&
+        account.canResumeProfile(_container.read(currentProfileIdProvider))) {
       await _container.read(setupActionProvider.notifier).initStatus();
+    } else {
+      await _container.read(setupActionProvider.notifier).setRunning(false);
+      _container.read(currentProfileIdProvider.notifier).value = null;
+      if (!_bootDecision.isDegraded) await account.reconcileProfile();
     }
     _container.read(initProvider.notifier).value = true;
+    unawaited(account.loadConfig());
+    unawaited(account.refresh());
     unawaited(_container.read(resourcesActionProvider.notifier).autoUpdate());
     await bootGuard.markRunning();
     unawaited(_container.read(locationPermissionsProvider.notifier).refresh());

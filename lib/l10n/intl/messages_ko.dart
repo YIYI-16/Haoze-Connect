@@ -557,7 +557,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "본 소프트웨어 자체는 프록시 서버, 노드, 구독, 네트워크 접속 서비스를 일절 제공하지 않으며, 이러한 서비스의 어떤 제공자와도 제휴, 대리 또는 보증 관계가 없습니다.",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "본 소프트웨어는 구독 URL, 노드 정보, 구성 내용, 방문한 웹사이트, 연결 기록, 트래픽 내용, 로그를 수집하거나 업로드하지 않습니다. 이 데이터는 사용자의 기기에만 저장되며 개발자는 접근할 수 없습니다.\n\n본 소프트웨어는 프로필을 업데이트할 때 사용자가 입력한 구독 URL을 가져오거나 업데이트를 확인할 때 GitHub에 접속하는 등 기능이 필요할 때만 네트워크에 접속합니다.\n\n본 소프트웨어에는 어떤 플랫폼에서도 분석 또는 비정상 종료 보고 서비스가 포함되어 있지 않습니다.",
+      "로그인과 가입 시 입력한 계정 정보를 HTTPS로 설정된 Xboard 패널에 보냅니다. 앱은 패널에서 요금제, 사용량, 구독을 가져옵니다. 프록시 트래픽은 선택한 노드를 거칩니다.\n\n인증 정보는 시스템 보안 저장소를 사용하며 비밀번호는 저장하지 않습니다. 설정과 로컬 기록은 기기에 보관합니다. 분석 및 충돌 원격 수집은 포함하지 않습니다.\n\n업데이트 확인은 패널에서 버전과 다운로드 정보를 읽습니다. 규칙 리소스 업데이트 등은 설정된 원격 주소에도 연결할 수 있습니다.",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "데이터 수집 및 개인정보 보호",
@@ -731,6 +731,62 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("개"),
     "groupTimeoutCount": m33,
+    "haozeAccount": MessageLookupByLibrary.simpleMessage("계정"),
+    "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage("서비스 약관에 동의합니다"),
+    "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
+      "보안 확인이 필요합니다. 웹사이트에서 가입한 후 여기서 로그인하세요.",
+    ),
+    "haozeCodeSent": MessageLookupByLibrary.simpleMessage(
+      "코드를 보냈습니다. 이메일을 확인하세요.",
+    ),
+    "haozeConfigError": MessageLookupByLibrary.simpleMessage(
+      "가입 설정을 불러오지 못했습니다.",
+    ),
+    "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage("비밀번호 확인"),
+    "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
+      "로그인 또는 가입이 거부되었습니다. 정보를 확인하세요.",
+    ),
+    "haozeEmail": MessageLookupByLibrary.simpleMessage("이메일"),
+    "haozeEmailCode": MessageLookupByLibrary.simpleMessage("이메일 인증 코드"),
+    "haozeExhausted": MessageLookupByLibrary.simpleMessage("데이터 소진"),
+    "haozeExpired": MessageLookupByLibrary.simpleMessage("요금제 만료"),
+    "haozeExpiry": MessageLookupByLibrary.simpleMessage("만료일"),
+    "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
+      "이메일, 비밀번호 및 필수 항목을 확인하세요.",
+    ),
+    "haozeInviteCode": MessageLookupByLibrary.simpleMessage("초대 코드"),
+    "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("최근 새로고침"),
+    "haozeLogin": MessageLookupByLibrary.simpleMessage("로그인"),
+    "haozeLogout": MessageLookupByLibrary.simpleMessage("로그아웃"),
+    "haozeNoPlan": MessageLookupByLibrary.simpleMessage("사용 가능한 요금제 없음"),
+    "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
+      "새 다운로드 정보를 가져오지 못했습니다. 패널 설정을 확인하거나 나중에 다시 시도하세요.",
+    ),
+    "haozeNoUsage": MessageLookupByLibrary.simpleMessage("아직 사용량 정보가 없습니다."),
+    "haozeNotReady": MessageLookupByLibrary.simpleMessage("구독 준비 중"),
+    "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
+      "패널에 연결할 수 없습니다. 계정과 최근 사용량은 유지됩니다.",
+    ),
+    "haozeProfileError": MessageLookupByLibrary.simpleMessage(
+      "계정은 불러왔지만 구독 설정에 실패했습니다. 동기화를 다시 시도하세요.",
+    ),
+    "haozeReady": MessageLookupByLibrary.simpleMessage("구독 준비 완료"),
+    "haozeRefresh": MessageLookupByLibrary.simpleMessage("사용량 새로고침"),
+    "haozeRegister": MessageLookupByLibrary.simpleMessage("회원 가입"),
+    "haozeRemaining": MessageLookupByLibrary.simpleMessage("남은 데이터"),
+    "haozeSendCode": MessageLookupByLibrary.simpleMessage("코드 전송"),
+    "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
+      "세션이 만료되었습니다. 다시 로그인하세요.",
+    ),
+    "haozeStorageError": MessageLookupByLibrary.simpleMessage(
+      "보안 저장소를 업데이트하지 못했습니다. 다시 시도하세요.",
+    ),
+    "haozeSync": MessageLookupByLibrary.simpleMessage("구독 동기화"),
+    "haozeTerms": MessageLookupByLibrary.simpleMessage("약관 보기"),
+    "haozeTotal": MessageLookupByLibrary.simpleMessage("총 데이터"),
+    "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("만료 없음"),
+    "haozeUsage": MessageLookupByLibrary.simpleMessage("요금제 및 사용량"),
+    "haozeWebsite": MessageLookupByLibrary.simpleMessage("웹사이트 열기"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("변경 사항을 캐시하시겠습니까?"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("인바운드 사용자별 해시"),
     "healthCheck": MessageLookupByLibrary.simpleMessage("상태 확인"),

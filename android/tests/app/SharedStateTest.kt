@@ -153,4 +153,11 @@ class SharedStateTest {
 
         assertNull(state.vpnOptions?.accessControlProps?.mode)
     }
+    @Test
+    fun `account readiness fails closed for absent fields`() {
+        assertTrue(!SharedState().accountReady)
+        assertTrue(!gson.fromJson("{}", SharedState::class.java).accountReady)
+        assertTrue(gson.fromJson("""{"accountReady":true}""", SharedState::class.java).accountReady)
+    }
+
 }

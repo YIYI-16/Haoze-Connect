@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 enum XboardFailure {
   configuration,
@@ -64,7 +65,35 @@ class StrictIoXboardTransport implements XboardTransport {
     Uri uri,
     Map<String, String> headers,
     Map<String, Object?>? body,
-  ) async {
+  ) => _send(method, uri, headers, body, binary: false);
+
+  Future<Uint8List> download(Uri uri) async {
+    final response = await _send(
+      'GET',
+      uri,
+      {
+        'Accept': 'application/yaml, text/yaml, text/plain',
+        'User-Agent': 'HaozeConnect/0.1.0',
+      },
+      null,
+      binary: true,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw XboardException(
+        XboardFailure.http,
+        statusCode: response.statusCode,
+      );
+    }
+    return response.body as Uint8List;
+  }
+
+  Future<XboardResponse> _send(
+    String method,
+    Uri uri,
+    Map<String, String> headers,
+    Map<String, Object?>? body, {
+    required bool binary,
+  }) async {
     _requireHttps(uri);
     // close() is awaited through the non-null alias; abort owns timed-out work.
     // ignore: close_sinks
@@ -93,12 +122,16 @@ class StrictIoXboardTransport implements XboardTransport {
         }
         final bytes = <int>[];
         await for (final chunk in response) {
-          if (bytes.length + chunk.length > 1024 * 1024) {
+          if (bytes.length + chunk.length > (binary ? 8 : 1) * 1024 * 1024) {
             throw const XboardException(XboardFailure.protocol);
           }
           bytes.addAll(chunk);
         }
         Object? data;
+        if (binary) {
+          consumed = true;
+          return XboardResponse(response.statusCode, Uint8List.fromList(bytes));
+        }
         try {
           data = jsonDecode(utf8.decode(bytes));
         } on FormatException {

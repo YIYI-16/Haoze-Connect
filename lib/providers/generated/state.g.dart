@@ -138,7 +138,7 @@ final class SetupPatchProvider
   }
 }
 
-String _$setupPatchHash() => r'283e94846903bafab1c22985b6f90d4c0e2a4697';
+String _$setupPatchHash() => r'd09fb41d40ced4cd47c9131fe55e983e35128724';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -437,7 +437,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'98486029d33bd542b933d43e0c92a1f74aaa69a0';
+String _$sharedStateHash() => r'33ea4424ea87f4280a9a91a1bd48f2a16ba9e304';
 
 @ProviderFor(vpnRouteAddress)
 final vpnRouteAddressProvider = VpnRouteAddressProvider._();

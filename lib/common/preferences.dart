@@ -58,7 +58,11 @@ class Preferences {
 
   Future<void> saveShareState(SharedState shareState) async {
     final preferences = await _store.value;
-    await preferences?.setString('sharedState', json.encode(shareState));
+    // Headless starts require Flutter to restore the secure account first.
+    await preferences?.setString(
+      'sharedState',
+      json.encode(shareState.copyWith(accountReady: false)),
+    );
   }
 
   /// The md5 of the config.yaml the Core last accepted, which is also what

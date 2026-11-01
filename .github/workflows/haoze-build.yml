@@ -1,4 +1,4 @@
-name: Haoze FlClash prototype (artifacts only)
+name: Haoze Connect Mihomo integration (artifacts only)
 
 on:
   workflow_dispatch:
@@ -38,7 +38,15 @@ jobs:
       - run: flutter pub get
       - working-directory: packages/haoze_xboard
         run: flutter pub get
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache-dependency-path: core/go.sum
+      - run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
       - run: flutter analyze --no-fatal-infos --no-pub
+      - run: flutter test --no-pub test/features/haoze test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart
       - working-directory: packages/haoze_xboard
         run: |
           flutter analyze --no-fatal-infos --no-pub
@@ -61,9 +69,11 @@ jobs:
         with:
           go-version: '1.27.1'
           cache-dependency-path: core/go.sum
-      - run: rustup toolchain install 1.99.0 --profile minimal
+      - run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
       - run: flutter pub get
-      - name: Build upstream UI and native baseline
+      - name: Build account UI and Windows native runtime
         run: flutter build windows --release --no-pub --dart-define=APP_ENV=pre
       - name: Compile isolated panel probe
         working-directory: packages/haoze_xboard
@@ -76,12 +86,12 @@ jobs:
       - name: Probe standalone Dart HTTPS
         continue-on-error: true
         run: '& "$env:RUNNER_TEMP\HaozePanelProbe.exe" | Out-File -Encoding utf8 "$env:RUNNER_TEMP\haoze-panel-dart.json"'
-      - name: Package baseline
-        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\FlClash-Upstream-Baseline-Windows-x64.zip"
+      - name: Package integration preview
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "$env:RUNNER_TEMP\HaozeConnect-Mihomo-Preview-Windows-x64.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: FlClash-upstream-Windows-baseline
-          path: ${{ runner.temp }}/FlClash-Upstream-Baseline-Windows-x64.zip
+          name: HaozeConnect-Mihomo-Preview-Windows-x64
+          path: ${{ runner.temp }}/HaozeConnect-Mihomo-Preview-Windows-x64.zip
       - uses: actions/upload-artifact@v4
         with:
           name: Haoze-isolated-panel-probes
@@ -120,11 +130,16 @@ jobs:
         with:
           go-version: '1.27.1'
           cache-dependency-path: core/go.sum
-      - run: rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android
+      - run: |
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android
+          rustup default 1.99.0
       - run: flutter pub get
-      - name: Build upstream Android baseline
+      - name: Test Android account lifecycle gate
+        working-directory: android
+        run: ./gradlew :app:testDebugUnitTest -Ptarget-platform=android-arm64 -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
+      - name: Build Android integration preview
         run: flutter build apk --release --no-pub --target-platform android-arm64 --split-per-abi --dart-define=APP_ENV=pre
       - uses: actions/upload-artifact@v4
         with:
-          name: FlClash-upstream-Android-baseline-debug-signed
+          name: HaozeConnect-Mihomo-Preview-Android-arm64-debug-signed
           path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk

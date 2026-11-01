@@ -5,10 +5,11 @@ The application baseline is FlClash v0.9.2, commit
 `c5062921054902b25215a6a933e72ccd714c9bfa`. No Hiddify application code is
 copied into this prototype. FlClash's GPLv3 license and attribution remain.
 
-`packages/haoze_xboard` is an independent account/configuration module. It is
-not yet connected to the FlClash UI, session persistence or VPN lifecycle.
-Successful module tests and an upstream build do not establish a finished
-Haoze client, successful login on the affected devices, or an HTTPS fix.
+`packages/haoze_xboard` is an independent account/configuration module. The
+integration now connects it to fresh FlClash login/registration/account views,
+system secure storage, one managed profile and the existing lifecycle owners.
+The app version is 6.0.0 for the integration preview, not a published release.
+No affected-device HTTPS fix or complete routing/IPv6 acceptance is claimed.
 
 ## Backend evidence
 
@@ -97,3 +98,44 @@ Compare browser, the standalone Dart probe and the native probe on the actual
 failing device/network, disconnected and connected. Browser success alone does
 not establish equal DNS, trust roots, proxy selection or request behavior.
 Tests on the build server cannot establish a fix on that device.
+
+
+## Account integration and current limits
+
+Login/registration automatically obtains a Meta subscription, downloads it over
+an isolated strictly verified transport, validates it with the core, and selects
+one account-owned file profile. The URL is not retained in ordinary profile
+metadata. A content comparison skips unchanged configuration; usage refresh does
+not reapply profiles. A failed file/metadata commit retains the old content, and
+node selections edited during the download win at commit time.
+
+Only the secure store retains email, panel origin, Bearer credential,
+subscription token and managed profile id. Passwords are never persisted.
+Account origins cannot cross-restore. Logout locks further refresh/connection
+attempts immediately, stops the tunnel and removes only the managed profile.
+A secure-store failure remains visible and requires a cleanup retry; the locked
+session cannot reactivate. This is local sign-out, not server-session revocation.
+
+Registration honors email verification, forced invitation and terms. Panels
+requiring interactive CAPTCHA direct registration to the website; password
+login stays available. Updates use `/client/app/getVersion` and open a validated
+HTTPS download link only after confirmation. Empty/invalid update metadata does
+not invalidate the account. No automatic upstream updater is started.
+
+Android's native state machine independently rejects a start without a live
+account-ready state. Persisted SharedState always records accountReady=false;
+therefore unattended/headless cold starts (including Always-on after process
+loss) are intentionally unavailable in this preview until Flutter restores the
+secure account. This avoids treating a cached subscription as account authority.
+System VPN behavior and permission UI still require device acceptance.
+
+Android preview identity: com.haoze.connect.mihomo (debug-signed fallback adds
+.dev). Windows: HaozeConnectMihomo.exe, CompanyName Haoze, ProductName Haoze Connect
+Mihomo. Both are separate from the prior Hiddify app. Native core/helper names
+remain upstream names; helper coexistence and installation remain unverified.
+
+Local checks cover account/session failure boundaries, real widget layouts in
+light/dark at phone/desktop widths, storage revocation, profile validation and
+rollback, and Android JVM lifecycle transitions. They do not establish successful
+VPN routing, IPv6 containment, Smart App Control compatibility or panel access on
+the user's affected Windows/Android devices. Those remain UNKNOWN.

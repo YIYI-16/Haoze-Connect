@@ -1,3 +1,4 @@
+import 'package:fl_clash/features/haoze/account_view.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -12,7 +13,7 @@ extension DashboardWidgetView on DashboardWidget {
     DashboardWidget.vpnButton => const VpnCard(),
     DashboardWidget.networkTakeover => const NetworkTakeoverCard(),
     DashboardWidget.serviceStatus => const ServiceStatusCard(),
-    DashboardWidget.profiles => const ProfilesCard(),
+    DashboardWidget.profiles => const HaozeDashboardCard(),
     DashboardWidget.proxyGroups => const ProxyGroupsCard(),
     DashboardWidget.connectionStats => const ConnectionStatsCard(),
     DashboardWidget.intranetIp => const IntranetIpCard(),

@@ -6,6 +6,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/features/haoze/account.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/icon.dart';
 import 'package:flutter/foundation.dart';
@@ -88,6 +89,15 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     _updateVisible(state);
     if (state == AppLifecycleState.resumed) {
+      final account = ref.read(haozeAccountProvider);
+      if (account.initialized &&
+          account.authenticated &&
+          !account.busy &&
+          (account.updatedAt == null ||
+              DateTime.now().difference(account.updatedAt!) >
+                  const Duration(seconds: 30))) {
+        unawaited(ref.read(haozeAccountProvider.notifier).controller.refresh());
+      }
       unawaited(ref.read(locationPermissionsProvider.notifier).refresh());
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {

@@ -4,6 +4,7 @@ import com.follow.clash.service.models.VpnOptions
 import com.google.gson.annotations.SerializedName
 
 data class SharedState(
+    val accountReady: Boolean = false,
     val startTip: String = "Starting VPN...",
     val stopTip: String = "Stopping VPN...",
     val localNetworkTip: String =

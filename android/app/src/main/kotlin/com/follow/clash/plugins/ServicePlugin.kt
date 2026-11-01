@@ -106,10 +106,9 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             result.success("Invalid shared state")
             return
         }
-        scope.launch {
-            ServiceState.syncSharedState(state)
-            result.success("")
-        }
+        // Apply on the channel thread so an earlier ready state cannot overtake revocation.
+        val synced = runCatching { ServiceState.syncSharedState(state) }.isSuccess
+        result.success(if (synced) "" else "Unable to synchronize account state")
     }
 
     private fun start(call: MethodCall, result: MethodChannel.Result) {

@@ -7,6 +7,7 @@ part of '../state.dart';
 // **************************************************************************
 
 _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
+  accountReady: json['accountReady'] as bool? ?? false,
   setupParams: json['setupParams'] == null
       ? null
       : SetupParams.fromJson(json['setupParams'] as Map<String, dynamic>),
@@ -24,6 +25,7 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
 
 Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
     <String, dynamic>{
+      'accountReady': instance.accountReady,
       'setupParams': instance.setupParams,
       'vpnOptions': instance.vpnOptions,
       'stopTip': instance.stopTip,

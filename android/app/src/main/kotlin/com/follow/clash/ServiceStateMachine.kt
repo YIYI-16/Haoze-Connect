@@ -121,6 +121,10 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     }
 
     fun requestStart(): Deferred<Boolean> {
+        if (!sharedState.accountReady) {
+            host.showToast(MISSING_CONFIG_MESSAGE)
+            return CompletableDeferred(false)
+        }
         if (isStartedAs(sharedState.vpnOptions)) {
             return CompletableDeferred(true)
         }
@@ -136,6 +140,9 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     fun syncSharedState(state: SharedState) {
         sharedState = state
         applySharedState()
+        if (!state.accountReady && isRunRequested) {
+            requestStop()
+        }
     }
 
     // No new request for a settled run: one refused at a prompt would take the service down.
@@ -146,12 +153,13 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     // toggles this start off instead of racing a second setup against it.
     private suspend fun startFromPreferences() {
         val request = createRequest(running = true)
-        sharedState = host.loadSharedState()
-        if (sharedState.setupParams == null || sharedState.vpnOptions == null) {
+        val cachedState = host.loadSharedState()
+        if (!cachedState.accountReady || cachedState.setupParams == null || cachedState.vpnOptions == null) {
             host.showToast(MISSING_CONFIG_MESSAGE)
             abandon(request)
             return
         }
+        sharedState = cachedState
         if (!setupCore()) {
             abandon(request)
         } else if (launchStart(request).await() == StartOutcome.FAILED) {

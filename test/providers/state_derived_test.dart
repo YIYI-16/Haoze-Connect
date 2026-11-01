@@ -368,7 +368,11 @@ void main() {
     final mobile = container.read(currentNavigationItemsStateProvider).value;
     expect(
       mobile.map((item) => item.label),
-      containsAll([PageLabel.dashboard, PageLabel.profiles, PageLabel.tools]),
+      containsAll([PageLabel.dashboard, PageLabel.account, PageLabel.tools]),
+    );
+    expect(
+      mobile.map((item) => item.label),
+      isNot(contains(PageLabel.profiles)),
     );
     expect(
       mobile.map((item) => item.label),

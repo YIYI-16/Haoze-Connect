@@ -694,7 +694,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сама Программа не предоставляет прокси-серверы, узлы, подписки или услуги доступа к сети и не состоит в партнёрских, агентских или гарантийных отношениях с поставщиками таких услуг.",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "Программа не собирает и не отправляет адреса ваших подписок, сведения об узлах, содержимое конфигураций, посещённые сайты, записи о подключениях, содержимое трафика и журналы. Эти данные хранятся только на вашем устройстве, и у разработчиков нет к ним доступа.\n\nПрограмма обращается к сети только при использовании соответствующих функций, например загружает указанный вами адрес подписки при обновлении профиля или обращается к GitHub при проверке обновлений.\n\nПрограмма не содержит никаких сервисов статистики или отчётов о сбоях ни на одной платформе.",
+      "При входе и регистрации введённые данные передаются по HTTPS настроенной панели Xboard. Приложение получает от неё тариф, трафик и подписку. Проксируемый трафик проходит через выбранный узел.\n\nУчётные данные хранятся в защищённом системном хранилище; пароль не сохраняется. Конфигурация и локальные записи остаются на устройстве. Аналитика и телеметрия сбоев отсутствуют.\n\nПроверка обновлений получает версии и ссылки от панели. Обновление правил и другие функции также могут обращаться к настроенным удалённым адресам.",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "Сбор данных и конфиденциальность",
@@ -910,6 +910,72 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("групп"),
     "groupTimeoutCount": m33,
+    "haozeAccount": MessageLookupByLibrary.simpleMessage("Аккаунт"),
+    "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage(
+      "Я принимаю условия использования",
+    ),
+    "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
+      "Панель требует проверку. Зарегистрируйтесь на сайте, затем войдите здесь.",
+    ),
+    "haozeCodeSent": MessageLookupByLibrary.simpleMessage(
+      "Код отправлен. Проверьте почту.",
+    ),
+    "haozeConfigError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить настройки регистрации.",
+    ),
+    "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
+      "Подтвердите пароль",
+    ),
+    "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
+      "Вход или регистрация отклонены. Проверьте данные.",
+    ),
+    "haozeEmail": MessageLookupByLibrary.simpleMessage("Электронная почта"),
+    "haozeEmailCode": MessageLookupByLibrary.simpleMessage("Код из письма"),
+    "haozeExhausted": MessageLookupByLibrary.simpleMessage("Лимит исчерпан"),
+    "haozeExpired": MessageLookupByLibrary.simpleMessage("Тариф истёк"),
+    "haozeExpiry": MessageLookupByLibrary.simpleMessage("Срок действия"),
+    "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
+      "Проверьте почту, пароль и обязательные поля.",
+    ),
+    "haozeInviteCode": MessageLookupByLibrary.simpleMessage("Код приглашения"),
+    "haozeLastRefresh": MessageLookupByLibrary.simpleMessage(
+      "Последнее обновление",
+    ),
+    "haozeLogin": MessageLookupByLibrary.simpleMessage("Войти"),
+    "haozeLogout": MessageLookupByLibrary.simpleMessage("Выйти"),
+    "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Нет активного тарифа"),
+    "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
+      "Новые данные о загрузке не получены. Проверьте настройки панели или повторите позже.",
+    ),
+    "haozeNoUsage": MessageLookupByLibrary.simpleMessage(
+      "Данные о трафике пока недоступны.",
+    ),
+    "haozeNotReady": MessageLookupByLibrary.simpleMessage("Подписка не готова"),
+    "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Панель недоступна. Аккаунт и последние данные сохранены.",
+    ),
+    "haozeProfileError": MessageLookupByLibrary.simpleMessage(
+      "Аккаунт загружен, но настройка подписки не удалась. Повторите синхронизацию.",
+    ),
+    "haozeReady": MessageLookupByLibrary.simpleMessage("Подписка готова"),
+    "haozeRefresh": MessageLookupByLibrary.simpleMessage("Обновить трафик"),
+    "haozeRegister": MessageLookupByLibrary.simpleMessage("Регистрация"),
+    "haozeRemaining": MessageLookupByLibrary.simpleMessage("Осталось"),
+    "haozeSendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
+    "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
+      "Сессия истекла. Войдите снова.",
+    ),
+    "haozeStorageError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось обновить защищённое хранилище. Повторите попытку.",
+    ),
+    "haozeSync": MessageLookupByLibrary.simpleMessage(
+      "Синхронизировать подписку",
+    ),
+    "haozeTerms": MessageLookupByLibrary.simpleMessage("Условия использования"),
+    "haozeTotal": MessageLookupByLibrary.simpleMessage("Общий лимит"),
+    "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
+    "haozeUsage": MessageLookupByLibrary.simpleMessage("Тариф и трафик"),
+    "haozeWebsite": MessageLookupByLibrary.simpleMessage("Открыть сайт"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Кэшировать изменения?",
     ),

@@ -164,6 +164,14 @@ class SetupAction extends _$SetupAction {
   }
 
   Future<bool> setRunning(bool running, {bool initialize = false}) {
+    if (running &&
+        ref.exists(haozeAccountProvider) &&
+        !ref
+            .read(haozeAccountProvider.notifier)
+            .controller
+            .canResumeProfile(ref.read(currentProfileIdProvider))) {
+      return Future.value(false);
+    }
     if (running && !initialize && !ref.read(initProvider)) {
       return Future.value(true);
     }

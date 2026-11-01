@@ -568,7 +568,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "本ソフトウェア自体は、プロキシサーバー、ノード、サブスクリプション、ネットワーク接続サービスを一切提供しておらず、それらのサービス提供者と提携、代理、保証の関係はありません。",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "本ソフトウェアは、サブスクリプション URL、ノード情報、設定内容、閲覧したウェブサイト、接続記録、通信内容、ログを収集またはアップロードしません。これらのデータは端末内にのみ保存され、開発者がアクセスすることはできません。\n\n本ソフトウェアが外部ネットワークにアクセスするのは、プロファイル更新時に指定されたサブスクリプション URL へアクセスする場合や、アップデート確認時に GitHub へアクセスする場合など、該当する機能を使用したときのみです。\n\n本ソフトウェアには、どのプラットフォームでも統計やクラッシュレポートのサービスは一切組み込まれていません。",
+      "ログインと登録では、入力した情報を HTTPS で設定済みの Xboard パネルに送信します。プラン、使用量、設定をパネルから取得し、プロキシ通信は選択したノードを経由します。\n\n認証情報はシステムの安全な領域に保存し、パスワードは保存しません。設定とローカル記録は端末に保存します。解析やクラッシュの遠隔送信はありません。\n\n更新確認はパネルのバージョンとダウンロード情報を読み取ります。ルールの更新などは設定された配信先にも接続します。",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "データ収集とプライバシー",
@@ -742,6 +742,62 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("個"),
     "groupTimeoutCount": m33,
+    "haozeAccount": MessageLookupByLibrary.simpleMessage("アカウント"),
+    "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage("利用規約に同意する"),
+    "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
+      "このパネルは認証が必要です。サイトで登録後、ここでログインしてください。",
+    ),
+    "haozeCodeSent": MessageLookupByLibrary.simpleMessage(
+      "コードを送信しました。メールをご確認ください。",
+    ),
+    "haozeConfigError": MessageLookupByLibrary.simpleMessage(
+      "登録設定を読み込めませんでした。",
+    ),
+    "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage("パスワード確認"),
+    "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
+      "ログインまたは登録が拒否されました。入力内容をご確認ください。",
+    ),
+    "haozeEmail": MessageLookupByLibrary.simpleMessage("メール"),
+    "haozeEmailCode": MessageLookupByLibrary.simpleMessage("メール確認コード"),
+    "haozeExhausted": MessageLookupByLibrary.simpleMessage("容量を使い切りました"),
+    "haozeExpired": MessageLookupByLibrary.simpleMessage("プランの期限切れ"),
+    "haozeExpiry": MessageLookupByLibrary.simpleMessage("有効期限"),
+    "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
+      "メール、パスワードと必須項目をご確認ください。",
+    ),
+    "haozeInviteCode": MessageLookupByLibrary.simpleMessage("招待コード"),
+    "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("最終更新"),
+    "haozeLogin": MessageLookupByLibrary.simpleMessage("ログイン"),
+    "haozeLogout": MessageLookupByLibrary.simpleMessage("ログアウト"),
+    "haozeNoPlan": MessageLookupByLibrary.simpleMessage("利用可能なプランなし"),
+    "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
+      "新しいダウンロード情報を取得できませんでした。パネルの設定を確認するか、後で再試行してください。",
+    ),
+    "haozeNoUsage": MessageLookupByLibrary.simpleMessage("使用量をまだ取得していません。"),
+    "haozeNotReady": MessageLookupByLibrary.simpleMessage("設定の準備待ち"),
+    "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
+      "パネルに接続できません。アカウントと前回の使用量を保持しています。",
+    ),
+    "haozeProfileError": MessageLookupByLibrary.simpleMessage(
+      "アカウントは読み込まれましたが、設定の同期に失敗しました。",
+    ),
+    "haozeReady": MessageLookupByLibrary.simpleMessage("設定の準備完了"),
+    "haozeRefresh": MessageLookupByLibrary.simpleMessage("使用量を更新"),
+    "haozeRegister": MessageLookupByLibrary.simpleMessage("アカウント作成"),
+    "haozeRemaining": MessageLookupByLibrary.simpleMessage("残量"),
+    "haozeSendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
+    "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
+      "セッションが切れました。再度ログインしてください。",
+    ),
+    "haozeStorageError": MessageLookupByLibrary.simpleMessage(
+      "安全な保存領域を更新できません。再試行してください。",
+    ),
+    "haozeSync": MessageLookupByLibrary.simpleMessage("設定を同期"),
+    "haozeTerms": MessageLookupByLibrary.simpleMessage("規約を読む"),
+    "haozeTotal": MessageLookupByLibrary.simpleMessage("総容量"),
+    "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("無期限"),
+    "haozeUsage": MessageLookupByLibrary.simpleMessage("プランと使用量"),
+    "haozeWebsite": MessageLookupByLibrary.simpleMessage("サイトを開く"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("インバウンドユーザーでハッシュ"),
     "healthCheck": MessageLookupByLibrary.simpleMessage("ヘルスチェック"),

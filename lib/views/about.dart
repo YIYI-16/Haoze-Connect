@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/features/haoze/account.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -27,16 +29,46 @@ class AboutView extends ConsumerWidget {
 
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final commonAction = ref.read(commonActionProvider.notifier);
     final result = await globalState.loadingRun(
-      () async => (release: await request.checkForUpdate()),
+      () async => (
+        version: await ref
+            .read(haozeAccountProvider.notifier)
+            .controller
+            .appVersion(
+              system.isAndroid
+                  ? 'android'
+                  : system.isWindows
+                  ? 'windows'
+                  : 'macos',
+            ),
+      ),
       title: context.appLocalizations.checkUpdate,
       tag: LoadingTag.checkUpdate,
     );
-    if (result == null) return;
-    unawaited(
-      commonAction.checkUpdateResultHandle(data: result.release, isUser: true),
+    if (result == null || !context.mounted) return;
+    final update = result.version;
+    final version = update?.version.replaceFirst(RegExp(r'^v'), '');
+    if (update?.downloadUri == null ||
+        version == null ||
+        !RegExp(r'^\d{1,9}\.\d{1,9}\.\d{1,9}$').hasMatch(version) ||
+        compareVersions(version, globalState.packageInfo.version) <= 0) {
+      await dialogs.showAlert(
+        title: context.appLocalizations.checkUpdate,
+        message: TextSpan(text: context.appLocalizations.haozeNoUpdateInfo),
+      );
+      return;
+    }
+    final accepted = await dialogs.showMessage(
+      title: context.appLocalizations.discoverNewVersion,
+      message: TextSpan(text: version),
+      confirmText: context.appLocalizations.goDownload,
     );
+    if (accepted == true) {
+      await launchUrl(
+        update!.downloadUri!,
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 
   Widget _buildLinkItem({
@@ -93,6 +125,12 @@ class AboutView extends ConsumerWidget {
                 title: appLocalizations.project,
                 url: 'https://github.com/$repository',
                 label: 'github.com/$repository',
+              ),
+              _buildLinkItem(
+                glyph: AppGlyphs.code,
+                title: 'FlClash',
+                url: 'https://github.com/chen08209/FlClash',
+                label: 'github.com/chen08209/FlClash',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,

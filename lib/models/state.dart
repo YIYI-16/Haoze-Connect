@@ -181,6 +181,7 @@ abstract class SelectedProxyState with _$SelectedProxyState {
 @freezed
 abstract class SharedState with _$SharedState {
   const factory SharedState({
+    @Default(false) bool accountReady,
     SetupParams? setupParams,
     VpnOptions? vpnOptions,
     required String stopTip,

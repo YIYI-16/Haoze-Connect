@@ -37,6 +37,7 @@ private fun vpnOptions(enable: Boolean = true, stack: String = "gvisor") = VpnOp
 )
 
 private fun configuredState(enable: Boolean = true, stack: String = "gvisor") = SharedState(
+    accountReady = true,
     vpnOptions = vpnOptions(enable, stack),
     setupParams = SetupParams(testUrl = "https://example.com", selectedMap = emptyMap()),
 )
@@ -878,4 +879,40 @@ class ServiceStateMachineTest {
         assertFalse(machine.captureRequestToken().running)
         assertEquals(RunState.STOPPED, machine.runState.value)
     }
+    @Test
+    fun `an account that is not ready cannot request a start`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState().copy(accountReady = false))
+        assertFalse(machine.requestStart().await())
+        assertEquals(0, host.startCalls)
+    }
+
+    @Test
+    fun `cached configuration without account readiness cannot start headlessly`() = runTest {
+        val host = FakeHost(backgroundScope)
+        host.storedSharedState = configuredState().copy(accountReady = false)
+        val machine = ServiceStateMachine(host)
+        machine.handleStartAction()
+        assertEquals(0, host.setupCalls)
+        assertEquals(0, host.startCalls)
+        assertEquals(RunState.STOPPED, machine.runState.value)
+    }
+
+    @Test
+    fun `account revocation supersedes a pending VPN consent`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val app = FakeApp(holdVpnPreparation = true)
+        host.app = app
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        val start = machine.requestStart()
+        testScheduler.runCurrent()
+        machine.syncSharedState(configuredState().copy(accountReady = false))
+        testScheduler.runCurrent()
+        assertFalse(start.await())
+        assertEquals(0, host.startCalls)
+        assertEquals(RunState.STOPPED, machine.runState.value)
+    }
+
 }

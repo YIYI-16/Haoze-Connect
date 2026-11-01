@@ -1,3 +1,4 @@
+import 'package:fl_clash/features/haoze/account_view.dart';
 import 'dart:math' as math;
 
 import 'package:fl_clash/common/common.dart';
@@ -226,7 +227,7 @@ class _DesktopDashboard extends StatelessWidget {
             middleHeight,
             row([
               (1, const IntranetIpCard()),
-              (1, const ProfilesCard()),
+              (1, const HaozeDashboardCard()),
               (
                 1,
                 ServiceStatusCard(

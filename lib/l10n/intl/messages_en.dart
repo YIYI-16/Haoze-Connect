@@ -668,7 +668,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The Software itself does not provide any proxy server, node, subscription, or network access service, and has no partnership, agency, or guarantee relationship with any provider of such services.",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "The Software does not collect or upload your subscription URLs, node details, configuration content, visited websites, connection records, traffic content, or logs. This data stays on your device and the developers have no access to it.\n\nThe Software only reaches the network when you use a feature that needs it, such as fetching the subscription URL you provided when updating a profile, or contacting GitHub when checking for updates.\n\nThe Software includes no analytics or crash reporting service on any platform.",
+      "Sign-in and registration send the account information you enter over HTTPS to the configured Xboard panel. The app obtains your plan, usage and subscription from that panel. Proxied traffic passes through the node you select.\n\nCredentials use system secure storage; passwords are not saved on the device. Subscription configuration and local activity records remain on the device. The app includes no analytics or crash telemetry.\n\nUpdate checks read version and download information from the panel. Features such as rule-resource updates can also contact their configured remote addresses.",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "Data collection and privacy",
@@ -876,6 +876,70 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groups"),
     "groupTimeoutCount": m33,
+    "haozeAccount": MessageLookupByLibrary.simpleMessage("Account"),
+    "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage(
+      "I agree to the terms of service",
+    ),
+    "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
+      "This panel requires a security check. Create your account on the website, then sign in here.",
+    ),
+    "haozeCodeSent": MessageLookupByLibrary.simpleMessage(
+      "Code sent. Please check your email.",
+    ),
+    "haozeConfigError": MessageLookupByLibrary.simpleMessage(
+      "Registration settings could not be loaded.",
+    ),
+    "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
+      "Confirm password",
+    ),
+    "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
+      "Sign-in or registration was rejected. Check the account details and panel requirements.",
+    ),
+    "haozeEmail": MessageLookupByLibrary.simpleMessage("Email"),
+    "haozeEmailCode": MessageLookupByLibrary.simpleMessage("Email code"),
+    "haozeExhausted": MessageLookupByLibrary.simpleMessage("Quota exhausted"),
+    "haozeExpired": MessageLookupByLibrary.simpleMessage("Plan expired"),
+    "haozeExpiry": MessageLookupByLibrary.simpleMessage("Expires"),
+    "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
+      "Check your email, password and required fields.",
+    ),
+    "haozeInviteCode": MessageLookupByLibrary.simpleMessage("Invitation code"),
+    "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("Last refreshed"),
+    "haozeLogin": MessageLookupByLibrary.simpleMessage("Sign in"),
+    "haozeLogout": MessageLookupByLibrary.simpleMessage("Sign out"),
+    "haozeNoPlan": MessageLookupByLibrary.simpleMessage("No active plan"),
+    "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
+      "No newer download information was obtained. Check the panel configuration or retry later.",
+    ),
+    "haozeNoUsage": MessageLookupByLibrary.simpleMessage(
+      "Usage data is not available yet.",
+    ),
+    "haozeNotReady": MessageLookupByLibrary.simpleMessage(
+      "Subscription not ready",
+    ),
+    "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Cannot reach the panel. Your saved account and last usage data are retained.",
+    ),
+    "haozeProfileError": MessageLookupByLibrary.simpleMessage(
+      "Account loaded, but subscription setup failed. Retry subscription synchronization.",
+    ),
+    "haozeReady": MessageLookupByLibrary.simpleMessage("Subscription ready"),
+    "haozeRefresh": MessageLookupByLibrary.simpleMessage("Refresh usage"),
+    "haozeRegister": MessageLookupByLibrary.simpleMessage("Create account"),
+    "haozeRemaining": MessageLookupByLibrary.simpleMessage("Remaining"),
+    "haozeSendCode": MessageLookupByLibrary.simpleMessage("Send code"),
+    "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
+      "Your session expired. Please sign in again.",
+    ),
+    "haozeStorageError": MessageLookupByLibrary.simpleMessage(
+      "Secure storage could not be updated. Please retry.",
+    ),
+    "haozeSync": MessageLookupByLibrary.simpleMessage("Sync subscription"),
+    "haozeTerms": MessageLookupByLibrary.simpleMessage("Read terms"),
+    "haozeTotal": MessageLookupByLibrary.simpleMessage("Total quota"),
+    "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("No expiry"),
+    "haozeUsage": MessageLookupByLibrary.simpleMessage("Plan and usage"),
+    "haozeWebsite": MessageLookupByLibrary.simpleMessage("Open website"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Cache the changes?",
     ),

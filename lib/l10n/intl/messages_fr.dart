@@ -714,7 +714,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Le Logiciel ne fournit lui-même aucun serveur proxy, nœud, abonnement ni service d’accès au réseau, et n’a aucun partenariat, mandat ni lien de garantie avec un quelconque fournisseur de tels services.",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "Le Logiciel ne collecte ni ne transmet vos URL d’abonnement, détails de nœuds, contenus de configuration, sites visités, historiques de connexion, contenus de trafic ou journaux. Ces données restent sur votre appareil et les développeurs n’y ont pas accès.\n\nLe Logiciel n’accède au réseau que lorsque vous utilisez une fonction qui en a besoin, par exemple pour récupérer l’URL d’abonnement que vous avez fournie lors de la mise à jour d’un profil, ou pour contacter GitHub lors de la recherche de mises à jour.\n\nLe Logiciel n’inclut aucun service d’analyse ni de rapport de plantage, sur aucune plateforme.",
+      "La connexion et l’inscription transmettent les informations saisies par HTTPS au panneau Xboard configuré. L’application y obtient l’offre, la consommation et l’abonnement. Le trafic via proxy passe par le nœud choisi.\n\nLes identifiants utilisent le stockage sécurisé du système ; les mots de passe ne sont pas conservés. Les configurations et les journaux locaux restent sur l’appareil. Aucune télémétrie d’analyse ou de plantage n’est incluse.\n\nLa recherche de mises à jour lit les versions et les liens du panneau. Certaines fonctions, dont la mise à jour des règles, peuvent contacter les adresses distantes configurées.",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "Collecte de données et confidentialité",
@@ -932,6 +932,82 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groupes"),
     "groupTimeoutCount": m33,
+    "haozeAccount": MessageLookupByLibrary.simpleMessage("Compte"),
+    "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage(
+      "J’accepte les conditions d’utilisation",
+    ),
+    "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
+      "Un contrôle est requis. Inscrivez-vous sur le site, puis connectez-vous ici.",
+    ),
+    "haozeCodeSent": MessageLookupByLibrary.simpleMessage(
+      "Code envoyé. Consultez votre messagerie.",
+    ),
+    "haozeConfigError": MessageLookupByLibrary.simpleMessage(
+      "Impossible de charger les paramètres d’inscription.",
+    ),
+    "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
+      "Confirmer le mot de passe",
+    ),
+    "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
+      "Connexion ou inscription refusée. Vérifiez les informations.",
+    ),
+    "haozeEmail": MessageLookupByLibrary.simpleMessage("E-mail"),
+    "haozeEmailCode": MessageLookupByLibrary.simpleMessage(
+      "Code reçu par e-mail",
+    ),
+    "haozeExhausted": MessageLookupByLibrary.simpleMessage("Quota épuisé"),
+    "haozeExpired": MessageLookupByLibrary.simpleMessage("Offre expirée"),
+    "haozeExpiry": MessageLookupByLibrary.simpleMessage("Expiration"),
+    "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
+      "Vérifiez l’e-mail, le mot de passe et les champs requis.",
+    ),
+    "haozeInviteCode": MessageLookupByLibrary.simpleMessage(
+      "Code d’invitation",
+    ),
+    "haozeLastRefresh": MessageLookupByLibrary.simpleMessage(
+      "Dernière actualisation",
+    ),
+    "haozeLogin": MessageLookupByLibrary.simpleMessage("Se connecter"),
+    "haozeLogout": MessageLookupByLibrary.simpleMessage("Se déconnecter"),
+    "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Aucune offre active"),
+    "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
+      "Aucune nouvelle information de téléchargement obtenue. Vérifiez le panneau ou réessayez plus tard.",
+    ),
+    "haozeNoUsage": MessageLookupByLibrary.simpleMessage(
+      "Les données ne sont pas encore disponibles.",
+    ),
+    "haozeNotReady": MessageLookupByLibrary.simpleMessage(
+      "Abonnement non prêt",
+    ),
+    "haozePanelUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Panneau inaccessible. Le compte et les dernières données sont conservés.",
+    ),
+    "haozeProfileError": MessageLookupByLibrary.simpleMessage(
+      "Compte chargé, mais la configuration a échoué. Relancez la synchronisation.",
+    ),
+    "haozeReady": MessageLookupByLibrary.simpleMessage("Abonnement prêt"),
+    "haozeRefresh": MessageLookupByLibrary.simpleMessage(
+      "Actualiser la consommation",
+    ),
+    "haozeRegister": MessageLookupByLibrary.simpleMessage("Créer un compte"),
+    "haozeRemaining": MessageLookupByLibrary.simpleMessage("Restant"),
+    "haozeSendCode": MessageLookupByLibrary.simpleMessage("Envoyer le code"),
+    "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
+      "Session expirée. Reconnectez-vous.",
+    ),
+    "haozeStorageError": MessageLookupByLibrary.simpleMessage(
+      "Impossible de mettre à jour le stockage sécurisé. Réessayez.",
+    ),
+    "haozeSync": MessageLookupByLibrary.simpleMessage(
+      "Synchroniser l’abonnement",
+    ),
+    "haozeTerms": MessageLookupByLibrary.simpleMessage("Lire les conditions"),
+    "haozeTotal": MessageLookupByLibrary.simpleMessage("Quota total"),
+    "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage(
+      "Sans expiration",
+    ),
+    "haozeUsage": MessageLookupByLibrary.simpleMessage("Offre et consommation"),
+    "haozeWebsite": MessageLookupByLibrary.simpleMessage("Ouvrir le site"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Mettre les modifications en cache ?",
     ),

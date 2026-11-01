@@ -199,6 +199,14 @@ class Profiles extends _$Profiles {
 
   Profile labeled(Profile profile) => state.optimizeLabel(profile);
 
+  Future<void> putManaged(Profile profile) {
+    final next = state.copyAndPut(profile, (item) => item.id == profile.id);
+    return _optimisticAsync(
+      next,
+      () => _serial(() => database.profiles.put(profile.toCompanion())),
+    );
+  }
+
   /// A new provider label follows into custom profiles whatever path set it.
   void put(Profile profile) {
     final newProfile = labeled(profile);
