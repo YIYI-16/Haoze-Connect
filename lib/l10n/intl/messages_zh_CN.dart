@@ -725,6 +725,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("长期有效"),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("套餐与流量"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("打开网站"),
+    "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
+      "未获得虚拟网卡权限。便携版请以管理员身份运行；安装版请完成系统权限授权。",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("按入站用户哈希"),
     "healthCheck": MessageLookupByLibrary.simpleMessage("健康检查"),

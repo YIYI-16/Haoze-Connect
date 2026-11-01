@@ -940,6 +940,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("No expiry"),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("Plan and usage"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("Open website"),
+    "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
+      "TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request.",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Cache the changes?",
     ),

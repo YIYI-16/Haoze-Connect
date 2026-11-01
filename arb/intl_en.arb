@@ -999,5 +999,6 @@
   "haozeRefresh": "Refresh usage",
   "haozeReady": "Subscription ready",
   "haozeNotReady": "Subscription not ready",
-  "haozeNoUpdateInfo": "No newer download information was obtained. Check the panel configuration or retry later."
+  "haozeNoUpdateInfo": "No newer download information was obtained. Check the panel configuration or retry later.",
+  "haozeWindowsTunAuthorizationFailed": "TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request."
 }

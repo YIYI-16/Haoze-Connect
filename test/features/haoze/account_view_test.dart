@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:fl_clash/features/haoze/account.dart';
 import 'package:fl_clash/features/haoze/account_view.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,6 +126,22 @@ class _FailedProfileSetup extends SetupAction {
 
   @override
   void resetCoreTraffic() {}
+}
+
+class _DeniedAuthorizationSetup extends _FailedProfileSetup {
+  @override
+  Future<AuthorizeCode> authorizeCore() async => AuthorizeCode.error;
+
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool force = false,
+    Future<void> Function()? preloadInvoke,
+  }) async {
+    events.add('authorize');
+    await requestAdmin(true);
+    return true;
+  }
 }
 
 void main() {
@@ -386,6 +403,37 @@ void main() {
     },
   );
 
+  test(
+    'managed permission denial stops without downgrading to proxy only',
+    () async {
+      await engine.login('user@example.com', 'example-password');
+      final setup = _DeniedAuthorizationSetup();
+      final container = ProviderContainer(
+        overrides: [
+          haozeAccountProvider.overrideWith(() => _Account(engine)),
+          setupActionProvider.overrideWith(() => setup),
+          commonActionProvider.overrideWith(_NoTraffic.new),
+          currentProfileIdProvider.overrideWithBuild((_, _) => 42),
+          initProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(haozeAccountProvider);
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((value) => value.copyWith.tun(enable: true));
+      expect(
+        await container.read(setupActionProvider.notifier).setRunning(true),
+        false,
+      );
+      expect(container.read(patchClashConfigProvider).tun.enable, true);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.none,
+      );
+      expect(setup.events, ['authorize', 'stop']);
+    },
+  );
   for (final dark in [false, true]) {
     for (final size in [const Size(390, 844), const Size(1200, 900)]) {
       testWidgets('login layout fits ${size.width} dp, dark=$dark', (

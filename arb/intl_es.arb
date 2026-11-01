@@ -999,5 +999,6 @@
   "haozeRefresh": "Actualizar consumo",
   "haozeReady": "Suscripción lista",
   "haozeNotReady": "Suscripción pendiente",
-  "haozeNoUpdateInfo": "No se obtuvo información de una nueva descarga. Revisa el panel o inténtalo más tarde."
+  "haozeNoUpdateInfo": "No se obtuvo información de una nueva descarga. Revisa el panel o inténtalo más tarde.",
+  "haozeWindowsTunAuthorizationFailed": "Falta el permiso TUN. Ejecuta la versión portátil como administrador o autoriza la versión instalada."
 }

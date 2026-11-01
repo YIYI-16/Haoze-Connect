@@ -712,6 +712,13 @@ class SetupAction extends _$SetupAction {
         return true;
       case AuthorizeCode.error:
         authorizationNotifier.value = TunAuthorizationState.none;
+        if (ref.exists(haozeAccountProvider)) {
+          final message = system.isWindows
+              ? currentAppLocalizations.haozeWindowsTunAuthorizationFailed
+              : currentAppLocalizations.tunAuthorizationFailed;
+          dialogs.showNotifier(message, level: MessageLevel.error);
+          throw MessageException(message);
+        }
         ref
             .read(patchClashConfigProvider.notifier)
             .update((state) => state.copyWith.tun(enable: false));

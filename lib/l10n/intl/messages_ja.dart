@@ -798,6 +798,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("無期限"),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("プランと使用量"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("サイトを開く"),
+    "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
+      "TUNの権限がありません。ポータブル版は管理者として実行し、インストール版ではシステムの権限要求を承認してください。",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("インバウンドユーザーでハッシュ"),
     "healthCheck": MessageLookupByLibrary.simpleMessage("ヘルスチェック"),

@@ -976,6 +976,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
     "haozeUsage": MessageLookupByLibrary.simpleMessage("Тариф и трафик"),
     "haozeWebsite": MessageLookupByLibrary.simpleMessage("Открыть сайт"),
+    "haozeWindowsTunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
+      "Нет разрешения TUN. Запустите переносную версию от администратора или подтвердите системный запрос установленной версии.",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Кэшировать изменения?",
     ),

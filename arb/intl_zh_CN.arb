@@ -999,5 +999,6 @@
   "haozeRefresh": "刷新流量",
   "haozeReady": "订阅已就绪",
   "haozeNotReady": "订阅尚未就绪",
-  "haozeNoUpdateInfo": "未获取到更新的下载信息，请检查面板配置或稍后重试。"
+  "haozeNoUpdateInfo": "未获取到更新的下载信息，请检查面板配置或稍后重试。",
+  "haozeWindowsTunAuthorizationFailed": "未获得虚拟网卡权限。便携版请以管理员身份运行；安装版请完成系统权限授权。"
 }

@@ -7,6 +7,7 @@ import 'package:fl_clash/common/boot_record.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/system_dns.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
+import 'package:fl_clash/core/desktop/windows_privileges.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -126,10 +127,23 @@ class System {
 
   late final bool _hasSystemd = Directory('/run/systemd/system').existsSync();
 
-  bool get hasHelperService =>
-      isWindows || (isLinux && !isAppImage && _hasSystemd);
+  WindowsTunPrivilege get _windowsTunPrivilege => windowsTunPrivilege(
+    elevated: readWindowsProcessElevation(),
+    executableDirectory: appPath.executableDirPath,
+    programDirectories: readWindowsProgramDirectories(),
+  );
+
+  bool get hasHelperService => isWindows
+      ? _windowsTunPrivilege == WindowsTunPrivilege.helper
+      : isLinux && !isAppImage && _hasSystemd;
 
   Future<bool> checkIsAdmin() async {
+    if (isWindows) {
+      final privilege = _windowsTunPrivilege;
+      return privilege == WindowsTunPrivilege.direct ||
+          (privilege == WindowsTunPrivilege.helper &&
+              await helperClient.readiness() == HelperReadiness.ready);
+    }
     if (hasHelperService) {
       return await helperClient.readiness() == HelperReadiness.ready;
     }
@@ -206,7 +220,12 @@ class System {
       return AuthorizeCode.error;
     }
     if (system.isWindows) {
-      return await windows?.registerService() ?? AuthorizeCode.error;
+      return switch (_windowsTunPrivilege) {
+        WindowsTunPrivilege.direct => AuthorizeCode.none,
+        WindowsTunPrivilege.helper =>
+          await windows?.registerService() ?? AuthorizeCode.error,
+        WindowsTunPrivilege.administratorRequired => AuthorizeCode.error,
+      };
     }
     if (hasHelperService) {
       return await linux?.registerService() ?? AuthorizeCode.error;

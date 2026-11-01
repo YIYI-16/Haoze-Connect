@@ -999,5 +999,6 @@
   "haozeRefresh": "Actualiser la consommation",
   "haozeReady": "Abonnement prêt",
   "haozeNotReady": "Abonnement non prêt",
-  "haozeNoUpdateInfo": "Aucune nouvelle information de téléchargement obtenue. Vérifiez le panneau ou réessayez plus tard."
+  "haozeNoUpdateInfo": "Aucune nouvelle information de téléchargement obtenue. Vérifiez le panneau ou réessayez plus tard.",
+  "haozeWindowsTunAuthorizationFailed": "Autorisation TUN refusée. Exécutez la version portable comme administrateur ou autorisez la version installée."
 }

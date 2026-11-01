@@ -180,7 +180,11 @@ IP egress. Windows Server IPv4, true dual-stack Windows/Android, QUIC/WebRTC,
 connect/disconnect cleanup, user proxy-only modes and Smart App Control remain
 separate runtime acceptance requirements. No device leak fix is claimed here.
 
-The Windows preview installer uses its own AppId and user-local program folder.
+The Windows preview installer uses its own AppId and a fixed Program Files folder
+with administrator installation. User-local previous directories are not reused.
 It does not install, delete or stop a shared FlClash helper during install or
-uninstall, and keeps user data. Helper/UAC behavior still requires platform
+uninstall, and keeps user data. An already elevated process uses its own direct
+core. A copy in a user directory cannot use or register the persistent helper; it
+requires an elevated direct core for TUN. A managed TUN permission failure stops the connection instead of switching to
+proxy-only operation. Helper/UAC behavior still requires platform
 acceptance. All preview Windows binaries are unsigned.

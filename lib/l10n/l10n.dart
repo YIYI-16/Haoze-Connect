@@ -8372,6 +8372,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request.`
+  String get haozeWindowsTunAuthorizationFailed {
+    return Intl.message(
+      'TUN permission was not granted. Run the portable app as administrator, or approve the installed app permission request.',
+      name: 'haozeWindowsTunAuthorizationFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

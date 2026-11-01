@@ -46,7 +46,7 @@ jobs:
           rustup toolchain install 1.99.0 --profile minimal
           rustup default 1.99.0
       - run: flutter analyze --no-fatal-infos --no-pub
-      - run: flutter test --no-pub test/features/haoze test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
+      - run: flutter test --no-pub test/features/haoze test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/common/system_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
       - name: Generate native routing fixture
         run: dart --packages=.dart_tool/package_config.json tool/haoze_route_fixture.dart "$RUNNER_TEMP/haoze-routing.yaml"
       - name: Test offline routing with the pinned Mihomo core
@@ -80,6 +80,17 @@ jobs:
       - run: flutter pub get
       - name: Build account UI and Windows native runtime
         run: flutter build windows --release --no-pub --dart-define=APP_ENV=pre
+      - name: Verify Windows token elevation reader
+        run: |
+          & dart run tool/haoze_windows_privilege_probe.dart "$env:RUNNER_TEMP\haoze-privilege.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $haozePrivilege = Get-Content -Raw "$env:RUNNER_TEMP\haoze-privilege.json" | ConvertFrom-Json
+          $haozeProtected = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion').ProgramFilesDir
+          if ($haozeProtected -notin $haozePrivilege.programDirectories) { throw 'Program Files registry read mismatch' }
+          $haozeIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
+          $haozePrincipal = [Security.Principal.WindowsPrincipal]::new($haozeIdentity)
+          $haozeExpected = $haozePrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          if ($haozePrivilege.elevated -ne $haozeExpected) { throw 'Windows token privilege mismatch' }
       - name: Compile isolated panel probe
         working-directory: packages/haoze_xboard
         run: |

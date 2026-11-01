@@ -999,5 +999,6 @@
   "haozeRefresh": "使用量を更新",
   "haozeReady": "設定の準備完了",
   "haozeNotReady": "設定の準備待ち",
-  "haozeNoUpdateInfo": "新しいダウンロード情報を取得できませんでした。パネルの設定を確認するか、後で再試行してください。"
+  "haozeNoUpdateInfo": "新しいダウンロード情報を取得できませんでした。パネルの設定を確認するか、後で再試行してください。",
+  "haozeWindowsTunAuthorizationFailed": "TUNの権限がありません。ポータブル版は管理者として実行し、インストール版ではシステムの権限要求を承認してください。"
 }

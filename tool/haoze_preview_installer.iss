@@ -4,9 +4,11 @@ AppName=Haoze Connect Mihomo Preview
 AppVersion=6.0.0
 AppPublisher=Haoze
 AppPublisherURL=https://www.haoze.cyou
-DefaultDirName={localappdata}\Programs\HaozeConnectMihomoPreview
+DefaultDirName={autopf64}\HaozeConnectMihomoPreview
 DefaultGroupName=Haoze Connect Mihomo Preview
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
+UsePreviousAppDir=no
+DisableDirPage=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\build\haoze-installer
@@ -21,7 +23,7 @@ WizardStyle=modern
 Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{userprograms}\Haoze Connect Mihomo Preview"; Filename: "{app}\HaozeConnectMihomo.exe"
+Name: "{autoprograms}\Haoze Connect Mihomo Preview"; Filename: "{app}\HaozeConnectMihomo.exe"
 
 [Run]
 Filename: "{app}\HaozeConnectMihomo.exe"; Flags: postinstall nowait skipifsilent unchecked
