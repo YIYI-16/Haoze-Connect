@@ -76,7 +76,10 @@ class SigningPreparationTest(unittest.TestCase):
         ranges = ''.join(f'Signer (minSdkVersion={start}, maxSdkVersion={end}) certificate SHA-256 digest: {pin}\n'
                          for start, end in [(33, 2147483647), (24, 32)])
         signing.verify_signature_output(prefix + ranges)
+        signing.verify_signature_output(prefix + f'V2 Signer: certificate SHA-256 digest: {pin}\n')
+        signing.verify_signature_output(prefix + f'V2 Signer: certificate SHA-256 digest: {pin}\nV3.1 Signer (minSdkVersion=33, maxSdkVersion=2147483647): certificate SHA-256 digest: {pin}\n')
         for invalid in [prefix + ranges.replace(pin, 'b' * 64, 1),
+                        prefix + f'V2 Signer: certificate SHA-256 digest: {"b" * 64}\n',
                         prefix.replace('signers: 1', 'signers: 2') + ranges,
                         prefix + ranges + f'Signer #2 certificate SHA-256 digest: {pin}\n',
                         prefix, ranges]:

@@ -87,8 +87,8 @@ def android_tools():
 
 def verify_signature_output(signatures):
     lines = [line for line in signatures.splitlines()
-             if line.startswith('Signer ') and ' certificate SHA-256 digest:' in line]
-    pattern = re.compile(r'^Signer (?:#1|\(minSdkVersion=\d+(?: \(dev release=true\))?, maxSdkVersion=\d+\)) certificate SHA-256 digest: ([0-9a-fA-F]{64})$')
+             if ' certificate SHA-256 digest:' in line and not line.startswith('Source Stamp Signer')]
+    pattern = re.compile(r'^(?:Signer (?:#1|\(minSdkVersion=\d+(?: \(dev release=true\))?, maxSdkVersion=\d+\))|V[1-4](?:\.[0-9]+)? Signer(?: #[0-9]+| \(minSdkVersion=[^\r\n]+\))?):? certificate SHA-256 digest: ([0-9a-fA-F]{64})$')
     matches = [pattern.fullmatch(line) for line in lines]
     certificates = [match[1].lower() for match in matches if match]
     if ('Number of signers: 1' not in signatures.splitlines() or not lines or
