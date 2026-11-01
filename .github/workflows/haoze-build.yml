@@ -134,6 +134,19 @@ jobs:
           rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android
           rustup default 1.99.0
       - run: flutter pub get
+      - name: Prepare Gradle wrapper for JVM tests
+        working-directory: android
+        run: |
+          {
+            echo "flutter.sdk=$FLUTTER_ROOT"
+            echo "sdk.dir=$ANDROID_HOME"
+          } > local.properties
+          wrapper="$FLUTTER_ROOT/bin/cache/artifacts/gradle_wrapper"
+          if [ ! -d "$wrapper" ]; then
+            flutter precache --android
+          fi
+          cp -R "$wrapper/." .
+          chmod +x gradlew
       - name: Test Android account lifecycle gate
         working-directory: android
         run: ./gradlew :app:testDebugUnitTest -Ptarget-platform=android-arm64 -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
