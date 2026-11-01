@@ -1,7 +1,7 @@
 [Setup]
 AppId={{98273092-7dae-4b33-9b79-69400bf8f086}
 AppName=Haoze Connect Mihomo Preview
-AppVersion=6.0.0
+AppVersion=6.0.1
 AppPublisher=Haoze
 AppPublisherURL=https://www.haoze.cyou
 DefaultDirName={autopf64}\HaozeConnectMihomoPreview
