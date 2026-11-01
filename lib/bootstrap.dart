@@ -108,7 +108,7 @@ class Bootstrap {
         vpnProps: config.vpnProps.copyWith(ipv6: true, allowBypass: false),
         patchClashConfig: config.patchClashConfig.copyWith(
           tun: config.patchClashConfig.tun.copyWith(
-            enable: true,
+            enable: system.isWindows,
             device: 'HaozeMihomo',
           ),
         ),

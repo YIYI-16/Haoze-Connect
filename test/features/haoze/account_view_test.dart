@@ -144,6 +144,17 @@ class _DeniedAuthorizationSetup extends _FailedProfileSetup {
   }
 }
 
+class _NativeVpnAuthorizationSetup extends _DeniedAuthorizationSetup {
+  int desktopRequests = 0;
+  @override
+  bool get usesNativeVpnPermission => true;
+  @override
+  Future<AuthorizeCode> authorizeCore() async {
+    desktopRequests++;
+    return AuthorizeCode.error;
+  }
+}
+
 void main() {
   const captures = String.fromEnvironment('HAOZE_PREVIEW_DIR');
   final boundaryKey = GlobalKey();
@@ -403,6 +414,30 @@ void main() {
     },
   );
 
+  test(
+    'native mobile VPN never enters desktop administrator authorization',
+    () async {
+      final setup = _NativeVpnAuthorizationSetup();
+      final container = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => setup)],
+      );
+      addTearDown(container.dispose);
+      container.listen(patchClashConfigProvider, (_, _) {});
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((value) => value.copyWith.tun(enable: true));
+      expect(
+        await container.read(setupActionProvider.notifier).requestAdmin(true),
+        true,
+      );
+      expect(setup.desktopRequests, 0);
+      expect(container.read(patchClashConfigProvider).tun.enable, true);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.none,
+      );
+    },
+  );
   test(
     'managed permission denial stops without downgrading to proxy only',
     () async {

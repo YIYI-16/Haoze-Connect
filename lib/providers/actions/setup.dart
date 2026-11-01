@@ -686,9 +686,12 @@ class SetupAction extends _$SetupAction {
     return system.authorizeCore();
   }
 
+  @protected
+  bool get usesNativeVpnPermission => system.isAndroid;
+
   @visibleForTesting
   Future<bool> requestAdmin(bool enableTun) async {
-    if (!enableTun || ref.read(safeModeProvider)) {
+    if (usesNativeVpnPermission || !enableTun || ref.read(safeModeProvider)) {
       return true;
     }
     final authorizationState = ref.read(authorizedTunEnableProvider);
