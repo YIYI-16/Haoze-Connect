@@ -44,7 +44,7 @@ void main() {
       setGlobalUa('');
 
       expect(globalState.ua, _packageInfo.ua);
-      expect(globalState.ua, contains('Haoze Connect/v1.2.3'));
+      expect(globalState.ua, contains('Haoze/v1.2.3'));
     });
 
     test('prefers the configured global user agent', () {
