@@ -4,12 +4,12 @@
 
 [Setup]
 AppId={{98273092-7dae-4b33-9b79-69400bf8f086}
-AppName=Haoze Connect Mihomo
+AppName=Haoze
 AppVersion={#HaozeVersion}
 AppPublisher=Haoze
 AppPublisherURL=https://www.haoze.cyou
 DefaultDirName={autopf64}\HaozeConnectMihomoPreview
-DefaultGroupName=Haoze Connect Mihomo
+DefaultGroupName=Haoze
 PrivilegesRequired=admin
 UsePreviousAppDir=no
 DisableDirPage=yes
@@ -26,8 +26,11 @@ WizardStyle=modern
 [Files]
 Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[InstallDelete]
+Type: files; Name: "{autoprograms}\Haoze Connect Mihomo.lnk"
+
 [Icons]
-Name: "{autoprograms}\Haoze Connect Mihomo"; Filename: "{app}\HaozeConnectMihomo.exe"
+Name: "{autoprograms}\Haoze"; Filename: "{app}\HaozeConnectMihomo.exe"
 
 [Run]
 Filename: "{app}\HaozeConnectMihomo.exe"; Flags: postinstall nowait skipifsilent unchecked

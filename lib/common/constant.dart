@@ -9,9 +9,12 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
+// Keep integration keys and existing backup collections stable across branding changes.
+const appPersistenceName = 'Haoze Connect';
+
 const appName = String.fromEnvironment(
   'XBOARD_APP_NAME',
-  defaultValue: 'Haoze Connect',
+  defaultValue: 'Haoze',
 );
 const appHelperService = 'FlClashHelperService';
 const coreManifestName = 'manifest.json';

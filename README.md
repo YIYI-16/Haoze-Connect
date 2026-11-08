@@ -1,4 +1,4 @@
-> **Haoze Connect — unified account integration.** This branch contains the 6.1.0
+> **Haoze — unified account integration.** This branch contains the 6.1.1
 > AuthRouter account update for `https://www.haoze.cyou`, based on the upstream
 > FlClash v0.9.2 code retained below. It is not a published stable release.
 > See [unified login and release requirements](UNIFIED-ACCOUNT.md) and [integration status and API contracts](packages/haoze_xboard/README.md).

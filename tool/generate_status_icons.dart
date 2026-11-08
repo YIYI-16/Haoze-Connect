@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'src/icons/ico.dart';
+import 'generate_haoze_branding.dart' as haoze;
 
 const sourceDir = 'assets_source/images/icon';
 const pngOutputDir = 'assets/images/tray/unix';
@@ -63,6 +64,7 @@ Future<void> main() async {
     }
     final appIcon = await renderer.wrapRaster(File(appIconSource));
     await _writeIco(renderer, appIcon, File(appIconOutput));
+    await haoze.generateHaozeBranding();
   } finally {
     if (tempDir.existsSync()) {
       await tempDir.delete(recursive: true);
