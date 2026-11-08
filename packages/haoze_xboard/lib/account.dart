@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'browser_auth.dart';
 
 import 'haoze_xboard.dart';
 
@@ -135,7 +136,12 @@ class XboardAccountController {
 
   bool ownsProfile(int id) => !_revoked && _account?.profileId == id;
 
-  Set<String> get directHosts => {origin.host, ?_account?.subscriptionHost};
+  Set<String> get directHosts => {
+    origin.host,
+    'account.zhouhaoze.com',
+    'sso.zhouhaoze.com',
+    ?_account?.subscriptionHost,
+  };
 
   bool canResumeProfile(int? id) =>
       !_revoked &&
@@ -197,6 +203,28 @@ class XboardAccountController {
   Future<void> login(String email, String password) =>
       _authenticate(email, () => client.login(email, password));
 
+  Future<void> loginWithBrowser(
+    Future<XboardBrowserAccount> Function() authenticate,
+  ) => _serial(() async {
+    if (_account != null) return;
+    try {
+      final account = await authenticate();
+      if (!_closed) await _acceptSession(account.email, account.session);
+    } on XboardLoginCancelled {
+      // Cancelling the browser is an ordinary exit, not a credential failure.
+    } on XboardException catch (error) {
+      _emit(
+        state.copy(
+          issue: error.kind == XboardFailure.unauthorized
+              ? XboardAccountIssue.credentials
+              : XboardAccountIssue.network,
+        ),
+      );
+    } catch (_) {
+      _emit(state.copy(issue: XboardAccountIssue.network));
+    }
+  });
+
   Future<void> register(
     String email,
     String password, {
@@ -249,6 +277,10 @@ class XboardAccountController {
       );
       return;
     }
+    if (!_closed) await _acceptSession(email, session);
+  });
+
+  Future<void> _acceptSession(String email, XboardSession session) async {
     final account = XboardSavedAccount(
       origin: origin.origin,
       email: email.trim(),
@@ -270,7 +302,7 @@ class XboardAccountController {
       ),
     );
     await _refresh(syncProfile: true);
-  });
+  }
 
   Future<void> refresh({bool syncProfile = false}) {
     if (_refreshing case final pending?) return pending;

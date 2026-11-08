@@ -877,8 +877,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groups"),
     "groupTimeoutCount": m33,
     "haozeAccount": MessageLookupByLibrary.simpleMessage("Account"),
+    "haozeAccountSecurity": MessageLookupByLibrary.simpleMessage(
+      "Account & security",
+    ),
     "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage(
       "I agree to the terms of service",
+    ),
+    "haozeBrowserPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Your browser handles authentication. This app never receives your account password.",
+    ),
+    "haozeBrowserWaiting": MessageLookupByLibrary.simpleMessage(
+      "Complete sign-in in your browser, then return to this app.",
     ),
     "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
       "This panel requires a security check. Create your account on the website, then sign in here.",
@@ -907,6 +916,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("Last refreshed"),
     "haozeLogin": MessageLookupByLibrary.simpleMessage("Sign in"),
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Sign out"),
+    "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
+      "Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).",
+    ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("No active plan"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "No newer download information was obtained. Check the panel configuration or retry later.",
@@ -937,6 +949,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeSync": MessageLookupByLibrary.simpleMessage("Sync subscription"),
     "haozeTerms": MessageLookupByLibrary.simpleMessage("Read terms"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("Total quota"),
+    "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage(
+      "Sign in with Haoze",
+    ),
+    "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
+      "Use your unified account with a password, email code, Google or Passkey.",
+    ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("No expiry"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(
       "Checking for updates…",
@@ -1079,9 +1097,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Enter the rule content",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),

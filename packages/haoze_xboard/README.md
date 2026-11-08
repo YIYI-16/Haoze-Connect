@@ -1,4 +1,4 @@
-# Haoze Xboard integration prototype
+# Haoze XBoard account integration
 
 The application baseline is FlClash v0.9.2, commit
 `7fd417fb9a9a277c6a9339a8ac87f907df7c25f7`; its core submodule is
@@ -6,9 +6,9 @@ The application baseline is FlClash v0.9.2, commit
 copied into this prototype. FlClash's GPLv3 license and attribution remain.
 
 `packages/haoze_xboard` is an independent account/configuration module. The
-integration now connects it to fresh FlClash login/registration/account views,
+integration connects it to unified browser login and native account views,
 system secure storage, one managed profile and the existing lifecycle owners.
-The app version is 6.0.0 for the integration preview, not a published release.
+The current update is 6.1.0; release publication is separate from source validation.
 No affected-device HTTPS fix or complete routing/IPv6 acceptance is claimed.
 
 ## Backend evidence
@@ -41,10 +41,8 @@ key, server token or administrator route belongs in the app.
 
 | Request | Authentication | Use |
 | --- | --- | --- |
-| GET `/api/v1/guest/comm/config` | None | Actual registration verification/invite requirements |
-| POST `/api/v1/passport/auth/login` | Email/password JSON | Returns the two distinct credentials below |
-| POST `/api/v1/passport/auth/register` | Email/password; required verification fields | Register and receive credentials |
-| POST `/api/v1/passport/comm/sendEmailVerify` | Email and required captcha fields | Request an email code |
+| GET `/api/v1/account-bridge/app/login` | Fresh state + S256 challenge | Start browser OIDC authentication |
+| POST `/api/v1/account-bridge/app/exchange` | One-use code + PKCE verifier | Receive the verified email and two credentials below |
 | GET `/api/v1/user/info` | Exact `Authorization: <auth_data>` | Account information |
 | GET `/api/v1/user/getSubscribe` | Exact `Authorization: <auth_data>` | Traffic, expiry and real subscription URL |
 | GET `/api/v1/client/app/getVersion?token=<subscription-token>` | Subscription token, not Bearer | Screenshot's platform versions/downloads |
@@ -106,7 +104,7 @@ First launch opens the managed account screen without the upstream
 no-service restatement gate; no upstream consent version is silently accepted.
 The GPL license and upstream attribution remain available.
 
-Login/registration automatically obtains a Meta subscription, downloads it over
+Unified login automatically obtains a Meta subscription, downloads it over
 an isolated strictly verified transport, validates it with the core, and selects
 one account-owned file profile. The URL is not retained in ordinary profile
 metadata. A content comparison skips unchanged configuration; usage refresh does
@@ -120,10 +118,13 @@ attempts immediately, stops the tunnel and removes only the managed profile.
 A secure-store failure remains visible and requires a cleanup retry; the locked
 session cannot reactivate. This is local sign-out, not server-session revocation.
 
-Registration honors email verification, forced invitation and terms. Panels
-requiring interactive CAPTCHA direct registration to the website; password
-login stays available. Updates use `/client/app/getVersion` and open a validated
-HTTPS download link only after confirmation. Empty/invalid update metadata does
+Registration, email verification, first-password confirmation, Google, Passkey
+and password-only MFA are handled by the existing unified account service in the
+system browser. The native UI no longer sends passwords or registration codes
+to XBoard. Legacy SDK methods remain for compatibility and isolated regression
+tests; the application never calls them. See [the current auth contract](../../UNIFIED-ACCOUNT.md).
+Updates use `/client/app/getVersion` and retain signature/checksum verification.
+Empty/invalid update metadata does
 not invalidate the account. No automatic upstream updater is started.
 
 Android's native state machine independently rejects a start without a live
@@ -148,7 +149,7 @@ the user's affected Windows/Android devices. Those remain UNKNOWN.
 ## China routing and IPv6 policy
 
 The managed subscription and final generated configuration both apply the same
-policy after user/configuration overlays. API and subscription hosts go DIRECT;
+policy after user/configuration overlays. API, account, SSO and subscription hosts go DIRECT;
 Chinese domain/IP fallback rules go DIRECT while explicit subscription routes
 and rejections retain their priority. HTTP/TLS/QUIC name inspection also classifies real-IP
 connections whose DNS result was cached before VPN startup, without changing the

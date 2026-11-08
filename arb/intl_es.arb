@@ -1017,5 +1017,11 @@
   "haozeUpdateOpening": "Abriendo el instalador del sistema…",
   "haozeUpdatePanelAccess": "El panel denegó el acceso a la API de versiones. Solicita al administrador que habilite la búsqueda pública de actualizaciones.",
   "haozeUpdatePanelConfiguration": "El panel no tiene una versión y una URL de descarga válidas para esta plataforma. Contacta con el administrador.",
-  "haozeUpdateInstallFailed": "No se pudo abrir el instalador. Reinténtalo o comprueba los permisos de instalación."
+  "haozeUpdateInstallFailed": "No se pudo abrir el instalador. Reinténtalo o comprueba los permisos de instalación.",
+  "haozeUnifiedLogin": "Iniciar sesión con Haoze",
+  "haozeUnifiedLoginDescription": "Usa tu cuenta unificada con contraseña, código por correo, Google o Passkey.",
+  "haozeBrowserWaiting": "Completa el inicio de sesión en el navegador y vuelve a la aplicación.",
+  "haozeBrowserPrivacy": "La autenticación se realiza en el navegador. La aplicación nunca recibe la contraseña de tu cuenta.",
+  "haozeMigrationNotice": "Usuarios de XBoard: confirma una contraseña de al menos 6 caracteres al iniciar sesión por primera vez. Puedes usar la anterior.",
+  "haozeAccountSecurity": "Cuenta y seguridad"
 }

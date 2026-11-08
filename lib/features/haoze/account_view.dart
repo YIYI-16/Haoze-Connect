@@ -63,95 +63,20 @@ class _AuthenticationPage extends ConsumerStatefulWidget {
 }
 
 class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  final _confirmation = TextEditingController();
-  final _emailCode = TextEditingController();
-  final _invite = TextEditingController();
-  bool _register = false;
-  bool _termsAccepted = false;
-  bool _invalid = false;
-  bool _codeSent = false;
   bool _submitting = false;
-  int _cooldown = 0;
-  Timer? _timer;
-
-  XboardAccountController get _controller =>
-      ref.read(haozeAccountProvider.notifier).controller;
 
   Future<void> _submit() async {
     if (_submitting) return;
-    final state = ref.read(haozeAccountProvider);
-    final config = state.config ?? {};
-    final invalid =
-        !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(_email.text.trim()) ||
-        _password.text.isEmpty ||
-        (_register &&
-            (_password.text.length < 8 ||
-                _password.text != _confirmation.text ||
-                (enabled(config['is_email_verify']) &&
-                    _emailCode.text.trim().isEmpty) ||
-                (enabled(config['is_invite_force']) &&
-                    _invite.text.trim().isEmpty)));
-    setState(() => _invalid = invalid);
-    if (invalid || state.busy || !ref.read(initProvider)) return;
-    _submitting = true;
+    setState(() => _submitting = true);
+    final browser = ref.read(haozeBrowserLoginProvider);
     try {
-      if (_register) {
-        if ((config['tos_url'] is String &&
-                (config['tos_url'] as String).isNotEmpty &&
-                !_termsAccepted) ||
-            config.isEmpty ||
-            enabled(config['is_captcha']) ||
-            enabled(config['is_recaptcha'])) {
-          return;
-        }
-        await _controller.register(
-          _email.text,
-          _password.text,
-          emailCode: _emailCode.text.trim(),
-          inviteCode: _invite.text.trim(),
-        );
-      } else {
-        await _controller.login(_email.text, _password.text);
-      }
+      await ref
+          .read(haozeAccountProvider.notifier)
+          .controller
+          .loginWithBrowser(browser.login);
     } finally {
-      _submitting = false;
+      if (mounted) setState(() => _submitting = false);
     }
-  }
-
-  Future<void> _sendCode() async {
-    if (_cooldown > 0 || ref.read(haozeAccountProvider).busy) return;
-    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(_email.text.trim())) {
-      setState(() => _invalid = true);
-      return;
-    }
-    await _controller.sendEmailCode(_email.text.trim());
-    if (!mounted || ref.read(haozeAccountProvider).issue != null) return;
-    setState(() {
-      _cooldown = 60;
-      _codeSent = true;
-    });
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      setState(() => _cooldown--);
-      if (_cooldown == 0) timer.cancel();
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _email.dispose();
-    _password.dispose();
-    _confirmation.dispose();
-    _emailCode.dispose();
-    _invite.dispose();
-    super.dispose();
   }
 
   @override
@@ -159,17 +84,7 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
     final state = ref.watch(haozeAccountProvider);
     final initialized = ref.watch(initProvider);
     final l10n = context.appLocalizations;
-    final config = state.config;
-    final captcha =
-        enabled(config?['is_captcha']) || enabled(config?['is_recaptcha']);
-    final terms = config?['tos_url'];
-    final hasTerms = terms is String && terms.isNotEmpty;
-    final canRegister =
-        config != null &&
-        !captcha &&
-        !enabled(config['stop_register']) &&
-        (!hasTerms || _termsAccepted);
-    final ready = !state.busy && initialized && (!_register || canRegister);
+    final busy = _submitting || state.busy;
     return CommonScaffold(
       title: appName,
       body: Builder(
@@ -184,135 +99,54 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
-              child: AutofillGroup(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 16,
-                  children: [
-                    Text(
-                      _register ? l10n.haozeRegister : l10n.haozeLogin,
-                      style: AppTextStyle.title1.of(context),
-                    ),
-                    ErrorBanner(
-                      message: _invalid
-                          ? l10n.haozeInvalidForm
-                          : _issue(context, state.issue),
-                    ),
-                    if (_register && state.configFailed) ...[
-                      ErrorBanner(message: l10n.haozeConfigError),
-                      TextButton(
-                        onPressed: state.busy ? null : _controller.loadConfig,
-                        child: Text(l10n.retry),
-                      ),
-                    ],
-                    if (_register && captcha) Text(l10n.haozeCaptchaWebsite),
-                    TextFormField(
-                      key: const ValueKey('haoze-email'),
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      autofillHints: const [AutofillHints.username],
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(labelText: l10n.haozeEmail),
-                    ),
-                    SecretTextFormField(
-                      key: const ValueKey('haoze-password'),
-                      controller: _password,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) {
-                        if (ready) unawaited(_submit());
-                      },
-                      decoration: InputDecoration(labelText: l10n.password),
-                    ),
-                    if (_register) ...[
-                      SecretTextFormField(
-                        key: const ValueKey('haoze-confirmation'),
-                        controller: _confirmation,
-                        decoration: InputDecoration(
-                          labelText: l10n.haozeConfirmPassword,
-                        ),
-                      ),
-                      if (enabled(config?['is_email_verify'])) ...[
-                        TextFormField(
-                          key: const ValueKey('haoze-email-code'),
-                          controller: _emailCode,
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                            labelText: l10n.haozeEmailCode,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: state.busy || captcha || _cooldown > 0
-                              ? null
-                              : _sendCode,
-                          child: Text(
-                            _cooldown > 0
-                                ? '${l10n.haozeSendCode} ($_cooldown)'
-                                : l10n.haozeSendCode,
-                          ),
-                        ),
-                        if (_codeSent) Text(l10n.haozeCodeSent),
-                      ],
-                      TextFormField(
-                        key: const ValueKey('haoze-invite'),
-                        controller: _invite,
-                        autocorrect: false,
-                        decoration: InputDecoration(
-                          labelText: l10n.haozeInviteCode,
-                        ),
-                      ),
-                      if (hasTerms) ...[
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _termsAccepted,
-                          onChanged: state.busy
-                              ? null
-                              : (value) => setState(
-                                  () => _termsAccepted = value == true,
-                                ),
-                          title: Text(l10n.haozeAgreeTerms),
-                        ),
-                        TextButton(
-                          onPressed: () => _openWebsite(terms),
-                          child: Text(l10n.haozeTerms),
-                        ),
-                      ],
-                    ],
-                    FilledButton(
-                      key: const ValueKey('haoze-submit'),
-                      onPressed: ready ? _submit : null,
-                      child: Text(
-                        _register ? l10n.haozeRegister : l10n.haozeLogin,
-                      ),
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 20,
+                children: [
+                  Text(
+                    l10n.haozeUnifiedLogin,
+                    style: AppTextStyle.title1.of(context),
+                  ),
+                  Text(l10n.haozeUnifiedLoginDescription),
+                  ErrorBanner(message: _issue(context, state.issue)),
+                  if (_submitting) Text(l10n.haozeBrowserWaiting),
+                  FilledButton(
+                    key: const ValueKey('haoze-submit'),
+                    onPressed: busy || !initialized ? null : _submit,
+                    child: Text(l10n.haozeUnifiedLogin),
+                  ),
+                  if (_submitting)
                     TextButton(
-                      key: const ValueKey('haoze-auth-toggle'),
-                      onPressed: state.busy
-                          ? null
-                          : () {
-                              setState(() {
-                                _register = !_register;
-                                _invalid = false;
-                              });
-                              if (_register && config == null) {
-                                unawaited(_controller.loadConfig());
-                              }
-                            },
-                      child: Text(
-                        _register ? l10n.haozeLogin : l10n.haozeRegister,
-                      ),
+                      key: const ValueKey('haoze-login-cancel'),
+                      onPressed: () =>
+                          ref.read(haozeBrowserLoginProvider).cancel(),
+                      child: Text(l10n.cancel),
                     ),
-                    TextButton(
-                      onPressed: () => _openWebsite(haozePanelUrl),
-                      child: Text(l10n.haozeWebsite),
-                    ),
-                    TextButton(
-                      key: const ValueKey('haoze-auth-update'),
-                      onPressed: () => showHaozeUpdateDialog(context),
-                      child: Text(l10n.checkUpdate),
-                    ),
-                  ],
-                ),
+                  Text(
+                    l10n.haozeBrowserPrivacy,
+                    style: AppTextStyle.footnote.of(context),
+                  ),
+                  Text(
+                    l10n.haozeMigrationNotice,
+                    style: AppTextStyle.footnote.of(context),
+                  ),
+                  OutlinedButton(
+                    key: const ValueKey('haoze-register-website'),
+                    onPressed: busy
+                        ? null
+                        : () => _openWebsite(haozeAccountUrl),
+                    child: Text(l10n.haozeRegister),
+                  ),
+                  TextButton(
+                    onPressed: () => _openWebsite(haozePanelUrl),
+                    child: Text(l10n.haozeWebsite),
+                  ),
+                  TextButton(
+                    key: const ValueKey('haoze-auth-update'),
+                    onPressed: () => showHaozeUpdateDialog(context),
+                    child: Text(l10n.checkUpdate),
+                  ),
+                ],
               ),
             ),
           ),
@@ -362,6 +196,12 @@ class HaozeAccountView extends ConsumerWidget {
                       ? null
                       : () => controller.refresh(syncProfile: true),
                   child: Text(l10n.haozeSync),
+                ),
+                OutlinedButton(
+                  key: const ValueKey('haoze-account-security'),
+                  onPressed: () =>
+                      _openWebsite('$haozeAccountUrl/auth/login?next=security'),
+                  child: Text(l10n.haozeAccountSecurity),
                 ),
                 TextButton(
                   onPressed: state.busy ? null : controller.logout,

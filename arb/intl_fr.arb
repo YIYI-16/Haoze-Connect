@@ -1017,5 +1017,11 @@
   "haozeUpdateOpening": "Ouverture du programme d’installation système…",
   "haozeUpdatePanelAccess": "L’accès à l’API de version du panneau a été refusé. Demandez à l’administrateur d’activer la vérification publique des mises à jour.",
   "haozeUpdatePanelConfiguration": "La version et l’URL de téléchargement de cette plateforme ne sont pas correctement configurées. Contactez l’administrateur.",
-  "haozeUpdateInstallFailed": "Impossible d’ouvrir le programme d’installation. Réessayez ou vérifiez les autorisations."
+  "haozeUpdateInstallFailed": "Impossible d’ouvrir le programme d’installation. Réessayez ou vérifiez les autorisations.",
+  "haozeUnifiedLogin": "Se connecter avec Haoze",
+  "haozeUnifiedLoginDescription": "Utilisez votre compte unifié avec un mot de passe, un code par e-mail, Google ou Passkey.",
+  "haozeBrowserWaiting": "Terminez la connexion dans votre navigateur, puis revenez dans l’application.",
+  "haozeBrowserPrivacy": "L’authentification se déroule dans le navigateur. Cette application ne reçoit jamais votre mot de passe.",
+  "haozeMigrationNotice": "Utilisateurs XBoard existants : confirmez un mot de passe d’au moins 6 caractères à la première connexion. L’ancien est accepté.",
+  "haozeAccountSecurity": "Compte et sécurité"
 }

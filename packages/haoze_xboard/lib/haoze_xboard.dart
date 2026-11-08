@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'browser_auth.dart';
 
 enum XboardFailure {
   configuration,
@@ -247,6 +248,23 @@ class XboardClient {
   Future<Map<String, dynamic>> publicConfig() =>
       _request('GET', 'guest/comm/config');
 
+  Future<XboardBrowserAccount> exchangeBrowserGrant(
+    String code,
+    String verifier,
+  ) async {
+    final data = await _request(
+      'POST',
+      'account-bridge/app/exchange',
+      body: {'code': code, 'code_verifier': verifier},
+    );
+    final email = data['email'];
+    if (email is! String ||
+        !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+      throw const XboardException(XboardFailure.protocol);
+    }
+    return XboardBrowserAccount(email: email, session: _session(data));
+  }
+
   Future<XboardSession> login(String email, String password) async => _session(
     await _request(
       'POST',
@@ -330,7 +348,7 @@ class XboardClient {
     );
     final response = await _transport.send(method, uri, {
       'Accept': 'application/json',
-      'User-Agent': 'HaozeConnect-Prototype/0.1.0',
+      'User-Agent': 'HaozeConnect/6.1.0',
       if (session != null) 'Authorization': session.authorization,
     }, body);
     if (response.statusCode < 200 || response.statusCode >= 300) {

@@ -732,7 +732,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("개"),
     "groupTimeoutCount": m33,
     "haozeAccount": MessageLookupByLibrary.simpleMessage("계정"),
+    "haozeAccountSecurity": MessageLookupByLibrary.simpleMessage("계정 및 보안"),
     "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage("서비스 약관에 동의합니다"),
+    "haozeBrowserPrivacy": MessageLookupByLibrary.simpleMessage(
+      "인증은 브라우저에서 진행됩니다. 앱은 통합 계정 비밀번호를 받지 않습니다.",
+    ),
+    "haozeBrowserWaiting": MessageLookupByLibrary.simpleMessage(
+      "브라우저에서 로그인을 완료한 다음 앱으로 돌아오세요.",
+    ),
     "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
       "보안 확인이 필요합니다. 웹사이트에서 가입한 후 여기서 로그인하세요.",
     ),
@@ -758,6 +765,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("최근 새로고침"),
     "haozeLogin": MessageLookupByLibrary.simpleMessage("로그인"),
     "haozeLogout": MessageLookupByLibrary.simpleMessage("로그아웃"),
+    "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
+      "기존 XBoard 사용자는 첫 로그인 시 6자 이상의 비밀번호를 확인해야 합니다. 기존 비밀번호도 사용할 수 있습니다.",
+    ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("사용 가능한 요금제 없음"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "새 다운로드 정보를 가져오지 못했습니다. 패널 설정을 확인하거나 나중에 다시 시도하세요.",
@@ -784,6 +794,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeSync": MessageLookupByLibrary.simpleMessage("구독 동기화"),
     "haozeTerms": MessageLookupByLibrary.simpleMessage("약관 보기"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("총 데이터"),
+    "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("Haoze로 로그인"),
+    "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
+      "비밀번호, 이메일 인증 코드, Google 또는 Passkey로 통합 계정에 로그인하세요.",
+    ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("만료 없음"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("업데이트 확인 중…"),
     "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("최신 버전입니다"),

@@ -911,8 +911,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("групп"),
     "groupTimeoutCount": m33,
     "haozeAccount": MessageLookupByLibrary.simpleMessage("Аккаунт"),
+    "haozeAccountSecurity": MessageLookupByLibrary.simpleMessage(
+      "Аккаунт и безопасность",
+    ),
     "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage(
       "Я принимаю условия использования",
+    ),
+    "haozeBrowserPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Проверка проходит в браузере. Приложение не получает пароль вашей учётной записи.",
+    ),
+    "haozeBrowserWaiting": MessageLookupByLibrary.simpleMessage(
+      "Завершите вход в браузере и вернитесь в приложение.",
     ),
     "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
       "Панель требует проверку. Зарегистрируйтесь на сайте, затем войдите здесь.",
@@ -943,6 +952,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeLogin": MessageLookupByLibrary.simpleMessage("Войти"),
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Выйти"),
+    "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
+      "Пользователям XBoard при первом входе нужно подтвердить пароль: минимум 6 символов, можно использовать прежний.",
+    ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Нет активного тарифа"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "Новые данные о загрузке не получены. Проверьте настройки панели или повторите позже.",
@@ -973,6 +985,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeTerms": MessageLookupByLibrary.simpleMessage("Условия использования"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("Общий лимит"),
+    "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage(
+      "Войти через Haoze",
+    ),
+    "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
+      "Единая учётная запись: пароль, код из письма, Google или Passkey.",
+    ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(
       "Проверка обновлений…",
@@ -1115,9 +1133,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Введите содержимое правила",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),

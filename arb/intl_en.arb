@@ -1017,5 +1017,11 @@
   "haozeUpdateOpening": "Opening the system installer…",
   "haozeUpdatePanelAccess": "The panel version endpoint denied access. Ask the administrator to enable public update checks.",
   "haozeUpdatePanelConfiguration": "The panel has not configured a valid version and download URL for this platform. Contact the administrator.",
-  "haozeUpdateInstallFailed": "The installer could not be opened. Retry or check installation permissions."
+  "haozeUpdateInstallFailed": "The installer could not be opened. Retry or check installation permissions.",
+  "haozeUnifiedLogin": "Sign in with Haoze",
+  "haozeUnifiedLoginDescription": "Use your unified account with a password, email code, Google or Passkey.",
+  "haozeBrowserWaiting": "Complete sign-in in your browser, then return to this app.",
+  "haozeBrowserPrivacy": "Your browser handles authentication. This app never receives your account password.",
+  "haozeMigrationNotice": "Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).",
+  "haozeAccountSecurity": "Account & security"
 }

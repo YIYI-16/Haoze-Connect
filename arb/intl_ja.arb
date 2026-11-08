@@ -1017,5 +1017,11 @@
   "haozeUpdateOpening": "システムのインストーラーを開いています…",
   "haozeUpdatePanelAccess": "パネルのバージョン API へのアクセスが拒否されました。公開更新チェックを有効にするよう管理者に連絡してください。",
   "haozeUpdatePanelConfiguration": "このプラットフォームのバージョンとダウンロード URL が正しく設定されていません。管理者に連絡してください。",
-  "haozeUpdateInstallFailed": "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。"
+  "haozeUpdateInstallFailed": "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。",
+  "haozeUnifiedLogin": "Haoze でログイン",
+  "haozeUnifiedLoginDescription": "パスワード、メール認証コード、Google、Passkey で統一アカウントにログインします。",
+  "haozeBrowserWaiting": "ブラウザでログインを完了してから、アプリに戻ってください。",
+  "haozeBrowserPrivacy": "認証はブラウザで行います。アプリはアカウントのパスワードを受け取りません。",
+  "haozeMigrationNotice": "既存の XBoard ユーザーは初回ログイン時に 6 文字以上のパスワードを確認してください。以前と同じものも使えます。",
+  "haozeAccountSecurity": "アカウントとセキュリティ"
 }

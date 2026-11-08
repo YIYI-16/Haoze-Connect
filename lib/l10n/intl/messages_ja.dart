@@ -743,7 +743,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("個"),
     "groupTimeoutCount": m33,
     "haozeAccount": MessageLookupByLibrary.simpleMessage("アカウント"),
+    "haozeAccountSecurity": MessageLookupByLibrary.simpleMessage(
+      "アカウントとセキュリティ",
+    ),
     "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage("利用規約に同意する"),
+    "haozeBrowserPrivacy": MessageLookupByLibrary.simpleMessage(
+      "認証はブラウザで行います。アプリはアカウントのパスワードを受け取りません。",
+    ),
+    "haozeBrowserWaiting": MessageLookupByLibrary.simpleMessage(
+      "ブラウザでログインを完了してから、アプリに戻ってください。",
+    ),
     "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
       "このパネルは認証が必要です。サイトで登録後、ここでログインしてください。",
     ),
@@ -769,6 +778,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("最終更新"),
     "haozeLogin": MessageLookupByLibrary.simpleMessage("ログイン"),
     "haozeLogout": MessageLookupByLibrary.simpleMessage("ログアウト"),
+    "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
+      "既存の XBoard ユーザーは初回ログイン時に 6 文字以上のパスワードを確認してください。以前と同じものも使えます。",
+    ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("利用可能なプランなし"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "新しいダウンロード情報を取得できませんでした。パネルの設定を確認するか、後で再試行してください。",
@@ -795,6 +807,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeSync": MessageLookupByLibrary.simpleMessage("設定を同期"),
     "haozeTerms": MessageLookupByLibrary.simpleMessage("規約を読む"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("総容量"),
+    "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("Haoze でログイン"),
+    "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
+      "パスワード、メール認証コード、Google、Passkey で統一アカウントにログインします。",
+    ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("無期限"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("更新を確認しています…"),
     "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("最新バージョンです"),

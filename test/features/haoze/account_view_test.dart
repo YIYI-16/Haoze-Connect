@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:haoze_xboard/browser_auth.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -58,9 +60,15 @@ class _Transport implements XboardTransport {
   ) async {
     paths.add(uri.path);
     if (uri.path.endsWith('/register')) registrationBody = body;
-    if (uri.path.endsWith('/login') || uri.path.endsWith('/register')) {
-      return XboardResponse(rejectLogin ? 422 : 200, const {
-        'data': {'auth_data': 'Bearer unit', 'token': 'unit-subscription'},
+    if (uri.path.endsWith('/login') ||
+        uri.path.endsWith('/register') ||
+        uri.path.endsWith('/app/exchange')) {
+      return XboardResponse(rejectLogin ? 401 : 200, const {
+        'data': {
+          'email': 'user@example.com',
+          'auth_data': 'Bearer unit',
+          'token': 'unit-subscription',
+        },
       });
     }
     if (uri.path.endsWith('/config')) {
@@ -171,6 +179,11 @@ void main() {
   late _Transport transport;
   late _Profiles profiles;
   late XboardAccountController engine;
+  late XboardBrowserLogin browser;
+  late StreamController<Uri> links;
+  Uri? launched;
+  bool autoReturn = true;
+
   setUp(() async {
     transport = _Transport();
     profiles = _Profiles();
@@ -186,8 +199,37 @@ void main() {
     );
     await engine.restore();
     await engine.loadConfig();
+    launched = null;
+    autoReturn = true;
+    links = StreamController<Uri>.broadcast();
+    browser = XboardBrowserLogin(
+      client: engine.client,
+      origin: Uri.https('example.com'),
+      links: links.stream,
+      open: (uri) async {
+        launched = uri;
+        if (autoReturn) {
+          links.add(
+            Uri(
+              scheme: 'haoze-connect',
+              host: 'auth',
+              path: '/callback',
+              queryParameters: {
+                'state': uri.queryParameters['state']!,
+                'code': 'a' * 64,
+              },
+            ),
+          );
+        }
+        return true;
+      },
+    );
   });
-  tearDown(() => engine.close());
+  tearDown(() async {
+    browser.close();
+    engine.close();
+    await links.close();
+  });
 
   Future<void> open(
     WidgetTester tester, {
@@ -207,6 +249,7 @@ void main() {
         ).withAppShapes.withAppTypography.withAppSurfaces,
         overrides: [
           haozeAccountProvider.overrideWith(() => _Account(engine)),
+          haozeBrowserLoginProvider.overrideWithValue(browser),
           initProvider.overrideWithBuild((_, _) => true),
           viewSizeProvider.overrideWithBuild((_, _) => size),
         ],
@@ -238,20 +281,6 @@ void main() {
     }
   }
 
-  Future<void> credentials(WidgetTester tester) async {
-    await tester.enterText(
-      find.byKey(const ValueKey('haoze-email')),
-      'user@example.com',
-    );
-    await tester.enterText(
-      find.descendant(
-        of: find.byKey(const ValueKey('haoze-password')),
-        matching: find.byType(EditableText),
-      ),
-      'example-password',
-    );
-  }
-
   Future<void> submit(WidgetTester tester) async {
     await tester.ensureVisible(find.byKey(const ValueKey('haoze-submit')));
     await tester.tap(find.byKey(const ValueKey('haoze-submit')));
@@ -272,7 +301,6 @@ void main() {
     'login activates automatic subscription without asking for a URL',
     (tester) async {
       await open(tester);
-      await credentials(tester);
       await submit(tester);
       expect(find.text('authenticated-home'), findsOneWidget);
       expect(profiles.preparations, 1);
@@ -281,7 +309,6 @@ void main() {
   testWidgets('failed login shows error and allows retry', (tester) async {
     transport.rejectLogin = true;
     await open(tester);
-    await credentials(tester);
     await submit(tester);
     expect(
       find.textContaining('Sign-in or registration was rejected'),
@@ -298,106 +325,37 @@ void main() {
     expect(find.text('authenticated-home'), findsOneWidget);
   });
   testWidgets(
-    'captcha registration is blocked while password login remains available',
+    'unified authentication replaces native password and registration forms',
     (tester) async {
-      transport.config['is_captcha'] = 1;
-      await tester.runAsync(engine.loadConfig);
       await open(tester);
-      await tester.tap(find.byKey(const ValueKey('haoze-auth-toggle')));
-      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-      await tester.pumpAndSettle();
+      expect(find.byType(EditableText), findsNothing);
       expect(
-        find.textContaining('This panel requires a security check'),
+        find.byKey(const ValueKey('haoze-register-website')),
         findsOneWidget,
       );
-      expect(
-        tester
-            .widget<FilledButton>(find.byKey(const ValueKey('haoze-submit')))
-            .onPressed,
-        isNull,
-      );
-      expect(transport.paths.any((path) => path.endsWith('/register')), false);
+      await submit(tester);
+      expect(launched!.path, '/api/v1/account-bridge/app/login');
+      expect(transport.paths.any((p) => p.contains('/passport/auth/')), false);
+      expect(engine.state.email, 'user@example.com');
     },
   );
-  testWidgets('registration config failures expose a retry', (tester) async {
-    transport.configFailure = true;
-    // Keep the failure state while starting from a controller with no cached config.
-    engine.close();
-    engine = XboardAccountController(
-      client: XboardClient(
-        panelOrigin: Uri.https('example.com'),
-        transport: transport,
-      ),
-      store: _Store(),
-      profiles: profiles,
-      origin: Uri.https('example.com'),
-      coreVersion: 'v1.19.33',
-    );
-    await tester.runAsync(engine.restore);
-    await tester.runAsync(engine.loadConfig);
+
+  testWidgets('browser sign-in can be cancelled and retried', (tester) async {
+    autoReturn = false;
     await open(tester);
-    await tester.tap(find.byKey(const ValueKey('haoze-auth-toggle')));
+    await submit(tester);
+    expect(find.byKey(const ValueKey('haoze-login-cancel')), findsOneWidget);
+    expect(engine.state.authenticated, false);
+    await tester.tap(find.byKey(const ValueKey('haoze-login-cancel')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Registration settings could not be loaded.'),
-      findsOneWidget,
-    );
-    expect(find.widgetWithText(TextButton, 'Retry'), findsOneWidget);
-    transport.configFailure = false;
-    await tester.tap(find.widgetWithText(TextButton, 'Retry'));
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Registration settings could not be loaded.'),
-      findsNothing,
-    );
+    expect(engine.state.issue, isNull);
+    expect(find.byKey(const ValueKey('haoze-login-cancel')), findsNothing);
+    autoReturn = true;
+    await submit(tester);
+    expect(engine.state.authenticated, true);
   });
 
-  testWidgets(
-    'registration enforces terms and forwards required email and invitation codes',
-    (tester) async {
-      transport.config.addAll({
-        'is_email_verify': 1,
-        'is_invite_force': 1,
-        'tos_url': 'https://example.com/terms',
-      });
-      await tester.runAsync(engine.loadConfig);
-      await open(tester, size: const Size(1200, 1000));
-      await tester.tap(find.byKey(const ValueKey('haoze-auth-toggle')));
-      await tester.pumpAndSettle();
-      expect(
-        tester
-            .widget<FilledButton>(find.byKey(const ValueKey('haoze-submit')))
-            .onPressed,
-        isNull,
-      );
-      await credentials(tester);
-      await tester.enterText(
-        find.descendant(
-          of: find.byKey(const ValueKey('haoze-confirmation')),
-          matching: find.byType(EditableText),
-        ),
-        'example-password',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('haoze-email-code')),
-        '123456',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('haoze-invite')),
-        'invite',
-      );
-      await tester.ensureVisible(find.byType(CheckboxListTile));
-      await tester.tap(find.byType(CheckboxListTile));
-      await tester.pumpAndSettle();
-      await submit(tester);
-      expect(find.text('authenticated-home'), findsOneWidget);
-      expect(transport.registrationBody?['email_code'], '123456');
-      expect(transport.registrationBody?['invite_code'], 'invite');
-    },
-  );
   test(
     'managed tunnel never starts while applying its profile fails',
     () async {

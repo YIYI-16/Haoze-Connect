@@ -7943,8 +7943,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8548,6 +8547,66 @@ class AppLocalizations {
     return Intl.message(
       'The installer could not be opened. Retry or check installation permissions.',
       name: 'haozeUpdateInstallFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign in with Haoze`
+  String get haozeUnifiedLogin {
+    return Intl.message(
+      'Sign in with Haoze',
+      name: 'haozeUnifiedLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use your unified account with a password, email code, Google or Passkey.`
+  String get haozeUnifiedLoginDescription {
+    return Intl.message(
+      'Use your unified account with a password, email code, Google or Passkey.',
+      name: 'haozeUnifiedLoginDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Complete sign-in in your browser, then return to this app.`
+  String get haozeBrowserWaiting {
+    return Intl.message(
+      'Complete sign-in in your browser, then return to this app.',
+      name: 'haozeBrowserWaiting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your browser handles authentication. This app never receives your account password.`
+  String get haozeBrowserPrivacy {
+    return Intl.message(
+      'Your browser handles authentication. This app never receives your account password.',
+      name: 'haozeBrowserPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).`
+  String get haozeMigrationNotice {
+    return Intl.message(
+      'Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).',
+      name: 'haozeMigrationNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account & security`
+  String get haozeAccountSecurity {
+    return Intl.message(
+      'Account & security',
+      name: 'haozeAccountSecurity',
       desc: '',
       args: [],
     );

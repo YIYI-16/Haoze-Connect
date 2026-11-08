@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/link.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
   late StreamController<Uri> links;
@@ -63,6 +64,27 @@ void main() {
 
     expect(received, isEmpty);
   });
+
+  test(
+    'native auth callback is never logged or imported as a subscription',
+    () async {
+      final original = debugPrint;
+      final printed = <String>[];
+      debugPrint = (String? text, {int? wrapWidth}) {
+        printed.add(text ?? '');
+      };
+      try {
+        await listen();
+        await emit(
+          'haoze-connect://auth/callback?code=sensitive-one-use-code&state=private-state',
+        );
+        expect(received, isEmpty);
+        expect(printed, isEmpty);
+      } finally {
+        debugPrint = original;
+      }
+    },
+  );
 
   test('listening again replaces the previous subscription', () async {
     await listen();

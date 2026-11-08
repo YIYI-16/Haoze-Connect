@@ -1017,5 +1017,11 @@
   "haozeUpdateOpening": "正在打开系统安装程序…",
   "haozeUpdatePanelAccess": "面板版本接口拒绝访问，请联系管理员开放更新检查接口。",
   "haozeUpdatePanelConfiguration": "面板尚未正确配置此平台的版本号或下载地址，请联系管理员。",
-  "haozeUpdateInstallFailed": "无法启动安装程序，请重试或检查安装权限。"
+  "haozeUpdateInstallFailed": "无法启动安装程序，请重试或检查安装权限。",
+  "haozeUnifiedLogin": "使用 Haoze 统一登录",
+  "haozeUnifiedLoginDescription": "支持账户密码、邮箱验证码、Google 和 Passkey。",
+  "haozeBrowserWaiting": "请在浏览器完成登录，随后返回 App。",
+  "haozeBrowserPrivacy": "认证由浏览器完成，App 不会接收你的统一账户密码。",
+  "haozeMigrationNotice": "原 XBoard 用户首次登录需确认密码：至少 6 位，可以与原密码相同。",
+  "haozeAccountSecurity": "账户与安全"
 }

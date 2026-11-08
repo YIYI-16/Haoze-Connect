@@ -15,6 +15,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:haoze_xboard/account.dart';
 import 'package:haoze_xboard/haoze_xboard.dart';
+import 'package:haoze_xboard/browser_auth.dart';
+import 'package:app_links/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const haozePanelUrl = String.fromEnvironment(
   'XBOARD_BASE_URL',
@@ -24,6 +27,22 @@ const haozeCoreVersion = String.fromEnvironment(
   'XBOARD_CORE_VERSION',
   defaultValue: 'v1.19.33',
 );
+const haozeAccountUrl = 'https://account.zhouhaoze.com';
+
+final haozeBrowserLoginProvider = Provider<XboardBrowserLogin>((ref) {
+  final client = XboardClient(panelOrigin: Uri.parse(haozePanelUrl));
+  final login = XboardBrowserLogin(
+    client: client,
+    origin: Uri.parse(haozePanelUrl),
+    links: AppLinks().uriLinkStream,
+    open: (uri) => launchUrl(uri, mode: LaunchMode.externalApplication),
+  );
+  ref.onDispose(() {
+    login.close();
+    client.close();
+  });
+  return login;
+});
 
 final haozeAccountProvider = NotifierProvider<HaozeAccount, XboardAccountState>(
   HaozeAccount.new,

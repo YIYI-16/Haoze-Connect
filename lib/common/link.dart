@@ -72,6 +72,8 @@ class LinkManager {
   }
 
   void _handle(Uri uri, Function(String url) installConfigCallBack) {
+    // Auth callbacks belong to the isolated PKCE waiter. Never log their code.
+    if (uri.scheme == 'haoze-connect') return;
     commonPrint.log('onAppLink: $uri');
     final url = _installConfigUrl(uri);
     if (url != null) {

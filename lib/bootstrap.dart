@@ -203,7 +203,6 @@ class Bootstrap {
       if (!_bootDecision.isDegraded) await account.reconcileProfile();
     }
     _container.read(initProvider.notifier).value = true;
-    unawaited(account.loadConfig());
     unawaited(account.refresh());
     unawaited(_container.read(resourcesActionProvider.notifier).autoUpdate());
     await bootGuard.markRunning();

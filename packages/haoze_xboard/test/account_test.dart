@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:haoze_xboard/account.dart';
 import 'package:haoze_xboard/haoze_xboard.dart';
+import 'package:haoze_xboard/browser_auth.dart';
 
 class MemoryStore implements XboardAccountStore {
   XboardSavedAccount? value;
@@ -125,6 +126,74 @@ void main() {
         ),
         profileId: 42,
       );
+
+  XboardBrowserAccount browserAccount() => XboardBrowserAccount(
+    email: 'verified@example.com',
+    session: XboardSession(
+      authorization: 'Bearer browser',
+      subscriptionToken: 'subscription',
+    ),
+  );
+
+  test(
+    'browser identity uses the verified server email and existing managed profile flow',
+    () async {
+      await controller.restore();
+      await controller.loginWithBrowser(() async => browserAccount());
+      expect(store.value?.email, 'verified@example.com');
+      expect(store.value?.profileId, 42);
+      expect(controller.state.profileReady, true);
+      expect(profiles.events, ['prepare', 'activate:42']);
+      expect(
+        controller.directHosts,
+        containsAll([
+          'example.com',
+          'account.zhouhaoze.com',
+          'sso.zhouhaoze.com',
+        ]),
+      );
+      expect(transport.requests.any((p) => p.contains('/passport/')), false);
+    },
+  );
+
+  test(
+    'browser cancellation leaves no stored account and unlocks retry',
+    () async {
+      await controller.loginWithBrowser(
+        () async => throw const XboardLoginCancelled(),
+      );
+      expect(store.value, null);
+      expect(controller.state.busy, false);
+      expect(controller.state.issue, null);
+      await controller.loginWithBrowser(() async => browserAccount());
+      expect(controller.state.authenticated, true);
+    },
+  );
+
+  test(
+    'browser login cannot activate a profile before secure storage succeeds',
+    () async {
+      store.failWrite = true;
+      await controller.loginWithBrowser(() async => browserAccount());
+      expect(controller.state.issue, XboardAccountIssue.storage);
+      expect(controller.state.authenticated, false);
+      expect(profiles.events, isEmpty);
+    },
+  );
+
+  test(
+    'disposing while the browser is open never stores late credentials',
+    () async {
+      final pending = Completer<XboardBrowserAccount>();
+      final login = controller.loginWithBrowser(() => pending.future);
+      await Future<void>.delayed(Duration.zero);
+      controller.close();
+      pending.complete(browserAccount());
+      await login;
+      expect(store.value, null);
+      expect(profiles.events, isEmpty);
+    },
+  );
 
   test(
     'login securely persists before activating one managed profile',

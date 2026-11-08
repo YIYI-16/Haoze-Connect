@@ -680,7 +680,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("个"),
     "groupTimeoutCount": m33,
     "haozeAccount": MessageLookupByLibrary.simpleMessage("账户"),
+    "haozeAccountSecurity": MessageLookupByLibrary.simpleMessage("账户与安全"),
     "haozeAgreeTerms": MessageLookupByLibrary.simpleMessage("我已阅读并同意服务条款"),
+    "haozeBrowserPrivacy": MessageLookupByLibrary.simpleMessage(
+      "认证由浏览器完成，App 不会接收你的统一账户密码。",
+    ),
+    "haozeBrowserWaiting": MessageLookupByLibrary.simpleMessage(
+      "请在浏览器完成登录，随后返回 App。",
+    ),
     "haozeCaptchaWebsite": MessageLookupByLibrary.simpleMessage(
       "面板启用了安全验证，请先在网站注册，再回到此处登录。",
     ),
@@ -700,6 +707,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("最近刷新"),
     "haozeLogin": MessageLookupByLibrary.simpleMessage("登录"),
     "haozeLogout": MessageLookupByLibrary.simpleMessage("退出登录"),
+    "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
+      "原 XBoard 用户首次登录需确认密码：至少 6 位，可以与原密码相同。",
+    ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("暂无可用套餐"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "未获取到更新的下载信息，请检查面板配置或稍后重试。",
@@ -722,6 +732,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeSync": MessageLookupByLibrary.simpleMessage("同步订阅"),
     "haozeTerms": MessageLookupByLibrary.simpleMessage("查看服务条款"),
     "haozeTotal": MessageLookupByLibrary.simpleMessage("总流量"),
+    "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("使用 Haoze 统一登录"),
+    "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
+      "支持账户密码、邮箱验证码、Google 和 Passkey。",
+    ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("长期有效"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("正在检查更新…"),
     "haozeUpdateCurrent": MessageLookupByLibrary.simpleMessage("已是最新版本"),
