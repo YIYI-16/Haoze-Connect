@@ -348,7 +348,7 @@ class XboardClient {
     );
     final response = await _transport.send(method, uri, {
       'Accept': 'application/json',
-      'User-Agent': 'HaozeConnect/6.1.1',
+      'User-Agent': 'HaozeConnect/6.1.2',
       if (session != null) 'Authorization': session.authorization,
     }, body);
     if (response.statusCode < 200 || response.statusCode >= 300) {

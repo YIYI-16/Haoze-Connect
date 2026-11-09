@@ -1,21 +1,27 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:image/image.dart' as image;
 import 'src/icons/ico.dart';
 
-final _background = image.ColorRgb8(27, 40, 62);
+final _background = image.ColorRgb8(245, 247, 250);
 const _source = 'assets_source/images/icon/haoze.png';
 
 Future<void> main() => generateHaozeBranding();
 
 Future<void> generateHaozeBranding() async {
-  final mark = image.decodePng(File(_source).readAsBytesSync())!;
-  final icon = image.Image(width: 512, height: 512, numChannels: 4);
-  image.fill(icon, color: _background);
+  final original = image.decodePng(File(_source).readAsBytesSync())!;
+  final mark = _darkMark(original);
+  final icon = _lightTile();
   image.compositeImage(
     icon,
-    image.copyResize(mark, width: 400, height: 400),
-    dstX: 56,
-    dstY: 56,
+    image.copyResize(
+      mark,
+      width: 320,
+      height: 320,
+      interpolation: image.Interpolation.cubic,
+    ),
+    dstX: 96,
+    dstY: 96,
   );
   await _png('assets/images/icon.png', icon);
   final ico = buildIco([
@@ -77,12 +83,12 @@ Future<void> generateHaozeBranding() async {
   }
   await _png('$res/drawable-nodpi/haoze_mark.png', mark);
   const foreground =
-      '<?xml version="1.0" encoding="utf-8"?>\n<inset xmlns:android="http://schemas.android.com/apk/res/android" android:insetLeft="18dp" android:insetRight="18dp" android:insetTop="18dp" android:insetBottom="18dp"><bitmap android:src="@drawable/haoze_mark" android:gravity="fill" android:filter="true" /></inset>\n';
+      '<?xml version="1.0" encoding="utf-8"?>\n<inset xmlns:android="http://schemas.android.com/apk/res/android" android:insetLeft="32dp" android:insetRight="32dp" android:insetTop="32dp" android:insetBottom="32dp"><bitmap android:src="@drawable/haoze_mark" android:gravity="fill" android:filter="true" /></inset>\n';
   for (final name in ['ic_launcher_foreground', 'ic_launcher_foreground_tv']) {
     await File('$res/drawable/$name.xml').writeAsString(foreground);
   }
   await File('$res/values/ic_launcher_background.xml').writeAsString(
-    '<?xml version="1.0" encoding="utf-8"?>\n<resources><color name="ic_launcher_background">#1B283E</color></resources>\n',
+    '<?xml version="1.0" encoding="utf-8"?>\n<resources><color name="ic_launcher_background">#F5F7FA</color></resources>\n',
   );
   final monochrome = image.Image.from(mark);
   for (final pixel in monochrome) {
@@ -134,7 +140,7 @@ Future<void> generateHaozeBranding() async {
     font: image.arial48,
     x: 148,
     y: 64,
-    color: image.ColorRgb8(226, 239, 249),
+    color: image.ColorRgb8(35, 51, 62),
   );
   await _png('$res/mipmap-xhdpi/ic_banner.png', banner);
 
@@ -191,4 +197,47 @@ Future<void> _png(String path, image.Image value) async {
   final file = File(path);
   await file.parent.create(recursive: true);
   await file.writeAsBytes(image.encodePng(value));
+}
+
+image.Image _darkMark(image.Image original) {
+  final mark = image.Image(
+    width: original.width,
+    height: original.height,
+    numChannels: 4,
+  );
+  for (final pixel in mark) {
+    var alpha = 0;
+    for (var dy = -2; dy <= 2; dy++) {
+      for (var dx = -2; dx <= 2; dx++) {
+        if (dx * dx + dy * dy > 4) continue;
+        final x = pixel.x + dx;
+        final y = pixel.y + dy;
+        if (x < 0 || y < 0 || x >= original.width || y >= original.height) {
+          continue;
+        }
+        alpha = math.max(alpha, original.getPixel(x, y).a.toInt());
+      }
+    }
+    pixel.setRgba(35, 51, 62, alpha < 16 ? 0 : alpha);
+  }
+  return image.gaussianBlur(mark, radius: 1);
+}
+
+image.Image _lightTile() {
+  final tile = image.Image(width: 512, height: 512, numChannels: 4);
+  for (final pixel in tile) {
+    final x = (pixel.x + 0.5 - 256) / 246;
+    final y = (pixel.y + 0.5 - 256) / 246;
+    final contour = math.pow(x.abs(), 4) + math.pow(y.abs(), 4);
+    final alpha = ((1 - contour) * 70 + 0.5).clamp(0.0, 1.0);
+    final t = pixel.y / 511;
+    final edge = ((contour - 0.965) / 0.035).clamp(0.0, 1.0) * 12;
+    pixel.setRgba(
+      (253 - 10 * t - edge).round(),
+      (254 - 9 * t - edge).round(),
+      (255 - 8 * t - edge).round(),
+      (alpha * 255).round(),
+    );
+  }
+  return tile;
 }

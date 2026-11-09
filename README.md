@@ -1,6 +1,6 @@
-> **Haoze — unified account integration.** This branch contains the 6.1.1
+> **Haoze — unified account integration.** This branch contains the 6.1.2
 > AuthRouter account update for `https://www.haoze.cyou`, based on the upstream
-> FlClash v0.9.2 code retained below. It is not a published stable release.
+> FlClash v0.9.2 code retained below. See GitHub Releases for Android and Windows installers.
 > See [unified login and release requirements](UNIFIED-ACCOUNT.md) and [integration status and API contracts](packages/haoze_xboard/README.md).
 > Source: [YIYI-16/Haoze-Connect, flclash-prototype](https://github.com/YIYI-16/Haoze-Connect/tree/flclash-prototype).
 > FlClash attribution and the GPLv3 license are retained. No Hiddify application
