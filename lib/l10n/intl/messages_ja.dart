@@ -771,6 +771,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("容量を使い切りました"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("プランの期限切れ"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("有効期限"),
+    "haozeGoogleNonceError": MessageLookupByLibrary.simpleMessage(
+      "Google の認証情報に今回の検証情報が含まれていません。Google Play 開発者サービスを更新して再試行してください。",
+    ),
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Google の認証を受け取りました。Haoze に戻ってログインを完了してください。",
     ),

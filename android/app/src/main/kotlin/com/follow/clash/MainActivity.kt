@@ -1,5 +1,6 @@
 package com.follow.clash
 
+import android.content.Intent
 import com.follow.clash.plugins.AppPlugin
 import com.follow.clash.plugins.BatteryPlugin
 import com.follow.clash.plugins.ServicePlugin
@@ -17,6 +18,11 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
         ServiceState.attachFlutterEngine(flutterEngine)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (nativeGoogleLogin?.onActivityResult(requestCode, resultCode, data) == true) return
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {

@@ -968,6 +968,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Cuota agotada"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Plan caducado"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Caducidad"),
+    "haozeGoogleNonceError": MessageLookupByLibrary.simpleMessage(
+      "La credencial de Google no incluye la verificación de este inicio de sesión. Actualiza los servicios de Google Play e inténtalo de nuevo.",
+    ),
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Autorización de Google recibida. Vuelve a Haoze para completar el inicio de sesión.",
     ),

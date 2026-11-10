@@ -75,6 +75,20 @@ void main() {
       'code': 'a' * 64,
     },
   );
+  test('Google login method is forwarded with its bound callback', () async {
+    final result = browser.login(loginMethod: 'google');
+    final request = await opened.future;
+    expect(request.queryParameters['login_method'], 'google');
+    links.add(callback(request));
+    expect((await result).email, 'verified@example.com');
+  });
+  test('unsupported login method never opens a browser', () async {
+    await expectLater(
+      browser.login(loginMethod: 'other'),
+      throwsA(isA<XboardException>()),
+    );
+    expect(opened.isCompleted, false);
+  });
   test('exchanges one opaque grant using its own S256 verifier', () async {
     final result = browser.login();
     final request = await opened.future;

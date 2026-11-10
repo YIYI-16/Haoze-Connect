@@ -8701,6 +8701,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Google returned a credential without this login challenge. Update Google Play services and try again.`
+  String get haozeGoogleNonceError {
+    return Intl.message(
+      'Google returned a credential without this login challenge. Update Google Play services and try again.',
+      name: 'haozeGoogleNonceError',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

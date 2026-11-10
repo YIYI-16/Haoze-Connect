@@ -74,6 +74,7 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
   late final NativeGoogleSignIn _google;
   NativeAuthResult? _result;
   XboardAccountIssue? _error;
+  bool _googleNonceError = false;
   bool _submitting = false;
   bool _started = false;
   bool _emailMode = false;
@@ -113,6 +114,7 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
     setState(() {
       _submitting = true;
       _error = null;
+      _googleNonceError = false;
     });
     try {
       await _ensureSession();
@@ -136,6 +138,8 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
           _code.clear();
         });
       }
+    } on NativeGoogleNonceException {
+      if (mounted) setState(() => _googleNonceError = true);
     } on XboardLoginCancelled {
       _started = false;
       _native.reset();
@@ -219,6 +223,7 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
       _started = false;
       _result = null;
       _error = null;
+      _googleNonceError = false;
       _codeSent = false;
       _password.clear();
       _confirm.clear();
@@ -269,7 +274,9 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
                       _ => l10n.haozeUnifiedLoginDescription,
                     }),
                     ErrorBanner(
-                      message: _issue(context, _error ?? state.issue),
+                      message: _googleNonceError
+                          ? l10n.haozeGoogleNonceError
+                          : _issue(context, _error ?? state.issue),
                     ),
                     if (step == null)
                       TextFormField(

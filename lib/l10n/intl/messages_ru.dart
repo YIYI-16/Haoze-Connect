@@ -943,6 +943,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Лимит исчерпан"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Тариф истёк"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Срок действия"),
+    "haozeGoogleNonceError": MessageLookupByLibrary.simpleMessage(
+      "В учётных данных Google нет проверки для этого входа. Обновите сервисы Google Play и повторите попытку.",
+    ),
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Авторизация Google получена. Вернитесь в Haoze для завершения входа.",
     ),

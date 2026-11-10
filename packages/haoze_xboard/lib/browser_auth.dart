@@ -45,8 +45,9 @@ class XboardBrowserLogin {
   _Attempt? _attempt;
   bool _closed = false;
 
-  Future<XboardBrowserAccount> login() async {
+  Future<XboardBrowserAccount> login({String? loginMethod}) async {
     if (_closed ||
+        (loginMethod != null && loginMethod != 'google') ||
         _attempt != null ||
         origin.scheme != 'https' ||
         origin.host.isEmpty ||
@@ -113,6 +114,7 @@ class XboardBrowserLogin {
               'state': state,
               'code_challenge': challenge,
               'code_challenge_method': 'S256',
+              'login_method': ?loginMethod,
             },
           ),
         );

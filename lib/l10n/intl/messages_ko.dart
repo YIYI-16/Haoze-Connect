@@ -758,6 +758,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("데이터 소진"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("요금제 만료"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("만료일"),
+    "haozeGoogleNonceError": MessageLookupByLibrary.simpleMessage(
+      "Google 인증 정보에 이번 로그인 확인 정보가 없습니다. Google Play 서비스를 업데이트한 후 다시 시도하세요.",
+    ),
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
     ),

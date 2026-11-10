@@ -33,7 +33,8 @@ class _Transport implements XboardTransport {
     if (uri.path.endsWith('/start')) {
       return XboardResponse(200, {'flow': 'f' * 43, 'nonce': 'n' * 43});
     }
-    if (uri.path.endsWith('/native/exchange')) {
+    if (uri.path.endsWith('/native/exchange') ||
+        uri.path.endsWith('/app/exchange')) {
       return const XboardResponse(200, {
         'data': {
           'email': 'user@example.com',
@@ -205,12 +206,13 @@ void main() {
       const channel = MethodChannel('haoze/native_google');
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'cancel') return null;
             expect(call.method, 'signIn');
             expect(call.arguments, {
               'serverClientId': 'web-client',
               'nonce': 'n' * 43,
             });
-            return 'native-id-token';
+            return {'id_token': 'native-id-token'};
           });
       addTearDown(
         () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -227,6 +229,114 @@ void main() {
       expect(call.uri.host, 'sso.example');
       expect(call.body!['id_token'], 'native-id-token');
       expect(transport.calls.last.body!.containsKey('id_token'), false);
+    },
+  );
+  test(
+    'Android missing nonce is reported without submitting a Google credential to AuthRouter',
+    () async {
+      const channel = MethodChannel('haoze/native_google');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (_) async {
+            throw PlatformException(code: 'nonce_invalid');
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+      final google = NativeGoogleSignIn(isAndroid: true, isWindows: false);
+      addTearDown(google.close);
+      await login.start('android');
+      await expectLater(
+        google.signIn(login, returnMessage: 'Return'),
+        throwsA(isA<NativeGoogleNonceException>()),
+      );
+      expect(
+        transport.calls.any((call) => call.uri.path.endsWith('/google')),
+        false,
+      );
+    },
+  );
+  test(
+    'Android native server code is sent to AuthRouter with the flow verifier and never launches a browser',
+    () async {
+      const channel = MethodChannel('haoze/native_google');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'cancel') return null;
+            return {'server_auth_code': 'native-server-code'};
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+      var launches = 0;
+      final google = NativeGoogleSignIn(
+        isAndroid: true,
+        isWindows: false,
+        open: (_) async {
+          launches++;
+          return true;
+        },
+      );
+      addTearDown(google.close);
+      await login.start('android');
+      final result = await google.signIn(login, returnMessage: 'Return');
+      expect(result.account!.email, 'user@example.com');
+      expect(launches, 0);
+      final call = transport.calls.firstWhere(
+        (call) => call.uri.path.endsWith('/google'),
+      );
+      expect(call.body!['server_auth_code'], 'native-server-code');
+      expect(call.body!['code_verifier'], isA<String>());
+      expect(call.body!.containsKey('id_token'), false);
+    },
+  );
+
+  test(
+    'cancelled Android native result cannot complete login or open a browser',
+    () async {
+      const channel = MethodChannel('haoze/native_google');
+      final token = Completer<Map<String, String>>();
+      var cancels = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            if (call.method == 'cancel') {
+              cancels++;
+              return null;
+            }
+            return token.future;
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+      var launches = 0;
+      final google = NativeGoogleSignIn(
+        isAndroid: true,
+        isWindows: false,
+        open: (_) async {
+          launches++;
+          return true;
+        },
+      );
+      addTearDown(google.close);
+      await login.start('android');
+      final result = google.signIn(login, returnMessage: 'Return');
+      final rejected = expectLater(
+        result,
+        throwsA(isA<XboardLoginCancelled>()),
+      );
+      await Future<void>.delayed(Duration.zero);
+      google.cancel();
+      token.complete({'server_auth_code': 'late-native-code'});
+      await rejected;
+      await Future<void>.delayed(Duration.zero);
+      expect(cancels, 1);
+      expect(launches, 0);
+      expect(
+        transport.calls.any((call) => call.uri.path.endsWith('/google')),
+        false,
+      );
     },
   );
 }

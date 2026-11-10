@@ -131,12 +131,14 @@ class _Google extends NativeGoogleSignIn {
   Future<Uri?> prepare() async =>
       isWindows ? Uri.parse('http://127.0.0.1:50000/oauth/callback') : null;
   bool wait = false;
+  bool nonceFailure = false;
   Completer<NativeAuthResult>? pending;
   @override
   Future<NativeAuthResult> signIn(
     XboardNativeLogin login, {
     required String returnMessage,
   }) async {
+    if (nonceFailure) throw const NativeGoogleNonceException();
     if (!wait) return login.authenticate('google', {'id_token': 'fixture'});
     pending = Completer<NativeAuthResult>();
     return pending!.future;
@@ -333,6 +335,33 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets(
+    'Google nonce failure gives a device-specific error and permits retry',
+    (tester) async {
+      google.nonceFailure = true;
+      await open(tester);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('haoze-native-google')),
+      );
+      await tester.tap(find.byKey(const ValueKey('haoze-native-google')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Update Google Play services'),
+        findsOneWidget,
+      );
+      expect(engine.state.authenticated, false);
+      expect(transport.paths.any((p) => p.endsWith('/google')), false);
+      google.nonceFailure = false;
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('haoze-native-google')),
+      );
+      await tester.tap(find.byKey(const ValueKey('haoze-native-google')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(engine.state.authenticated, true);
+    },
+  );
   testWidgets('login page does not offer update checks', (tester) async {
     await open(tester);
     expect(engine.state.authenticated, isFalse);

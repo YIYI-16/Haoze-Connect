@@ -1032,5 +1032,6 @@
   "haozeNativeGoogle": "Se connecter avec Google",
   "haozeNativePrivacy": "AuthRouter vérifie votre identité. Les mots de passe ne sont pas enregistrés sur cet appareil.",
   "haozeGoogleReturn": "Autorisation Google reçue. Revenez dans Haoze pour terminer la connexion.",
-  "haozeNativeGoogleWaiting": "Suivez les instructions de Google, puis revenez dans Haoze."
+  "haozeNativeGoogleWaiting": "Suivez les instructions de Google, puis revenez dans Haoze.",
+  "haozeGoogleNonceError": "Les identifiants Google ne contiennent pas la vérification de cette connexion. Mettez à jour les services Google Play et réessayez."
 }

@@ -9,6 +9,10 @@ import 'package:haoze_xboard/haoze_xboard.dart';
 import 'package:haoze_xboard/native_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class NativeGoogleNonceException implements Exception {
+  const NativeGoogleNonceException();
+}
+
 class NativeGoogleSignIn {
   NativeGoogleSignIn({
     required this.isAndroid,
@@ -107,16 +111,28 @@ class NativeGoogleSignIn {
     if (generation != _generation) throw const XboardLoginCancelled();
     if (isAndroid) {
       try {
-        final token = await const MethodChannel('haoze/native_google')
-            .invokeMethod<String>('signIn', {
+        final credential = await const MethodChannel('haoze/native_google')
+            .invokeMapMethod<String, dynamic>('signIn', {
               'serverClientId': config['webClientId'],
               'nonce': login.nonce,
             });
-        if (token == null) throw const XboardException(XboardFailure.protocol);
+        if (credential == null || credential.length != 1) {
+          throw const XboardException(XboardFailure.protocol);
+        }
+        final entry = credential.entries.single;
+        if (!['id_token', 'server_auth_code'].contains(entry.key) ||
+            entry.value is! String ||
+            (entry.value as String).isEmpty) {
+          throw const XboardException(XboardFailure.protocol);
+        }
         if (generation != _generation) throw const XboardLoginCancelled();
-        return await login.authenticate('google', {'id_token': token});
+        return await login.authenticate('google', credential);
       } on PlatformException catch (error) {
         if (error.code == 'cancelled') throw const XboardLoginCancelled();
+        if (error.code == 'nonce_invalid') {
+          if (generation != _generation) throw const XboardLoginCancelled();
+          throw const NativeGoogleNonceException();
+        }
         throw const XboardException(XboardFailure.configuration);
       }
     }
@@ -174,6 +190,13 @@ class NativeGoogleSignIn {
 
   void cancel() {
     _generation++;
+    if (isAndroid) {
+      unawaited(
+        const MethodChannel(
+          'haoze/native_google',
+        ).invokeMethod<void>('cancel').catchError((Object _) {}),
+      );
+    }
     if (_callback case final callback? when !callback.isCompleted) {
       callback.completeError(const XboardLoginCancelled());
     }

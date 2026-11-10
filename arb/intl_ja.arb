@@ -1032,5 +1032,6 @@
   "haozeNativeGoogle": "Google でログイン",
   "haozeNativePrivacy": "AuthRouter が本人確認を行います。パスワードは端末に保存されません。",
   "haozeGoogleReturn": "Google の認証を受け取りました。Haoze に戻ってログインを完了してください。",
-  "haozeNativeGoogleWaiting": "Google の案内に従って認証し、Haoze に戻ってください。"
+  "haozeNativeGoogleWaiting": "Google の案内に従って認証し、Haoze に戻ってください。",
+  "haozeGoogleNonceError": "Google の認証情報に今回の検証情報が含まれていません。Google Play 開発者サービスを更新して再試行してください。"
 }

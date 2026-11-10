@@ -1032,5 +1032,6 @@
   "haozeNativeGoogle": "Sign in with Google",
   "haozeNativePrivacy": "AuthRouter verifies your identity. Passwords are not saved on this device.",
   "haozeGoogleReturn": "Google authorization received. Return to Haoze to finish signing in.",
-  "haozeNativeGoogleWaiting": "Follow the Google sign-in prompt, then return to Haoze."
+  "haozeNativeGoogleWaiting": "Follow the Google sign-in prompt, then return to Haoze.",
+  "haozeGoogleNonceError": "Google returned a credential without this login challenge. Update Google Play services and try again."
 }

@@ -702,6 +702,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("流量已用尽"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("套餐已过期"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("到期时间"),
+    "haozeGoogleNonceError": MessageLookupByLibrary.simpleMessage(
+      "Google 返回的登录凭证缺少本次验证信息。请更新 Google Play 服务后重试。",
+    ),
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "已收到 Google 授权，请返回 Haoze 完成登录。",
     ),

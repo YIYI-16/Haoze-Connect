@@ -110,7 +110,9 @@ class XboardNativeLogin {
       'flow': _flow,
       ...values,
       if (action == 'mfa' || action == 'password-change') 'token': _token,
-      if (action == 'google' && values.containsKey('code'))
+      if (action == 'google' &&
+          (values.containsKey('code') ||
+              values.containsKey('server_auth_code')))
         'code_verifier': _verifier,
     });
     if (generation != _generation) throw const XboardLoginCancelled();

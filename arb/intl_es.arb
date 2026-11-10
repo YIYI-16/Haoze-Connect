@@ -1032,5 +1032,6 @@
   "haozeNativeGoogle": "Iniciar sesión con Google",
   "haozeNativePrivacy": "AuthRouter verifica tu identidad. Las contraseñas no se guardan en este dispositivo.",
   "haozeGoogleReturn": "Autorización de Google recibida. Vuelve a Haoze para completar el inicio de sesión.",
-  "haozeNativeGoogleWaiting": "Sigue las indicaciones de Google y vuelve a Haoze."
+  "haozeNativeGoogleWaiting": "Sigue las indicaciones de Google y vuelve a Haoze.",
+  "haozeGoogleNonceError": "La credencial de Google no incluye la verificación de este inicio de sesión. Actualiza los servicios de Google Play e inténtalo de nuevo."
 }
