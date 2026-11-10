@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'fade_box.dart';
 import 'scaffold.dart';
 import 'text.dart';
+import 'typography.dart';
 
 class Info {
   final String label;
@@ -191,6 +192,7 @@ class CommonCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         style:
             FilledButton.styleFrom(
+              textStyle: AppTextStyle.subheadline.of(context),
               padding: padding ?? EdgeInsets.zero,
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
               iconSize: commonCardIconSize,
