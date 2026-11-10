@@ -82,6 +82,8 @@ jobs:
       - run: flutter pub get
       - name: Build account UI and Windows native runtime
         run: flutter build windows --release --no-pub --dart-define=APP_ENV=stable
+      - name: Verify native login callbacks and Windows data migration
+        run: flutter test --no-pub test/features/haoze/native_google_test.dart test/features/haoze/account_view_test.dart test/common/haoze_data_migration_test.dart
       - name: Verify Windows token elevation reader
         run: |
           & dart run tool/haoze_windows_privilege_probe.dart "$env:RUNNER_TEMP\haoze-privilege.json"
@@ -120,10 +122,16 @@ jobs:
           if (-not $haozeVersion) { throw 'Missing release version' }
           & $haozeIscc "/DHaozeVersion=$haozeVersion" tool\haoze_preview_installer.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify installer, installed identity and uninstall cleanup
+        run: .\tool\haoze_windows_package_acceptance.ps1 -SetupPath build/haoze-installer/Haoze-Windows-Setup-x64-unsigned.exe -OutputPath "$env:RUNNER_TEMP\haoze-windows-install-acceptance.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Haoze-Windows-install-acceptance
+          path: ${{ runner.temp }}/haoze-windows-install-acceptance.json
       - uses: actions/upload-artifact@v4
         with:
           name: HaozeConnect-Stable-Windows-Setup-x64-unsigned
-          path: build/haoze-installer/HaozeConnect-Windows-Setup-x64-unsigned.exe
+          path: build/haoze-installer/Haoze-Windows-Setup-x64-unsigned.exe
       - uses: actions/upload-artifact@v4
         with:
           name: Haoze-isolated-panel-probes
@@ -250,7 +258,7 @@ jobs:
         run: |
           apk=$(find release/android -name HaozeConnect-Android-arm64.apk -print -quit)
           proof=$(find release/android -name android-release.json -print -quit)
-          setup=$(find release/windows -name HaozeConnect-Windows-Setup-x64-unsigned.exe -print -quit)
+          setup=$(find release/windows -name Haoze-Windows-Setup-x64-unsigned.exe -print -quit)
           python3 tool/haoze_release_manifest.py --android "$apk" --windows "$setup" --verification "$proof" --source "$HAOZE_SOURCE_SHA" --output UPDATE-MANIFEST.json
       - uses: actions/upload-artifact@v4
         with:

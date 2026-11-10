@@ -702,6 +702,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("流量已用尽"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("套餐已过期"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("到期时间"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "已收到 Google 授权，请返回 Haoze 完成登录。",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage("请检查邮箱、密码及必填项。"),
     "haozeInviteCode": MessageLookupByLibrary.simpleMessage("邀请码"),
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("最近刷新"),
@@ -710,6 +713,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "原 XBoard 用户首次登录需确认密码：至少 6 位，可以与原密码相同。",
     ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "请设置新密码以完成登录。",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage("使用 Google 登录"),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "请按 Google 提示完成验证，然后返回 Haoze。",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "请验证原账户密码后关联 Google。",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage("请输入验证器动态码或恢复码。"),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "身份由 AuthRouter 验证，密码不会保存在此设备。",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage("使用邮箱验证码登录"),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage("使用密码登录"),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("暂无可用套餐"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "未获取到更新的下载信息，请检查面板配置或稍后重试。",
@@ -734,7 +753,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTotal": MessageLookupByLibrary.simpleMessage("总流量"),
     "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("使用 Haoze 统一登录"),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "支持账户密码、邮箱验证码、Google 和 Passkey。",
+      "使用 Haoze 账号密码、邮箱验证码或 Google 登录。",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("长期有效"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("正在检查更新…"),

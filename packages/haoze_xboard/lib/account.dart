@@ -205,6 +205,10 @@ class XboardAccountController {
 
   Future<void> loginWithBrowser(
     Future<XboardBrowserAccount> Function() authenticate,
+  ) => loginWithCredential(authenticate);
+
+  Future<void> loginWithCredential(
+    Future<XboardBrowserAccount> Function() authenticate,
   ) => _serial(() async {
     if (_account != null) return;
     try {

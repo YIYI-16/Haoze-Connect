@@ -5,10 +5,12 @@
 [Setup]
 AppId={{98273092-7dae-4b33-9b79-69400bf8f086}
 AppName=Haoze
+AppVerName=Haoze
+UninstallDisplayName=Haoze
 AppVersion={#HaozeVersion}
 AppPublisher=Haoze
 AppPublisherURL=https://www.haoze.cyou
-DefaultDirName={autopf64}\HaozeConnectMihomoPreview
+DefaultDirName={autopf64}\Haoze
 DefaultGroupName=Haoze
 PrivilegesRequired=admin
 UsePreviousAppDir=no
@@ -16,9 +18,9 @@ DisableDirPage=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\build\haoze-installer
-OutputBaseFilename=HaozeConnect-Windows-Setup-x64-unsigned
+OutputBaseFilename=Haoze-Windows-Setup-x64-unsigned
 SetupIconFile=..\windows\runner\resources\app_icon.ico
-UninstallDisplayIcon={app}\HaozeConnectMihomo.exe
+UninstallDisplayIcon={app}\Haoze.exe
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -30,7 +32,7 @@ Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignore
 Type: files; Name: "{autoprograms}\Haoze Connect Mihomo.lnk"
 
 [Icons]
-Name: "{autoprograms}\Haoze"; Filename: "{app}\HaozeConnectMihomo.exe"
+Name: "{autoprograms}\Haoze"; Filename: "{app}\Haoze.exe"
 
 [Run]
-Filename: "{app}\HaozeConnectMihomo.exe"; Flags: postinstall nowait skipifsilent unchecked
+Filename: "{app}\Haoze.exe"; Flags: postinstall nowait skipifsilent unchecked

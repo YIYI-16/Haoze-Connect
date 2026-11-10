@@ -943,6 +943,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Лимит исчерпан"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Тариф истёк"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Срок действия"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Авторизация Google получена. Вернитесь в Haoze для завершения входа.",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "Проверьте почту, пароль и обязательные поля.",
     ),
@@ -954,6 +957,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Выйти"),
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "Пользователям XBoard при первом входе нужно подтвердить пароль: минимум 6 символов, можно использовать прежний.",
+    ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "Задайте новый пароль для завершения входа.",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage(
+      "Войти через Google",
+    ),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Следуйте указаниям Google и вернитесь в Haoze.",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Подтвердите пароль существующего аккаунта для привязки Google.",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "Введите код приложения аутентификации или код восстановления.",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "Личность проверяет AuthRouter. Пароли не сохраняются на устройстве.",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "Войти с кодом из письма",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage(
+      "Войти с паролем",
     ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Нет активного тарифа"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
@@ -989,7 +1016,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Войти через Haoze",
     ),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "Единая учётная запись: пароль, код из письма, Google или Passkey.",
+      "Войдите с паролем Haoze, кодом из письма или через Google.",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(

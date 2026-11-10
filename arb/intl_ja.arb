@@ -1019,9 +1019,18 @@
   "haozeUpdatePanelConfiguration": "このプラットフォームのバージョンとダウンロード URL が正しく設定されていません。管理者に連絡してください。",
   "haozeUpdateInstallFailed": "インストーラーを開けませんでした。再試行するか、インストール権限を確認してください。",
   "haozeUnifiedLogin": "Haoze でログイン",
-  "haozeUnifiedLoginDescription": "パスワード、メール認証コード、Google、Passkey で統一アカウントにログインします。",
+  "haozeUnifiedLoginDescription": "Haoze のパスワード、メール認証コード、Google でログインします。",
   "haozeBrowserWaiting": "ブラウザでログインを完了してから、アプリに戻ってください。",
   "haozeBrowserPrivacy": "認証はブラウザで行います。アプリはアカウントのパスワードを受け取りません。",
   "haozeMigrationNotice": "既存の XBoard ユーザーは初回ログイン時に 6 文字以上のパスワードを確認してください。以前と同じものも使えます。",
-  "haozeAccountSecurity": "アカウントとセキュリティ"
+  "haozeAccountSecurity": "アカウントとセキュリティ",
+  "haozeNativeMfa": "認証アプリのコードまたは復旧コードを入力してください。",
+  "haozeNativeChangePassword": "新しいパスワードを設定してログインを完了してください。",
+  "haozeNativeLinkGoogle": "Google を連携するには既存アカウントのパスワードを確認してください。",
+  "haozeNativeUsePassword": "パスワードでログイン",
+  "haozeNativeUseEmail": "メール認証コードでログイン",
+  "haozeNativeGoogle": "Google でログイン",
+  "haozeNativePrivacy": "AuthRouter が本人確認を行います。パスワードは端末に保存されません。",
+  "haozeGoogleReturn": "Google の認証を受け取りました。Haoze に戻ってログインを完了してください。",
+  "haozeNativeGoogleWaiting": "Google の案内に従って認証し、Haoze に戻ってください。"
 }

@@ -1019,9 +1019,18 @@
   "haozeUpdatePanelConfiguration": "The panel has not configured a valid version and download URL for this platform. Contact the administrator.",
   "haozeUpdateInstallFailed": "The installer could not be opened. Retry or check installation permissions.",
   "haozeUnifiedLogin": "Sign in with Haoze",
-  "haozeUnifiedLoginDescription": "Use your unified account with a password, email code, Google or Passkey.",
+  "haozeUnifiedLoginDescription": "Sign in with your Haoze password, email code or Google account.",
   "haozeBrowserWaiting": "Complete sign-in in your browser, then return to this app.",
   "haozeBrowserPrivacy": "Your browser handles authentication. This app never receives your account password.",
   "haozeMigrationNotice": "Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).",
-  "haozeAccountSecurity": "Account & security"
+  "haozeAccountSecurity": "Account & security",
+  "haozeNativeMfa": "Enter your authenticator code or recovery code.",
+  "haozeNativeChangePassword": "Set a new password to finish signing in.",
+  "haozeNativeLinkGoogle": "Verify your existing account password to link Google.",
+  "haozeNativeUsePassword": "Use a password",
+  "haozeNativeUseEmail": "Use an email code",
+  "haozeNativeGoogle": "Sign in with Google",
+  "haozeNativePrivacy": "AuthRouter verifies your identity. Passwords are not saved on this device.",
+  "haozeGoogleReturn": "Google authorization received. Return to Haoze to finish signing in.",
+  "haozeNativeGoogleWaiting": "Follow the Google sign-in prompt, then return to Haoze."
 }

@@ -12,6 +12,7 @@ import 'application.dart';
 import 'bootstrap.dart';
 import 'common/app_data.dart';
 import 'common/common.dart';
+import 'common/haoze_data_migration.dart';
 import 'common/preferences_store.dart';
 import 'common/window.dart';
 
@@ -19,11 +20,6 @@ void main(List<String> args) {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      if (Platform.isWindows || Platform.isLinux) {
-        SharedPreferencesStorePlatform.instance = AtomicFilePreferencesStore(
-          appPath.sharedPreferencesPath,
-        );
-      }
       if (Platform.isLinux) {
         linkManager.seedInitialLink(args);
       }
@@ -36,6 +32,23 @@ void main(List<String> args) {
         });
       };
       try {
+        if (Platform.isWindows) {
+          final roots = [
+            Platform.environment['APPDATA'],
+            Platform.environment['LOCALAPPDATA'],
+          ];
+          if (roots.any((root) => root == null || root.isEmpty)) {
+            throw StateError(
+              'Haoze application data directories are unavailable',
+            );
+          }
+          await migrateHaozeData(roots.cast<String>());
+        }
+        if (Platform.isWindows || Platform.isLinux) {
+          SharedPreferencesStorePlatform.instance = AtomicFilePreferencesStore(
+            appPath.sharedPreferencesPath,
+          );
+        }
         await RustLib.init();
         final version = await system.init();
         final container = await bootstrap.init(version);

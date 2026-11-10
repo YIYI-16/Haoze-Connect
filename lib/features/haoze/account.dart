@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:fl_clash/common/managed_routing.dart';
 import 'package:fl_clash/common/yaml_writer.dart';
 import 'package:yaml/yaml.dart';
 import 'routing_resources.dart';
+import 'native_google.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:haoze_xboard/account.dart';
 import 'package:haoze_xboard/haoze_xboard.dart';
 import 'package:haoze_xboard/browser_auth.dart';
+import 'package:haoze_xboard/native_auth.dart';
 import 'package:app_links/app_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,6 +31,28 @@ const haozeCoreVersion = String.fromEnvironment(
   defaultValue: 'v1.19.33',
 );
 const haozeAccountUrl = 'https://account.zhouhaoze.com';
+
+final haozeNativeLoginProvider = Provider<XboardNativeLogin>((ref) {
+  final client = XboardClient(panelOrigin: Uri.parse(haozePanelUrl));
+  final login = XboardNativeLogin(
+    origin: Uri.parse('https://sso.zhouhaoze.com'),
+    client: client,
+  );
+  ref.onDispose(() {
+    login.close();
+    client.close();
+  });
+  return login;
+});
+
+final haozeNativeGoogleProvider = Provider<NativeGoogleSignIn>((ref) {
+  final google = NativeGoogleSignIn(
+    isAndroid: system.isAndroid,
+    isWindows: system.isWindows,
+  );
+  ref.onDispose(() => unawaited(google.close()));
+  return google;
+});
 
 final haozeBrowserLoginProvider = Provider<XboardBrowserLogin>((ref) {
   final client = XboardClient(panelOrigin: Uri.parse(haozePanelUrl));

@@ -8562,10 +8562,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Use your unified account with a password, email code, Google or Passkey.`
+  /// `Sign in with your Haoze password, email code or Google account.`
   String get haozeUnifiedLoginDescription {
     return Intl.message(
-      'Use your unified account with a password, email code, Google or Passkey.',
+      'Sign in with your Haoze password, email code or Google account.',
       name: 'haozeUnifiedLoginDescription',
       desc: '',
       args: [],
@@ -8607,6 +8607,96 @@ class AppLocalizations {
     return Intl.message(
       'Account & security',
       name: 'haozeAccountSecurity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your authenticator code or recovery code.`
+  String get haozeNativeMfa {
+    return Intl.message(
+      'Enter your authenticator code or recovery code.',
+      name: 'haozeNativeMfa',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set a new password to finish signing in.`
+  String get haozeNativeChangePassword {
+    return Intl.message(
+      'Set a new password to finish signing in.',
+      name: 'haozeNativeChangePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verify your existing account password to link Google.`
+  String get haozeNativeLinkGoogle {
+    return Intl.message(
+      'Verify your existing account password to link Google.',
+      name: 'haozeNativeLinkGoogle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use a password`
+  String get haozeNativeUsePassword {
+    return Intl.message(
+      'Use a password',
+      name: 'haozeNativeUsePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use an email code`
+  String get haozeNativeUseEmail {
+    return Intl.message(
+      'Use an email code',
+      name: 'haozeNativeUseEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign in with Google`
+  String get haozeNativeGoogle {
+    return Intl.message(
+      'Sign in with Google',
+      name: 'haozeNativeGoogle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AuthRouter verifies your identity. Passwords are not saved on this device.`
+  String get haozeNativePrivacy {
+    return Intl.message(
+      'AuthRouter verifies your identity. Passwords are not saved on this device.',
+      name: 'haozeNativePrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google authorization received. Return to Haoze to finish signing in.`
+  String get haozeGoogleReturn {
+    return Intl.message(
+      'Google authorization received. Return to Haoze to finish signing in.',
+      name: 'haozeGoogleReturn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow the Google sign-in prompt, then return to Haoze.`
+  String get haozeNativeGoogleWaiting {
+    return Intl.message(
+      'Follow the Google sign-in prompt, then return to Haoze.',
+      name: 'haozeNativeGoogleWaiting',
       desc: '',
       args: [],
     );

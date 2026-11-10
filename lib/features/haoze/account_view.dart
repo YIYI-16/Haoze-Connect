@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/custom_issue.dart';
-import 'package:fl_clash/features/update/update_dialog.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -10,6 +9,10 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/dashboard/widgets/card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haoze_xboard/account.dart';
+import 'package:haoze_xboard/browser_auth.dart';
+import 'package:haoze_xboard/haoze_xboard.dart';
+import 'package:haoze_xboard/native_auth.dart';
+import 'native_google.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -63,20 +66,170 @@ class _AuthenticationPage extends ConsumerStatefulWidget {
 }
 
 class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
+  final _account = TextEditingController();
+  final _password = TextEditingController();
+  final _code = TextEditingController();
+  final _confirm = TextEditingController();
+  late final XboardNativeLogin _native;
+  late final NativeGoogleSignIn _google;
+  NativeAuthResult? _result;
+  XboardAccountIssue? _error;
   bool _submitting = false;
+  bool _started = false;
+  bool _emailMode = false;
+  bool _codeSent = false;
+  bool _googleWaiting = false;
 
-  Future<void> _submit() async {
+  @override
+  void initState() {
+    super.initState();
+    _native = ref.read(haozeNativeLoginProvider);
+    _google = ref.read(haozeNativeGoogleProvider);
+  }
+
+  @override
+  void dispose() {
+    _native.reset();
+    unawaited(_google.close());
+    _account.dispose();
+    _password.dispose();
+    _code.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  Future<void> _ensureSession() async {
+    if (_started && _native.active) return;
+    final redirect = await _google.prepare();
+    await _native.start(
+      _google.isAndroid ? 'android' : 'windows',
+      redirect: redirect,
+    );
+    _started = true;
+  }
+
+  Future<void> _run(Future<NativeAuthResult?> Function() action) async {
     if (_submitting) return;
-    setState(() => _submitting = true);
-    final browser = ref.read(haozeBrowserLoginProvider);
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
     try {
-      await ref
-          .read(haozeAccountProvider.notifier)
-          .controller
-          .loginWithBrowser(browser.login);
+      await _ensureSession();
+      if (!mounted) return;
+      final result = await action();
+      if (!mounted) return;
+      if (result?.account case final account?) {
+        _password.clear();
+        _code.clear();
+        _confirm.clear();
+        _started = false;
+        await ref
+            .read(haozeAccountProvider.notifier)
+            .controller
+            .loginWithCredential(() async => account);
+      } else if (result != null) {
+        setState(() {
+          _result = result;
+          _password.clear();
+          _confirm.clear();
+          _code.clear();
+        });
+      }
+    } on XboardLoginCancelled {
+      _started = false;
+      _native.reset();
+    } on XboardException catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error.kind == XboardFailure.unauthorized
+              ? XboardAccountIssue.credentials
+              : XboardAccountIssue.network,
+        );
+      }
+      if (error.statusCode == 401 && _result == null) {
+        _native.reset();
+        _started = false;
+        _codeSent = false;
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = XboardAccountIssue.network);
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          _googleWaiting = false;
+        });
+      }
     }
+  }
+
+  Future<void> _submit() => _run(() async {
+    final step = _result?.step;
+    if (step == 'password-change' &&
+        (_password.text.isEmpty || _password.text != _confirm.text)) {
+      throw const XboardException(XboardFailure.unauthorized);
+    }
+    return _native.authenticate(
+      switch (step) {
+        'mfa' => 'mfa',
+        'password-change' => 'password-change',
+        _ => _emailMode && step != 'link' ? 'email/verify' : 'password',
+      },
+      {
+        'account': _account.text.trim(),
+        'password': _password.text,
+        'code': _code.text.trim(),
+      },
+    );
+  });
+
+  Future<void> _sendCode() => _run(() async {
+    await _native.sendEmailCode(_account.text.trim());
+    if (mounted) setState(() => _codeSent = true);
+    return null;
+  });
+
+  Future<void> _googleLogin() => _run(() async {
+    if (mounted) setState(() => _googleWaiting = true);
+    try {
+      final result = await _google.signIn(
+        _native,
+        returnMessage: context.appLocalizations.haozeGoogleReturn,
+      );
+      if (mounted && _google.isWindows) {
+        try {
+          await windowPort?.show();
+        } on Exception {
+          // Foreground failure must not discard a verified login.
+        }
+      }
+      return result;
+    } catch (_) {
+      _native.reset();
+      _started = false;
+      rethrow;
+    }
+  });
+
+  void _reset() {
+    _native.reset();
+    unawaited(_google.close());
+    setState(() {
+      _started = false;
+      _result = null;
+      _error = null;
+      _codeSent = false;
+      _password.clear();
+      _confirm.clear();
+      _code.clear();
+    });
+  }
+
+  void _cancelGoogle() {
+    _native.reset();
+    _started = false;
+    _google.cancel();
   }
 
   @override
@@ -84,7 +237,8 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
     final state = ref.watch(haozeAccountProvider);
     final initialized = ref.watch(initProvider);
     final l10n = context.appLocalizations;
-    final busy = _submitting || state.busy;
+    final busy = _submitting || state.busy || !initialized;
+    final step = _result?.step;
     return CommonScaffold(
       title: appName,
       body: Builder(
@@ -99,54 +253,132 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 20,
-                children: [
-                  Text(
-                    l10n.haozeUnifiedLogin,
-                    style: AppTextStyle.title1.of(context),
-                  ),
-                  Text(l10n.haozeUnifiedLoginDescription),
-                  ErrorBanner(message: _issue(context, state.issue)),
-                  if (_submitting) Text(l10n.haozeBrowserWaiting),
-                  FilledButton(
-                    key: const ValueKey('haoze-submit'),
-                    onPressed: busy || !initialized ? null : _submit,
-                    child: Text(l10n.haozeUnifiedLogin),
-                  ),
-                  if (_submitting)
-                    TextButton(
-                      key: const ValueKey('haoze-login-cancel'),
-                      onPressed: () =>
-                          ref.read(haozeBrowserLoginProvider).cancel(),
-                      child: Text(l10n.cancel),
+              child: AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 20,
+                  children: [
+                    Text(
+                      l10n.haozeUnifiedLogin,
+                      style: AppTextStyle.title1.of(context),
                     ),
-                  Text(
-                    l10n.haozeBrowserPrivacy,
-                    style: AppTextStyle.footnote.of(context),
-                  ),
-                  Text(
-                    l10n.haozeMigrationNotice,
-                    style: AppTextStyle.footnote.of(context),
-                  ),
-                  OutlinedButton(
-                    key: const ValueKey('haoze-register-website'),
-                    onPressed: busy
-                        ? null
-                        : () => _openWebsite(haozeAccountUrl),
-                    child: Text(l10n.haozeRegister),
-                  ),
-                  TextButton(
-                    onPressed: () => _openWebsite(haozePanelUrl),
-                    child: Text(l10n.haozeWebsite),
-                  ),
-                  TextButton(
-                    key: const ValueKey('haoze-auth-update'),
-                    onPressed: () => showHaozeUpdateDialog(context),
-                    child: Text(l10n.checkUpdate),
-                  ),
-                ],
+                    Text(switch (step) {
+                      'mfa' => l10n.haozeNativeMfa,
+                      'password-change' => l10n.haozeNativeChangePassword,
+                      'link' => l10n.haozeNativeLinkGoogle,
+                      _ => l10n.haozeUnifiedLoginDescription,
+                    }),
+                    ErrorBanner(
+                      message: _issue(context, _error ?? state.issue),
+                    ),
+                    if (step == null)
+                      TextFormField(
+                        key: const ValueKey('haoze-native-account'),
+                        controller: _account,
+                        enabled: !busy,
+                        autofillHints: const [AutofillHints.username],
+                        autocorrect: false,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(labelText: l10n.account),
+                      ),
+                    if (step == 'link') Text(_result?.email ?? ''),
+                    if (step == 'mfa' || (_emailMode && step == null))
+                      TextFormField(
+                        key: const ValueKey('haoze-native-code'),
+                        controller: _code,
+                        enabled: !busy,
+                        autocorrect: false,
+                        autofillHints: step == 'mfa'
+                            ? null
+                            : const [AutofillHints.oneTimeCode],
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: step == 'mfa'
+                              ? l10n.haozeNativeMfa
+                              : l10n.haozeEmailCode,
+                        ),
+                        onFieldSubmitted: (_) {
+                          if (!busy) unawaited(_submit());
+                        },
+                      )
+                    else
+                      SecretTextFormField(
+                        key: const ValueKey('haoze-native-password'),
+                        controller: _password,
+                        decoration: InputDecoration(labelText: l10n.password),
+                        textInputAction: step == 'password-change'
+                            ? TextInputAction.next
+                            : TextInputAction.done,
+                        onFieldSubmitted: (_) {
+                          if (!busy) unawaited(_submit());
+                        },
+                      ),
+                    if (step == 'password-change')
+                      SecretTextFormField(
+                        controller: _confirm,
+                        decoration: InputDecoration(
+                          labelText: l10n.haozeConfirmPassword,
+                        ),
+                      ),
+                    if (_emailMode && step == null)
+                      OutlinedButton(
+                        key: const ValueKey('haoze-native-send-code'),
+                        onPressed: busy ? null : _sendCode,
+                        child: Text(l10n.haozeSendCode),
+                      ),
+                    if (_codeSent && step == null) Text(l10n.haozeCodeSent),
+                    FilledButton(
+                      key: const ValueKey('haoze-submit'),
+                      onPressed: busy ? null : _submit,
+                      child: _submitting
+                          ? const CommonCircleLoading(size: 20)
+                          : Text(l10n.haozeLogin),
+                    ),
+                    if (_googleWaiting) ...[
+                      Text(l10n.haozeNativeGoogleWaiting),
+                      TextButton(
+                        key: const ValueKey('haoze-login-cancel'),
+                        onPressed: _cancelGoogle,
+                        child: Text(l10n.cancel),
+                      ),
+                    ],
+                    if (step == null) ...[
+                      TextButton(
+                        key: const ValueKey('haoze-native-mode'),
+                        onPressed: busy
+                            ? null
+                            : () {
+                                _reset();
+                                setState(() => _emailMode = !_emailMode);
+                              },
+                        child: Text(
+                          _emailMode
+                              ? l10n.haozeNativeUsePassword
+                              : l10n.haozeNativeUseEmail,
+                        ),
+                      ),
+                      OutlinedButton(
+                        key: const ValueKey('haoze-native-google'),
+                        onPressed: busy ? null : _googleLogin,
+                        child: Text(l10n.haozeNativeGoogle),
+                      ),
+                    ] else
+                      TextButton(
+                        onPressed: busy ? null : _reset,
+                        child: Text(l10n.cancel),
+                      ),
+                    Text(
+                      l10n.haozeNativePrivacy,
+                      style: AppTextStyle.footnote.of(context),
+                    ),
+                    TextButton(
+                      onPressed: busy
+                          ? null
+                          : () => _openWebsite(haozeAccountUrl),
+                      child: Text(l10n.haozeRegister),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

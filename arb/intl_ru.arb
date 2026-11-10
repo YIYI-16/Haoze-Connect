@@ -1019,9 +1019,18 @@
   "haozeUpdatePanelConfiguration": "В панели не настроены корректные версия и ссылка для этой платформы. Обратитесь к администратору.",
   "haozeUpdateInstallFailed": "Не удалось открыть установщик. Повторите попытку или проверьте разрешения.",
   "haozeUnifiedLogin": "Войти через Haoze",
-  "haozeUnifiedLoginDescription": "Единая учётная запись: пароль, код из письма, Google или Passkey.",
+  "haozeUnifiedLoginDescription": "Войдите с паролем Haoze, кодом из письма или через Google.",
   "haozeBrowserWaiting": "Завершите вход в браузере и вернитесь в приложение.",
   "haozeBrowserPrivacy": "Проверка проходит в браузере. Приложение не получает пароль вашей учётной записи.",
   "haozeMigrationNotice": "Пользователям XBoard при первом входе нужно подтвердить пароль: минимум 6 символов, можно использовать прежний.",
-  "haozeAccountSecurity": "Аккаунт и безопасность"
+  "haozeAccountSecurity": "Аккаунт и безопасность",
+  "haozeNativeMfa": "Введите код приложения аутентификации или код восстановления.",
+  "haozeNativeChangePassword": "Задайте новый пароль для завершения входа.",
+  "haozeNativeLinkGoogle": "Подтвердите пароль существующего аккаунта для привязки Google.",
+  "haozeNativeUsePassword": "Войти с паролем",
+  "haozeNativeUseEmail": "Войти с кодом из письма",
+  "haozeNativeGoogle": "Войти через Google",
+  "haozeNativePrivacy": "Личность проверяет AuthRouter. Пароли не сохраняются на устройстве.",
+  "haozeGoogleReturn": "Авторизация Google получена. Вернитесь в Haoze для завершения входа.",
+  "haozeNativeGoogleWaiting": "Следуйте указаниям Google и вернитесь в Haoze."
 }

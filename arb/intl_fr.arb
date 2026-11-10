@@ -1019,9 +1019,18 @@
   "haozeUpdatePanelConfiguration": "La version et l’URL de téléchargement de cette plateforme ne sont pas correctement configurées. Contactez l’administrateur.",
   "haozeUpdateInstallFailed": "Impossible d’ouvrir le programme d’installation. Réessayez ou vérifiez les autorisations.",
   "haozeUnifiedLogin": "Se connecter avec Haoze",
-  "haozeUnifiedLoginDescription": "Utilisez votre compte unifié avec un mot de passe, un code par e-mail, Google ou Passkey.",
+  "haozeUnifiedLoginDescription": "Connectez-vous avec votre mot de passe Haoze, un code par e-mail ou Google.",
   "haozeBrowserWaiting": "Terminez la connexion dans votre navigateur, puis revenez dans l’application.",
   "haozeBrowserPrivacy": "L’authentification se déroule dans le navigateur. Cette application ne reçoit jamais votre mot de passe.",
   "haozeMigrationNotice": "Utilisateurs XBoard existants : confirmez un mot de passe d’au moins 6 caractères à la première connexion. L’ancien est accepté.",
-  "haozeAccountSecurity": "Compte et sécurité"
+  "haozeAccountSecurity": "Compte et sécurité",
+  "haozeNativeMfa": "Saisissez un code de votre application ou un code de récupération.",
+  "haozeNativeChangePassword": "Définissez un nouveau mot de passe pour terminer la connexion.",
+  "haozeNativeLinkGoogle": "Vérifiez le mot de passe de votre compte existant pour associer Google.",
+  "haozeNativeUsePassword": "Utiliser un mot de passe",
+  "haozeNativeUseEmail": "Utiliser un code par e-mail",
+  "haozeNativeGoogle": "Se connecter avec Google",
+  "haozeNativePrivacy": "AuthRouter vérifie votre identité. Les mots de passe ne sont pas enregistrés sur cet appareil.",
+  "haozeGoogleReturn": "Autorisation Google reçue. Revenez dans Haoze pour terminer la connexion.",
+  "haozeNativeGoogleWaiting": "Suivez les instructions de Google, puis revenez dans Haoze."
 }

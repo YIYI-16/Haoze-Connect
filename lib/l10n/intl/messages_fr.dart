@@ -967,6 +967,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Quota épuisé"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Offre expirée"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Expiration"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Autorisation Google reçue. Revenez dans Haoze pour terminer la connexion.",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "Vérifiez l’e-mail, le mot de passe et les champs requis.",
     ),
@@ -980,6 +983,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Se déconnecter"),
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "Utilisateurs XBoard existants : confirmez un mot de passe d’au moins 6 caractères à la première connexion. L’ancien est accepté.",
+    ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "Définissez un nouveau mot de passe pour terminer la connexion.",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage(
+      "Se connecter avec Google",
+    ),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Suivez les instructions de Google, puis revenez dans Haoze.",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Vérifiez le mot de passe de votre compte existant pour associer Google.",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "Saisissez un code de votre application ou un code de récupération.",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "AuthRouter vérifie votre identité. Les mots de passe ne sont pas enregistrés sur cet appareil.",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "Utiliser un code par e-mail",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage(
+      "Utiliser un mot de passe",
     ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Aucune offre active"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
@@ -1019,7 +1046,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Se connecter avec Haoze",
     ),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "Utilisez votre compte unifié avec un mot de passe, un code par e-mail, Google ou Passkey.",
+      "Connectez-vous avec votre mot de passe Haoze, un code par e-mail ou Google.",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage(
       "Sans expiration",

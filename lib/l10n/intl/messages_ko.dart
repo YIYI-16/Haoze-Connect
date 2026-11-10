@@ -758,6 +758,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("데이터 소진"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("요금제 만료"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("만료일"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "이메일, 비밀번호 및 필수 항목을 확인하세요.",
     ),
@@ -768,6 +771,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "기존 XBoard 사용자는 첫 로그인 시 6자 이상의 비밀번호를 확인해야 합니다. 기존 비밀번호도 사용할 수 있습니다.",
     ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "로그인을 완료하려면 새 비밀번호를 설정하세요.",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage("Google로 로그인"),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Google 안내에 따라 인증한 후 Haoze로 돌아오세요.",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Google을 연결하려면 기존 계정 비밀번호를 확인하세요.",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "인증 앱의 코드 또는 복구 코드를 입력하세요.",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "AuthRouter가 신원을 확인합니다. 비밀번호는 이 기기에 저장되지 않습니다.",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "이메일 인증 코드로 로그인",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage("비밀번호로 로그인"),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("사용 가능한 요금제 없음"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
       "새 다운로드 정보를 가져오지 못했습니다. 패널 설정을 확인하거나 나중에 다시 시도하세요.",
@@ -796,7 +819,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTotal": MessageLookupByLibrary.simpleMessage("총 데이터"),
     "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("Haoze로 로그인"),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "비밀번호, 이메일 인증 코드, Google 또는 Passkey로 통합 계정에 로그인하세요.",
+      "Haoze 비밀번호, 이메일 인증 코드 또는 Google로 로그인하세요.",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("만료 없음"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("업데이트 확인 중…"),

@@ -273,6 +273,23 @@ class XboardClient {
     ),
   );
 
+  Future<XboardBrowserAccount> exchangeNativeGrant(
+    String code,
+    String verifier,
+  ) async {
+    final data = await _request(
+      'POST',
+      'account-bridge/app/native/exchange',
+      body: {'code': code, 'code_verifier': verifier},
+    );
+    final email = data['email'];
+    if (email is! String ||
+        !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+      throw const XboardException(XboardFailure.protocol);
+    }
+    return XboardBrowserAccount(email: email, session: _session(data));
+  }
+
   Future<XboardSession> register(
     String email,
     String password, {
@@ -348,7 +365,7 @@ class XboardClient {
     );
     final response = await _transport.send(method, uri, {
       'Accept': 'application/json',
-      'User-Agent': 'HaozeConnect/6.1.2',
+      'User-Agent': 'Haoze/6.1.3',
       if (session != null) 'Authorization': session.authorization,
     }, body);
     if (response.statusCode < 200 || response.statusCode >= 300) {

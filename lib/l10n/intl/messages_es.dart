@@ -968,6 +968,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Cuota agotada"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Plan caducado"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Caducidad"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Autorización de Google recibida. Vuelve a Haoze para completar el inicio de sesión.",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "Revisa el correo, la contraseña y los campos obligatorios.",
     ),
@@ -981,6 +984,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Cerrar sesión"),
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "Usuarios de XBoard: confirma una contraseña de al menos 6 caracteres al iniciar sesión por primera vez. Puedes usar la anterior.",
+    ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "Establece una contraseña nueva para completar el inicio de sesión.",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage(
+      "Iniciar sesión con Google",
+    ),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Sigue las indicaciones de Google y vuelve a Haoze.",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Verifica la contraseña de tu cuenta existente para vincular Google.",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "Introduce el código de tu aplicación de autenticación o de recuperación.",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "AuthRouter verifica tu identidad. Las contraseñas no se guardan en este dispositivo.",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "Usar código por correo",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage(
+      "Usar contraseña",
     ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("Sin plan activo"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
@@ -1018,7 +1045,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Iniciar sesión con Haoze",
     ),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "Usa tu cuenta unificada con contraseña, código por correo, Google o Passkey.",
+      "Inicia sesión con tu contraseña de Haoze, un código por correo o Google.",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("Sin caducidad"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(

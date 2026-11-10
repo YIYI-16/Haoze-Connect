@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:haoze_xboard/browser_auth.dart';
+import 'package:haoze_xboard/native_auth.dart';
+import 'package:fl_clash/features/haoze/native_google.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haoze_xboard/account.dart';
 import 'package:haoze_xboard/haoze_xboard.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/common/app_ports.dart';
 
 import '../../helpers/test_app.dart';
 
@@ -59,10 +62,26 @@ class _Transport implements XboardTransport {
     Map<String, Object?>? body,
   ) async {
     paths.add(uri.path);
+    if (uri.path.endsWith('/native/v1/start')) {
+      return XboardResponse(200, {'flow': 'f' * 43, 'nonce': 'n' * 43});
+    }
+    if (uri.path.endsWith('/email/send')) {
+      return const XboardResponse(200, {'sent': true});
+    }
+    if (uri.path.endsWith('/native/v1/password') ||
+        uri.path.endsWith('/native/v1/google') ||
+        uri.path.endsWith('/email/verify')) {
+      return XboardResponse(rejectLogin ? 401 : 200, {
+        'step': 'complete',
+        'code': 'g' * 43,
+      });
+    }
+
     if (uri.path.endsWith('/register')) registrationBody = body;
     if (uri.path.endsWith('/login') ||
         uri.path.endsWith('/register') ||
-        uri.path.endsWith('/app/exchange')) {
+        uri.path.endsWith('/app/exchange') ||
+        uri.path.endsWith('/native/exchange')) {
       return XboardResponse(rejectLogin ? 401 : 200, const {
         'data': {
           'email': 'user@example.com',
@@ -93,6 +112,43 @@ class _Transport implements XboardTransport {
 
   @override
   void close() {}
+}
+
+class _Window extends Fake implements WindowPort {
+  int shows = 0;
+  bool fail = false;
+  @override
+  Future<void> show() async {
+    shows++;
+    if (fail) throw Exception('Cannot foreground window');
+  }
+}
+
+class _Google extends NativeGoogleSignIn {
+  _Google({bool windows = false})
+    : super(isAndroid: !windows, isWindows: windows);
+  @override
+  Future<Uri?> prepare() async =>
+      isWindows ? Uri.parse('http://127.0.0.1:50000/oauth/callback') : null;
+  bool wait = false;
+  Completer<NativeAuthResult>? pending;
+  @override
+  Future<NativeAuthResult> signIn(
+    XboardNativeLogin login, {
+    required String returnMessage,
+  }) async {
+    if (!wait) return login.authenticate('google', {'id_token': 'fixture'});
+    pending = Completer<NativeAuthResult>();
+    return pending!.future;
+  }
+
+  @override
+  void cancel() {
+    if (pending case final result? when !result.isCompleted) {
+      result.completeError(const XboardLoginCancelled());
+    }
+    pending = null;
+  }
 }
 
 class _Account extends HaozeAccount {
@@ -179,10 +235,8 @@ void main() {
   late _Transport transport;
   late _Profiles profiles;
   late XboardAccountController engine;
-  late XboardBrowserLogin browser;
-  late StreamController<Uri> links;
-  Uri? launched;
-  bool autoReturn = true;
+  late XboardNativeLogin native;
+  late _Google google;
 
   setUp(() async {
     transport = _Transport();
@@ -199,36 +253,17 @@ void main() {
     );
     await engine.restore();
     await engine.loadConfig();
-    launched = null;
-    autoReturn = true;
-    links = StreamController<Uri>.broadcast();
-    browser = XboardBrowserLogin(
+    native = XboardNativeLogin(
+      origin: Uri.https('sso.example.com'),
       client: engine.client,
-      origin: Uri.https('example.com'),
-      links: links.stream,
-      open: (uri) async {
-        launched = uri;
-        if (autoReturn) {
-          links.add(
-            Uri(
-              scheme: 'haoze-connect',
-              host: 'auth',
-              path: '/callback',
-              queryParameters: {
-                'state': uri.queryParameters['state']!,
-                'code': 'a' * 64,
-              },
-            ),
-          );
-        }
-        return true;
-      },
+      transport: transport,
     );
+    google = _Google();
   });
   tearDown(() async {
-    browser.close();
+    native.close();
+    await google.close();
     engine.close();
-    await links.close();
   });
 
   Future<void> open(
@@ -249,7 +284,8 @@ void main() {
         ).withAppShapes.withAppTypography.withAppSurfaces,
         overrides: [
           haozeAccountProvider.overrideWith(() => _Account(engine)),
-          haozeBrowserLoginProvider.overrideWithValue(browser),
+          haozeNativeLoginProvider.overrideWithValue(native),
+          haozeNativeGoogleProvider.overrideWithValue(google),
           initProvider.overrideWithBuild((_, _) => true),
           viewSizeProvider.overrideWithBuild((_, _) => size),
         ],
@@ -282,6 +318,14 @@ void main() {
   }
 
   Future<void> submit(WidgetTester tester) async {
+    await tester.enterText(
+      find.byKey(const ValueKey('haoze-native-account')),
+      'user@example.com',
+    );
+    await tester.enterText(
+      find.byType(SecretTextFormField).first,
+      'example-password',
+    );
     await tester.ensureVisible(find.byKey(const ValueKey('haoze-submit')));
     await tester.tap(find.byKey(const ValueKey('haoze-submit')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
@@ -289,12 +333,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('updates are available before account login', (tester) async {
+  testWidgets('login page does not offer update checks', (tester) async {
     await open(tester);
     expect(engine.state.authenticated, isFalse);
     final update = find.byKey(const ValueKey('haoze-auth-update'));
-    expect(update, findsOneWidget);
-    expect(tester.widget<TextButton>(update).onPressed, isNotNull);
+    expect(update, findsNothing);
   });
 
   testWidgets(
@@ -325,36 +368,104 @@ void main() {
     expect(find.text('authenticated-home'), findsOneWidget);
   });
   testWidgets(
-    'unified authentication replaces native password and registration forms',
+    'native credentials sign in without opening the account website',
     (tester) async {
       await open(tester);
-      expect(find.byType(EditableText), findsNothing);
-      expect(
-        find.byKey(const ValueKey('haoze-register-website')),
-        findsOneWidget,
-      );
+      expect(find.byType(EditableText), findsNWidgets(2));
       await submit(tester);
-      expect(launched!.path, '/api/v1/account-bridge/app/login');
+      expect(transport.paths, contains('/native/v1/password'));
+      expect(
+        transport.paths,
+        contains('/api/v1/account-bridge/app/native/exchange'),
+      );
       expect(transport.paths.any((p) => p.contains('/passport/auth/')), false);
       expect(engine.state.email, 'user@example.com');
     },
   );
 
-  testWidgets('browser sign-in can be cancelled and retried', (tester) async {
-    autoReturn = false;
+  testWidgets('Google sign-in can be cancelled and retried', (tester) async {
+    google.wait = true;
     await open(tester);
-    await submit(tester);
-    expect(find.byKey(const ValueKey('haoze-login-cancel')), findsOneWidget);
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('haoze-native-google')),
+    );
+    await tester.tap(find.byKey(const ValueKey('haoze-native-google')));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('haoze-login-cancel')),
+    );
     expect(engine.state.authenticated, false);
     await tester.tap(find.byKey(const ValueKey('haoze-login-cancel')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
     expect(engine.state.issue, isNull);
     expect(find.byKey(const ValueKey('haoze-login-cancel')), findsNothing);
-    autoReturn = true;
-    await submit(tester);
+    google.wait = false;
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('haoze-native-google')),
+    );
+    await tester.tap(find.byKey(const ValueKey('haoze-native-google')));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
     expect(engine.state.authenticated, true);
   });
+
+  for (final fail in [false, true]) {
+    testWidgets(
+      'Windows Google returns to Haoze; foreground failure=$fail preserves the session',
+      (tester) async {
+        final previous = windowPort;
+        final port = _Window()..fail = fail;
+        windowPort = port;
+        addTearDown(() => windowPort = previous);
+        google = _Google(windows: true);
+        await open(tester);
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('haoze-native-google')),
+        );
+        await tester.tap(find.byKey(const ValueKey('haoze-native-google')));
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+        expect(port.shows, 1);
+        expect(engine.state.authenticated, true);
+        expect(find.text('authenticated-home'), findsOneWidget);
+      },
+    );
+  }
+
+  testWidgets(
+    'email login sends a code and uses the AuthRouter code endpoint',
+    (tester) async {
+      await open(tester);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('haoze-native-mode')),
+      );
+      await tester.tap(find.byKey(const ValueKey('haoze-native-mode')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('haoze-native-account')),
+        'user@example.com',
+      );
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('haoze-native-send-code')),
+      );
+      await tester.tap(find.byKey(const ValueKey('haoze-native-send-code')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('haoze-native-code')),
+        '123456',
+      );
+      await tester.ensureVisible(find.byKey(const ValueKey('haoze-submit')));
+      await tester.tap(find.byKey(const ValueKey('haoze-submit')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(transport.paths, contains('/native/v1/email/send'));
+      expect(transport.paths, contains('/native/v1/email/verify'));
+      expect(engine.state.authenticated, true);
+    },
+  );
 
   test(
     'managed tunnel never starts while applying its profile fails',

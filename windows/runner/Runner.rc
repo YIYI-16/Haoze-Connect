@@ -92,11 +92,10 @@ BEGIN
             VALUE "CompanyName", "Haoze" "\0"
             VALUE "FileDescription", "Haoze" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "HaozeConnectMihomo" "\0"
+            VALUE "InternalName", "Haoze" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.follow. All rights reserved." "\0"
-            VALUE "OriginalFilename", "HaozeConnectMihomo.exe" "\0"
-            // path_provider and secure storage use ProductName as the existing data directory.
-            VALUE "ProductName", "Haoze Connect Mihomo" "\0"
+            VALUE "OriginalFilename", "Haoze.exe" "\0"
+            VALUE "ProductName", "Haoze" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

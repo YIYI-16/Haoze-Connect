@@ -909,6 +909,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("Quota exhausted"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("Plan expired"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("Expires"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Google authorization received. Return to Haoze to finish signing in.",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "Check your email, password and required fields.",
     ),
@@ -918,6 +921,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLogout": MessageLookupByLibrary.simpleMessage("Sign out"),
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "Existing XBoard users: confirm your password on the first sign-in (at least 6 characters; your previous password is allowed).",
+    ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "Set a new password to finish signing in.",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage(
+      "Sign in with Google",
+    ),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Follow the Google sign-in prompt, then return to Haoze.",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Verify your existing account password to link Google.",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "Enter your authenticator code or recovery code.",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "AuthRouter verifies your identity. Passwords are not saved on this device.",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "Use an email code",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage(
+      "Use a password",
     ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("No active plan"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
@@ -953,7 +980,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Sign in with Haoze",
     ),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "Use your unified account with a password, email code, Google or Passkey.",
+      "Sign in with your Haoze password, email code or Google account.",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("No expiry"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage(

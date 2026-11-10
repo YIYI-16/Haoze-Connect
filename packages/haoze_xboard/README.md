@@ -6,7 +6,7 @@ The application baseline is FlClash v0.9.2, commit
 copied into this prototype. FlClash's GPLv3 license and attribution remain.
 
 `packages/haoze_xboard` is an independent account/configuration module. The
-integration connects it to unified browser login and native account views,
+integration connects it to AuthRouter native login and account views,
 system secure storage, one managed profile and the existing lifecycle owners.
 The current update is 6.1.0; release publication is separate from source validation.
 No affected-device HTTPS fix or complete routing/IPv6 acceptance is claimed.
@@ -118,11 +118,17 @@ attempts immediately, stops the tunnel and removes only the managed profile.
 A secure-store failure remains visible and requires a cleanup retry; the locked
 session cannot reactivate. This is local sign-out, not server-session revocation.
 
-Registration, email verification, first-password confirmation, Google, Passkey
-and password-only MFA are handled by the existing unified account service in the
-system browser. The native UI no longer sends passwords or registration codes
-to XBoard. Legacy SDK methods remain for compatibility and isolated regression
-tests; the application never calls them. See [the current auth contract](../../UNIFIED-ACCOUNT.md).
+Passwords, email codes, first-password confirmation and password MFA are handled
+in the app by AuthRouter's native APIs. Android Google sign-in uses Credential
+Manager; Windows uses the system browser with a state/nonce/PKCE-bound loopback
+callback. Google tokens and passwords go only to AuthRouter. An opaque one-use
+grant is exchanged by AccountBridge using its existing confidential client,
+then mapped through the same immutable ordinary/administrator bindings.
+Desktop Google secrets and internal service secrets remain server-side.
+Registration, email verification and Passkey management remain in the account
+center; the native login page does not offer Passkey sign-in.
+Legacy browser endpoints remain compatible with installed clients.
+See [the current auth contract](../../UNIFIED-ACCOUNT.md).
 Updates use `/client/app/getVersion` and retain signature/checksum verification.
 Empty/invalid update metadata does
 not invalidate the account. No automatic upstream updater is started.
@@ -135,8 +141,7 @@ secure account. This avoids treating a cached subscription as account authority.
 System VPN behavior and permission UI still require device acceptance.
 
 Android preview identity: com.haoze.connect.mihomo (debug-signed fallback adds
-.dev). Windows: HaozeConnectMihomo.exe, CompanyName Haoze, ProductName Haoze Connect
-Mihomo. Both are separate from the prior Hiddify app. Native core/helper names
+.dev). Windows: Haoze.exe, CompanyName Haoze, ProductName Haoze. Both are separate from the prior Hiddify app. Native core/helper names
 remain upstream names; helper coexistence and installation remain unverified.
 
 Local checks cover account/session failure boundaries, real widget layouts in

@@ -1019,9 +1019,18 @@
   "haozeUpdatePanelConfiguration": "패널에 이 플랫폼의 버전 또는 다운로드 URL이 올바르게 설정되지 않았습니다. 관리자에게 문의하세요.",
   "haozeUpdateInstallFailed": "설치 프로그램을 열 수 없습니다. 다시 시도하거나 설치 권한을 확인하세요.",
   "haozeUnifiedLogin": "Haoze로 로그인",
-  "haozeUnifiedLoginDescription": "비밀번호, 이메일 인증 코드, Google 또는 Passkey로 통합 계정에 로그인하세요.",
+  "haozeUnifiedLoginDescription": "Haoze 비밀번호, 이메일 인증 코드 또는 Google로 로그인하세요.",
   "haozeBrowserWaiting": "브라우저에서 로그인을 완료한 다음 앱으로 돌아오세요.",
   "haozeBrowserPrivacy": "인증은 브라우저에서 진행됩니다. 앱은 통합 계정 비밀번호를 받지 않습니다.",
   "haozeMigrationNotice": "기존 XBoard 사용자는 첫 로그인 시 6자 이상의 비밀번호를 확인해야 합니다. 기존 비밀번호도 사용할 수 있습니다.",
-  "haozeAccountSecurity": "계정 및 보안"
+  "haozeAccountSecurity": "계정 및 보안",
+  "haozeNativeMfa": "인증 앱의 코드 또는 복구 코드를 입력하세요.",
+  "haozeNativeChangePassword": "로그인을 완료하려면 새 비밀번호를 설정하세요.",
+  "haozeNativeLinkGoogle": "Google을 연결하려면 기존 계정 비밀번호를 확인하세요.",
+  "haozeNativeUsePassword": "비밀번호로 로그인",
+  "haozeNativeUseEmail": "이메일 인증 코드로 로그인",
+  "haozeNativeGoogle": "Google로 로그인",
+  "haozeNativePrivacy": "AuthRouter가 신원을 확인합니다. 비밀번호는 이 기기에 저장되지 않습니다.",
+  "haozeGoogleReturn": "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
+  "haozeNativeGoogleWaiting": "Google 안내에 따라 인증한 후 Haoze로 돌아오세요."
 }

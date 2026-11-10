@@ -19,15 +19,15 @@ notification icons preserve its alpha mask. Connection-status badges retain
 separate stopped, proxy and TUN colors; the safe-mode diagnostic icon is kept.
 The existing status-icon generator reapplies the Haoze branding last.
 
-Display-name changes preserve existing application identity: the Android package
-and certificate, Windows binary and installer AppId, application data directory,
-secure-storage keys, startup integration key and WebDAV collection remain stable.
-Windows `ProductName` deliberately keeps its original value because both
-path_provider and flutter_secure_storage derive the existing data directory
-from it; the window title, FileDescription, installed-app name and Start Menu
-shortcut display **Haoze**. The installer removes its previous named Start Menu
-shortcut on upgrade.
+Windows uses **Haoze** for the executable (`Haoze.exe`), product metadata,
+installer, default installation directory and Start Menu shortcut. The Android
+package and signing certificate and the Windows installer AppId remain stable.
+Before storage plugins initialize, Windows moves the previous product's Roaming
+and Local application data directories to `Haoze/Haoze`, preserving encrypted
+credentials and settings. An existing destination is never overwritten; a failed
+move stops startup. Startup integration and WebDAV collection keys remain stable.
+The installer removes its previous named Start Menu shortcut on upgrade.
 
 Download asset names and repository URLs remain compatible with the existing
-6.0.x/6.1.x updater contract. This is a 6.1.2 application update; Android ARM64
-uses version code 64102.
+6.0.x/6.1.x updater contract. This is a 6.1.3 application update; Android ARM64
+uses version code 64103.

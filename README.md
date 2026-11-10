@@ -1,5 +1,5 @@
-> **Haoze — unified account integration.** This branch contains the 6.1.2
-> AuthRouter account update for `https://www.haoze.cyou`, based on the upstream
+> **Haoze — unified account integration.** This branch contains Android/Windows
+> native authentication through AuthRouter for `https://www.haoze.cyou`, based on the upstream
 > FlClash v0.9.2 code retained below. See GitHub Releases for Android and Windows installers.
 > See [unified login and release requirements](UNIFIED-ACCOUNT.md) and [integration status and API contracts](packages/haoze_xboard/README.md).
 > Source: [YIYI-16/Haoze-Connect, flclash-prototype](https://github.com/YIYI-16/Haoze-Connect/tree/flclash-prototype).

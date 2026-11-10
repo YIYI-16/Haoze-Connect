@@ -771,6 +771,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeExhausted": MessageLookupByLibrary.simpleMessage("容量を使い切りました"),
     "haozeExpired": MessageLookupByLibrary.simpleMessage("プランの期限切れ"),
     "haozeExpiry": MessageLookupByLibrary.simpleMessage("有効期限"),
+    "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
+      "Google の認証を受け取りました。Haoze に戻ってログインを完了してください。",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "メール、パスワードと必須項目をご確認ください。",
     ),
@@ -780,6 +783,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeLogout": MessageLookupByLibrary.simpleMessage("ログアウト"),
     "haozeMigrationNotice": MessageLookupByLibrary.simpleMessage(
       "既存の XBoard ユーザーは初回ログイン時に 6 文字以上のパスワードを確認してください。以前と同じものも使えます。",
+    ),
+    "haozeNativeChangePassword": MessageLookupByLibrary.simpleMessage(
+      "新しいパスワードを設定してログインを完了してください。",
+    ),
+    "haozeNativeGoogle": MessageLookupByLibrary.simpleMessage("Google でログイン"),
+    "haozeNativeGoogleWaiting": MessageLookupByLibrary.simpleMessage(
+      "Google の案内に従って認証し、Haoze に戻ってください。",
+    ),
+    "haozeNativeLinkGoogle": MessageLookupByLibrary.simpleMessage(
+      "Google を連携するには既存アカウントのパスワードを確認してください。",
+    ),
+    "haozeNativeMfa": MessageLookupByLibrary.simpleMessage(
+      "認証アプリのコードまたは復旧コードを入力してください。",
+    ),
+    "haozeNativePrivacy": MessageLookupByLibrary.simpleMessage(
+      "AuthRouter が本人確認を行います。パスワードは端末に保存されません。",
+    ),
+    "haozeNativeUseEmail": MessageLookupByLibrary.simpleMessage(
+      "メール認証コードでログイン",
+    ),
+    "haozeNativeUsePassword": MessageLookupByLibrary.simpleMessage(
+      "パスワードでログイン",
     ),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("利用可能なプランなし"),
     "haozeNoUpdateInfo": MessageLookupByLibrary.simpleMessage(
@@ -809,7 +834,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeTotal": MessageLookupByLibrary.simpleMessage("総容量"),
     "haozeUnifiedLogin": MessageLookupByLibrary.simpleMessage("Haoze でログイン"),
     "haozeUnifiedLoginDescription": MessageLookupByLibrary.simpleMessage(
-      "パスワード、メール認証コード、Google、Passkey で統一アカウントにログインします。",
+      "Haoze のパスワード、メール認証コード、Google でログインします。",
     ),
     "haozeUnlimitedTime": MessageLookupByLibrary.simpleMessage("無期限"),
     "haozeUpdateChecking": MessageLookupByLibrary.simpleMessage("更新を確認しています…"),

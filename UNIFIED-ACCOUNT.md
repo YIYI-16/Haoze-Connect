@@ -1,13 +1,49 @@
-# Haoze Connect 6.1.0 unified account update
+# Haoze native authentication
 
-The Android and Windows application now starts the existing AuthRouter login in
-the system browser. Google, password, email-code, Passkey, password-only MFA and
-imported-account first-password confirmation remain owned by the identity
-service. New accounts are registered and verified at account.zhouhaoze.com; the
-existing verification event grants UM-Foundation. No password, OAuth client
-secret or administrator service credential is embedded in this application.
+AuthRouter remains the identity authority. Password, email-code, MFA and imported
+first-password confirmation run inside the app. Android Google sign-in uses
+Credential Manager with the existing Web client as the server audience and the
+registered Android client bound to the release package/signature. Windows opens
+Google directly in the system browser and receives the code on a random
+127.0.0.1 loopback port. The desktop client secret stays in AuthRouter.
 
-## Handoff contract
+## Native grant contract
+
+1. The app sends a fresh S256 challenge to AuthRouter's HTTPS
+   /native/v1/start endpoint and receives a five-minute flow and Google nonce.
+   Windows additionally binds a literal loopback callback URI.
+2. Password, email and MFA proofs stay in that flow. Google ID tokens are verified
+   against Google's signing keys, issuer, audience, expiry, nonce and authorized
+   party. Windows Google codes are exchanged server-side with the desktop
+   credentials and the app's verifier. Same-email linking requires the existing
+   account password and any required MFA; email alone never grants ownership.
+3. AuthRouter returns a single-use, 60-second grant bound to that S256 challenge.
+   The app sends only the grant/verifier to
+   POST /api/v1/account-bridge/app/native/exchange.
+4. AccountBridge authenticates to AuthRouter's /native/v1/exchange using its
+   existing confidential OIDC client. AuthRouter rechecks the account version,
+   service access and authentication method before consuming the grant.
+   AccountBridge resolves the existing immutable identity binding and checks
+   ordinary/administrator restrictions before issuing the Haoze session.
+5. Only session credentials enter the existing secure-store/profile flow.
+   Passwords, flow proofs, verifiers and Google tokens are never persisted.
+   Cancelled or disposed attempts cannot start another browser login.
+
+AuthRouter reads NATIVE_GOOGLE_CONFIG_FILE, a private mounted JSON file containing
+serviceClientId, androidClientId, desktopClientId, desktopClientSecret and
+webClientId. The service client must be the existing AccountBridge OIDC client.
+Only the three public Google client IDs are returned by /native/v1/config.
+Do not commit this file or embed the desktop/internal service secrets in builds.
+
+Registration, email verification and Passkey management remain in the account
+center. Native Passkey sign-in is not included. Existing browser handoffs below
+remain available for installed older apps. Deploy the native AuthRouter and
+AccountBridge endpoints before distributing the new app. Native login still
+requires actual Android and Windows Google-account acceptance testing; simulated
+credentials and Kotlin compilation do not establish that acceptance.
+
+## Legacy browser handoff
+
 
 1. The app generates independent cryptographic state and a 32-byte PKCE verifier
    for each attempt. It sends only state, S256 challenge and method to
@@ -37,7 +73,7 @@ attempt; verifiers are intentionally not persisted. Local logout retains the
 existing behavior: remove local credentials and the managed profile; it does
 not log out the browser's SSO session or revoke all other devices.
 
-## Native integration
+## Legacy platform integration
 
 - Android adds a separate intent filter for the exact `haoze-connect` auth
   callback. The existing package `com.haoze.connect.mihomo` and pinned signing
@@ -62,7 +98,7 @@ Run `flutter pub get`, `flutter analyze --no-fatal-infos`, the account package's
 The backend includes `XBoard/account-bridge/tests/app-auth.php` for the full
 browser/code/exchange, PKCE, expiry, replay, revocation and administrator contract.
 
-Deploy the matching AccountBridge before distributing this update. Otherwise
+Deploy the matching AuthRouter and AccountBridge before distributing a native-login update. Otherwise
 the new app endpoints return 404. No AuthRouter OAuth client changes, new
 administrator credentials or database migrations are required. Keep the prior
 plugin files and App 6.0.4 packages for rollback. Preserve the installed app's
