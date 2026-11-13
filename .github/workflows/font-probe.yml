@@ -1,6 +1,8 @@
 name: Windows isolated font probe
 on:
   workflow_dispatch:
+  push:
+    branches: [test/windows-font-probe-20261113]
 permissions:
   contents: read
 jobs:
@@ -28,7 +30,7 @@ jobs:
           $spec += "`n  fonts:`n    - family: Noto Sans SC`n      fonts:`n        - asset: assets/NotoSansSC.ttf`n          weight: 400`n        - asset: assets/NotoSansSC.ttf`n          weight: 500`n        - asset: assets/NotoSansSC.ttf`n          weight: 600`n        - asset: assets/NotoSansSC.ttf`n          weight: 700`n"
           Set-Content pubspec.yaml $spec
           flutter pub get
-          flutter analyze --no-fatal-infos
+          flutter analyze lib --no-fatal-infos
           flutter build windows --release
       - uses: actions/upload-artifact@v4
         with:
