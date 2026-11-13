@@ -22,13 +22,17 @@ jobs:
           $spec = Get-Content pubspec.yaml -Raw
           Set-Content pubspec.yaml ($spec.Replace('build_assets: true', 'build_assets: false'))
           flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           flutter analyze --no-fatal-infos
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           flutter test --no-pub test/common/font_test.dart test/common/bundled_font_test.dart test/widgets/card_typography_test.dart test/manager/theme_manager_test.dart tool/haoze_windows_typography_preview_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Create isolated typography app
         shell: pwsh
         run: |
           $probe = "$env:RUNNER_TEMP/haoze_font_probe"
           flutter create --platforms=windows --project-name=haoze_font_probe $probe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $main = Get-Content tool/font_probe/main.dart -Raw
           $main = $main.Replace('package:fl_clash/ui/font.dart', 'font.dart').Replace('package:fl_clash/ui/typography.dart', 'typography.dart')
           Set-Content "$probe/lib/main.dart" $main
@@ -36,14 +40,18 @@ jobs:
           Copy-Item lib/ui/typography.dart "$probe/lib/typography.dart"
           Set-Location $probe
           flutter pub add material_ui:^1.5.0
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           New-Item -ItemType Directory -Force assets
           Copy-Item "$env:GITHUB_WORKSPACE/assets/fonts/NotoSansSC.ttf" assets/NotoSansSC.ttf
           $spec = Get-Content pubspec.yaml -Raw
           $spec += "`n  fonts:`n    - family: Noto Sans SC`n      fonts:`n        - asset: assets/NotoSansSC.ttf`n          weight: 400`n        - asset: assets/NotoSansSC.ttf`n          weight: 500`n        - asset: assets/NotoSansSC.ttf`n          weight: 600`n        - asset: assets/NotoSansSC.ttf`n          weight: 700`n"
           Set-Content pubspec.yaml $spec
           flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           flutter analyze lib --no-fatal-infos
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           flutter build windows --release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Copy-Item "$env:GITHUB_WORKSPACE/assets/fonts/OFL-NotoSansSC.txt" build/windows/x64/runner/Release/
       - uses: actions/upload-artifact@v4
         with:
