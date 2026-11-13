@@ -708,6 +708,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "已收到 Google 授权，请返回 Haoze 完成登录。",
     ),
+    "haozeGoogleReturnToApp": MessageLookupByLibrary.simpleMessage(
+      "返回 Windows 程序",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage("请检查邮箱、密码及必填项。"),
     "haozeInviteCode": MessageLookupByLibrary.simpleMessage("邀请码"),
     "haozeLastRefresh": MessageLookupByLibrary.simpleMessage("最近刷新"),

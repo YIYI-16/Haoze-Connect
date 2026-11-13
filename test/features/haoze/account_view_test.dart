@@ -137,6 +137,7 @@ class _Google extends NativeGoogleSignIn {
   Future<NativeAuthResult> signIn(
     XboardNativeLogin login, {
     required String returnMessage,
+    String? returnButtonLabel,
   }) async {
     if (nonceFailure) throw const NativeGoogleNonceException();
     if (!wait) return login.authenticate('google', {'id_token': 'fixture'});

@@ -764,6 +764,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
     ),
+    "haozeGoogleReturnToApp": MessageLookupByLibrary.simpleMessage(
+      "Windows 앱으로 돌아가기",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "이메일, 비밀번호 및 필수 항목을 확인하세요.",
     ),

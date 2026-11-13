@@ -200,6 +200,7 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
       final result = await _google.signIn(
         _native,
         returnMessage: context.appLocalizations.haozeGoogleReturn,
+        returnButtonLabel: context.appLocalizations.haozeGoogleReturnToApp,
       );
       if (mounted && _google.isWindows) {
         try {

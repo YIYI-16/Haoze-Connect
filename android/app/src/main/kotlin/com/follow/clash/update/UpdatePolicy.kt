@@ -11,7 +11,7 @@ data class UpdateIdentity(
 )
 
 object UpdatePolicy {
-    const val productionPackage = "com.haoze.connect.mihomo"
+    const val productionPackage = "com.haoze.connect"
 
     fun validate(installed: UpdateIdentity, candidate: UpdateIdentity,
                  expectedCode: Long, expectedVersion: String, pin: String) {

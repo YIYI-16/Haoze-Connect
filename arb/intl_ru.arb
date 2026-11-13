@@ -1032,6 +1032,7 @@
   "haozeNativeGoogle": "Войти через Google",
   "haozeNativePrivacy": "Личность проверяет AuthRouter. Пароли не сохраняются на устройстве.",
   "haozeGoogleReturn": "Авторизация Google получена. Вернитесь в Haoze для завершения входа.",
+  "haozeGoogleReturnToApp": "Вернуться в приложение Windows",
   "haozeNativeGoogleWaiting": "Следуйте указаниям Google и вернитесь в Haoze.",
   "haozeGoogleNonceError": "В учётных данных Google нет проверки для этого входа. Обновите сервисы Google Play и повторите попытку."
 }

@@ -16,10 +16,10 @@ class UpdatePolicyTest {
 
     @Test fun packageChangesAreRejected() {
         assertThrows(IllegalArgumentException::class.java) {
-            UpdatePolicy.validate(installed, candidate.copy(packageName = "other.app"), 64004, "6.0.4", pin)
+            UpdatePolicy.validate(installed, candidate.copy(packageName = "com.haoze.connect.mihomo"), 64004, "6.0.4", pin)
         }
         assertThrows(IllegalArgumentException::class.java) {
-            UpdatePolicy.validate(installed.copy(packageName = "com.haoze.connect.mihomo.dev"), candidate, 64004, "6.0.4", pin)
+            UpdatePolicy.validate(installed.copy(packageName = "com.haoze.connect.dev"), candidate, 64004, "6.0.4", pin)
         }
     }
 

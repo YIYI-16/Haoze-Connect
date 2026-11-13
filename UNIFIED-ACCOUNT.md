@@ -76,9 +76,9 @@ not log out the browser's SSO session or revoke all other devices.
 ## Legacy platform integration
 
 - Android adds a separate intent filter for the exact `haoze-connect` auth
-  callback. The existing package `com.haoze.connect.mihomo` and pinned signing
-  certificate remain unchanged; build number increases to 62100 (the split ARM64
-  APK uses version code 64100).
+  callback. Version 6.2.0 uses package `com.haoze.connect` with the existing pinned
+  signing certificate and build number 62200 (ARM64 version code 64200). The new
+  package installs separately from `com.haoze.connect.mihomo`.
 - Windows registers the callback scheme per user when the app starts. Its
   existing single-instance runner forwards browser links to the running app.
   The generic installer cleanup list includes the additional scheme.

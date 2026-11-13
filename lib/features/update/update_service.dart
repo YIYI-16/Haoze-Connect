@@ -415,7 +415,7 @@ class HaozeUpdateService {
       throw const UpdateException(UpdateFailure.metadata);
     }
     if (platform == UpdatePlatform.android &&
-        (asset['package'] != 'com.haoze.connect.mihomo' ||
+        (asset['package'] != 'com.haoze.connect' ||
             asset['package'] != identity.package ||
             asset['certificate_sha256'] != identity.certificate ||
             asset['version_code'] is! int ||

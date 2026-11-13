@@ -9,7 +9,7 @@ import 'package:riverpod/riverpod.dart';
 
 final _packageInfo = PackageInfo(
   appName: 'Haoze Connect',
-  packageName: 'com.haoze.connect.mihomo',
+  packageName: 'com.haoze.connect',
   version: '1.2.3',
   buildNumber: '1',
 );

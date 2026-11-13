@@ -24,7 +24,7 @@ Map<String, dynamic> manifest({
       'bytes': payload.length,
       'sha256': payloadDigest,
       if (platform == UpdatePlatform.android) ...{
-        'package': 'com.haoze.connect.mihomo',
+        'package': 'com.haoze.connect',
         'certificate_sha256': pin,
         'version_code': 64004,
       },
@@ -269,7 +269,7 @@ void main() {
         identity: const UpdateIdentity(
           version: '6.0.3',
           versionCode: 64003,
-          package: 'com.haoze.connect.mihomo',
+          package: 'com.haoze.connect',
           certificate: pin,
         ),
         directory: () async => directory,
@@ -452,7 +452,7 @@ void main() {
         identity: const UpdateIdentity(
           version: '6.0.3',
           versionCode: 64003,
-          package: 'com.haoze.connect.mihomo',
+          package: 'com.haoze.connect',
           certificate: pin,
         ),
         directory: () async => directory,

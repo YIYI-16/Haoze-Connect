@@ -140,7 +140,7 @@ loss) are intentionally unavailable in this preview until Flutter restores the
 secure account. This avoids treating a cached subscription as account authority.
 System VPN behavior and permission UI still require device acceptance.
 
-Android preview identity: com.haoze.connect.mihomo (debug-signed fallback adds
+Android preview identity: com.haoze.connect (debug-signed fallback adds
 .dev). Windows: Haoze.exe, CompanyName Haoze, ProductName Haoze. Both are separate from the prior Hiddify app. Native core/helper names
 remain upstream names; helper coexistence and installation remain unverified.
 

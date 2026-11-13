@@ -12,7 +12,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 PIN = ROOT / 'android/release-certificate.sha256'
-PACKAGE = 'com.haoze.connect.mihomo'
+PACKAGE = 'com.haoze.connect'
 SIGNING_NAMES = ('HAOZE_ANDROID_STORE_PASSWORD', 'HAOZE_ANDROID_KEY_ALIAS',
                  'HAOZE_ANDROID_KEY_PASSWORD')
 

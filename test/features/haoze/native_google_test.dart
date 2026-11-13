@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/features/haoze/native_google.dart';
@@ -75,6 +76,7 @@ void main() {
     'Windows listens only on loopback, rejects forged state, and exchanges codes through AuthRouter',
     () async {
       Uri? launched;
+      final pages = <({int status, String body, String? type, String? csp})>[];
       final http = HttpOverrides.runWithHttpOverrides(
         HttpClient.new,
         _NetworkOverrides(),
@@ -82,7 +84,13 @@ void main() {
       addTearDown(() => http.close(force: true));
       Future<int> callback(Uri uri) async {
         final response = await (await http.getUrl(uri)).close();
-        await response.drain<void>();
+        final body = await utf8.decoder.bind(response).join();
+        pages.add((
+          status: response.statusCode,
+          body: body,
+          type: response.headers.contentType?.mimeType,
+          csp: response.headers.value('Content-Security-Policy'),
+        ));
         return response.statusCode;
       }
 
@@ -130,8 +138,21 @@ void main() {
       final challenge = login.challenge;
       final result = await google.signIn(
         login,
-        returnMessage: 'Return to Haoze',
+        returnMessage: 'Return to Haoze <script>unsafe</script>',
+        returnButtonLabel: 'Return to Windows & app',
       );
+      expect(pages.first.body, isNot(contains('haoze-connect:')));
+      final page = pages.last;
+      expect(page.type, 'text/html');
+      expect(page.csp, contains("default-src 'none'"));
+      expect(page.csp, contains("script-src 'nonce-"));
+      expect(page.body, contains('href="haoze-connect://auth/return"'));
+      expect(page.body, contains('Return to Windows &amp; app'));
+      expect(page.body, contains('&lt;script&gt;unsafe'));
+      expect(page.body, isNot(contains('<script>unsafe')));
+      expect(page.body, contains('history.replaceState'));
+      expect(page.body, isNot(contains('google-code')));
+      expect(page.body, isNot(contains(launched!.queryParameters['state']!)));
       expect(result.account!.email, 'user@example.com');
       expect(launched!.host, 'accounts.google.com');
       expect(launched!.queryParameters['code_challenge'], challenge);
@@ -143,6 +164,48 @@ void main() {
       expect(exchange.body!['code'], 'google-code');
       expect(exchange.body!['code_verifier'], isNotNull);
       expect(exchange.body!.containsKey('client_secret'), false);
+    },
+  );
+
+  test(
+    'Windows OAuth error callbacks do not offer to launch the app',
+    () async {
+      final http = HttpOverrides.runWithHttpOverrides(
+        HttpClient.new,
+        _NetworkOverrides(),
+      );
+      addTearDown(() => http.close(force: true));
+      final google = NativeGoogleSignIn(
+        isAndroid: false,
+        isWindows: true,
+        open: (uri) async {
+          final redirect = Uri.parse(uri.queryParameters['redirect_uri']!);
+          final response = await (await http.getUrl(
+            redirect.replace(
+              queryParameters: {
+                'state': uri.queryParameters['state']!,
+                'error': 'access_denied',
+              },
+            ),
+          )).close();
+          expect(response.statusCode, 400);
+          expect(
+            await utf8.decoder.bind(response).join(),
+            isNot(contains('haoze-connect:')),
+          );
+          return true;
+        },
+      );
+      addTearDown(google.close);
+      await login.start('windows', redirect: await google.prepare());
+      await expectLater(
+        google.signIn(login, returnMessage: 'Return'),
+        throwsA(isA<XboardLoginCancelled>()),
+      );
+      expect(
+        transport.calls.any((call) => call.uri.path.endsWith('/google')),
+        false,
+      );
     },
   );
 

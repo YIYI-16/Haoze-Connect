@@ -915,6 +915,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeGoogleReturn": MessageLookupByLibrary.simpleMessage(
       "Google authorization received. Return to Haoze to finish signing in.",
     ),
+    "haozeGoogleReturnToApp": MessageLookupByLibrary.simpleMessage(
+      "Return to Windows app",
+    ),
     "haozeInvalidForm": MessageLookupByLibrary.simpleMessage(
       "Check your email, password and required fields.",
     ),

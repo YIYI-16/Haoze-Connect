@@ -57,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.haoze.connect.mihomo"
+        applicationId = "com.haoze.connect"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = flutter.versionCode

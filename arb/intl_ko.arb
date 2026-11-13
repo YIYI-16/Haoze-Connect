@@ -1032,6 +1032,7 @@
   "haozeNativeGoogle": "Google로 로그인",
   "haozeNativePrivacy": "AuthRouter가 신원을 확인합니다. 비밀번호는 이 기기에 저장되지 않습니다.",
   "haozeGoogleReturn": "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
+  "haozeGoogleReturnToApp": "Windows 앱으로 돌아가기",
   "haozeNativeGoogleWaiting": "Google 안내에 따라 인증한 후 Haoze로 돌아오세요.",
   "haozeGoogleNonceError": "Google 인증 정보에 이번 로그인 확인 정보가 없습니다. Google Play 서비스를 업데이트한 후 다시 시도하세요."
 }

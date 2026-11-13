@@ -8692,6 +8692,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Return to Windows app`
+  String get haozeGoogleReturnToApp {
+    return Intl.message(
+      'Return to Windows app',
+      name: 'haozeGoogleReturnToApp',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Follow the Google sign-in prompt, then return to Haoze.`
   String get haozeNativeGoogleWaiting {
     return Intl.message(
