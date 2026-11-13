@@ -1,0 +1,36 @@
+name: Windows isolated font probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: '3.47.6'
+          cache: true
+      - name: Create isolated typography app
+        shell: pwsh
+        run: |
+          $probe = "$env:RUNNER_TEMP/haoze_font_probe"
+          flutter create --platforms=windows --project-name=haoze_font_probe $probe
+          Copy-Item tool/font_probe/main.dart "$probe/lib/main.dart"
+          Copy-Item lib/ui/font.dart "$probe/lib/font.dart"
+          Copy-Item lib/ui/typography.dart "$probe/lib/typography.dart"
+          Set-Location $probe
+          flutter pub add material_ui:^1.5.0
+          New-Item -ItemType Directory -Force assets
+          Invoke-WebRequest 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf' -OutFile assets/NotoSansSC.ttf
+          $spec = Get-Content pubspec.yaml -Raw
+          $spec += "`n  fonts:`n    - family: Noto Sans SC`n      fonts:`n        - asset: assets/NotoSansSC.ttf`n          weight: 400`n        - asset: assets/NotoSansSC.ttf`n          weight: 500`n        - asset: assets/NotoSansSC.ttf`n          weight: 600`n        - asset: assets/NotoSansSC.ttf`n          weight: 700`n"
+          Set-Content pubspec.yaml $spec
+          flutter pub get
+          flutter analyze --no-fatal-infos
+          flutter build windows --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: isolated-font-probe
+          path: ${{ runner.temp }}/haoze_font_probe/build/windows/x64/runner/Release/
