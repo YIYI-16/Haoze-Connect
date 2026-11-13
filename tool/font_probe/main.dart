@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'font.dart';
-import 'typography.dart';
+import 'package:fl_clash/ui/font.dart';
+import 'package:fl_clash/ui/typography.dart';
 
 void main() => runApp(const Probe());
 

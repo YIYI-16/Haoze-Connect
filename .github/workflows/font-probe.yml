@@ -10,6 +10,8 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: subosito/flutter-action@v2.21.0
         with:
           flutter-version: '3.47.6'
@@ -27,7 +29,9 @@ jobs:
         run: |
           $probe = "$env:RUNNER_TEMP/haoze_font_probe"
           flutter create --platforms=windows --project-name=haoze_font_probe $probe
-          Copy-Item tool/font_probe/main.dart "$probe/lib/main.dart"
+          $main = Get-Content tool/font_probe/main.dart -Raw
+          $main = $main.Replace('package:fl_clash/ui/font.dart', 'font.dart').Replace('package:fl_clash/ui/typography.dart', 'typography.dart')
+          Set-Content "$probe/lib/main.dart" $main
           Copy-Item lib/ui/font.dart "$probe/lib/font.dart"
           Copy-Item lib/ui/typography.dart "$probe/lib/typography.dart"
           Set-Location $probe
