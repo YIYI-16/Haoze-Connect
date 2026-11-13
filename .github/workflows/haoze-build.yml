@@ -85,7 +85,7 @@ jobs:
       - name: Verify native login callbacks and Windows data migration
         run: flutter test --no-pub test/features/haoze/native_google_test.dart test/features/haoze/account_view_test.dart test/common/haoze_data_migration_test.dart
       - name: Verify Windows text weights and render native-font preview
-        run: flutter test --no-pub test/widgets/card_typography_test.dart tool/haoze_windows_typography_preview_test.dart
+        run: flutter test --no-pub test/common/font_test.dart test/common/bundled_font_test.dart test/widgets/card_typography_test.dart test/manager/theme_manager_test.dart tool/haoze_windows_typography_preview_test.dart
       - uses: actions/upload-artifact@v4
         with:
           name: Haoze-Windows-typography-preview
