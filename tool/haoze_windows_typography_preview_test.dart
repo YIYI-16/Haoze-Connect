@@ -34,13 +34,19 @@ void main() {
         }
         await loader.load();
       }
+      final bundled = FontLoader('Noto Sans SC')
+        ..addFont(rootBundle.load('assets/fonts/NotoSansSC.ttf'));
+      await bundled.load();
     });
     await tester.binding.setSurfaceSize(const Size(1100, 560));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final theme = ThemeData(
       platform: TargetPlatform.windows,
       fontFamily: 'Segoe UI',
-      fontFamilyFallback: const ['Microsoft YaHei UI'],
+      fontFamilyFallback: appFontFamilyFallback(
+        platform: TargetPlatform.windows,
+        locales: const [Locale('zh', 'CN')],
+      ),
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
     ).withAppShapes.withAppSurfaces.withAppTypography;
     final boundary = GlobalKey();
@@ -51,10 +57,19 @@ void main() {
         homeBuilder: (child) => Scaffold(body: child),
         child: RepaintBoundary(
           key: boundary,
-          child: const Row(
+          child: Row(
             children: [
-              Expanded(child: _Preview(before: true)),
-              Expanded(child: _Preview(before: false)),
+              Expanded(
+                child: Theme(
+                  data: theme.copyWith(
+                    textTheme: theme.textTheme.apply(
+                      fontFamilyFallback: const ['Microsoft YaHei UI'],
+                    ),
+                  ),
+                  child: const _Preview(before: true),
+                ),
+              ),
+              const Expanded(child: _Preview(before: false)),
             ],
           ),
         ),
@@ -87,10 +102,10 @@ class _Preview extends StatelessWidget {
   Widget build(BuildContext context) {
     final heading = AppTextStyle.headline
         .of(context)
-        .copyWith(fontWeight: before ? FontWeight.w600 : null);
+        .copyWith(fontWeight: before ? FontWeight.w500 : null);
     final label = AppTextStyle.subheadline
         .of(context, emphasized: true)
-        .copyWith(fontWeight: before ? FontWeight.w600 : null);
+        .copyWith(fontWeight: before ? FontWeight.w500 : null);
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,18 +131,13 @@ class _Preview extends StatelessWidget {
             '账户',
             style: AppTextStyle.pageTitle
                 .of(context)
-                .copyWith(fontWeight: before ? FontWeight.w600 : null),
+                .copyWith(fontWeight: before ? FontWeight.w500 : null),
           ),
           const Text('user@example.com'),
           CommonCard(
             inert: true,
             padding: const EdgeInsets.all(16),
-            child: before
-                ? DefaultTextStyle.merge(
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                    child: content,
-                  )
-                : content,
+            child: content,
           ),
           const Text('订阅已就绪\n最近刷新：2026-11-10 13:41:54'),
           Wrap(

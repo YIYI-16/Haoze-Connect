@@ -6,7 +6,7 @@ enum _HanVariant { simplified, traditional, japanese, korean }
 // Chinese proxy names with Japanese forms under an English UI on Windows.
 const _hanFamilies = <TargetPlatform, Map<_HanVariant, List<String>>>{
   TargetPlatform.windows: {
-    _HanVariant.simplified: ['Microsoft YaHei UI'],
+    _HanVariant.simplified: ['Noto Sans SC', 'Microsoft YaHei UI'],
     _HanVariant.traditional: ['Microsoft JhengHei UI'],
     _HanVariant.japanese: ['Yu Gothic UI', 'Meiryo UI'],
     _HanVariant.korean: ['Malgun Gothic'],

@@ -30,14 +30,8 @@ enum AppTextStyle {
   final FontWeight weight;
   final FontWeight emphasizedWeight;
 
-  TextStyle of(BuildContext context, {bool emphasized = false}) {
-    final theme = Theme.of(context);
-    return _apply(
-      _slotOf(theme.textTheme)!,
-      emphasized: emphasized,
-      platform: theme.platform,
-    );
-  }
+  TextStyle of(BuildContext context, {bool emphasized = false}) =>
+      _apply(_slotOf(Theme.of(context).textTheme)!, emphasized: emphasized);
 
   /// For text sized to the shape it marks, such as a letter in an icon.
   static TextStyle custom(
@@ -53,7 +47,7 @@ enum AppTextStyle {
     return base!.copyWith(
       fontSize: size,
       height: leading / size,
-      fontWeight: _platformWeight(weight, Theme.of(context).platform),
+      fontWeight: weight,
       letterSpacing: 0,
     );
   }
@@ -73,97 +67,38 @@ enum AppTextStyle {
     caption2 => theme.labelSmall,
   };
 
-  TextStyle _apply(
-    TextStyle base, {
-    required bool emphasized,
-    required TargetPlatform platform,
-  }) => base.copyWith(
+  TextStyle _apply(TextStyle base, {required bool emphasized}) => base.copyWith(
     fontSize: size,
     height: leading / size,
-    fontWeight: _platformWeight(
-      emphasized ? emphasizedWeight : weight,
-      platform,
-    ),
+    fontWeight: emphasized ? emphasizedWeight : weight,
     letterSpacing: 0,
   );
 
-  TextStyle? _on(
-    TextStyle? base, {
-    bool emphasized = false,
-    required TargetPlatform platform,
-  }) => base == null
-      ? null
-      : _apply(base, emphasized: emphasized, platform: platform);
+  TextStyle? _on(TextStyle? base, {bool emphasized = false}) =>
+      base == null ? null : _apply(base, emphasized: emphasized);
 }
 
 extension AppTypographyThemeExt on ThemeData {
   ThemeData get withAppTypography => copyWith(
-    textTheme: _onAppScale(textTheme, platform),
-    primaryTextTheme: _onAppScale(primaryTextTheme, platform),
+    textTheme: _onAppScale(textTheme),
+    primaryTextTheme: _onAppScale(primaryTextTheme),
   );
 }
 
-TextTheme _onAppScale(TextTheme theme, TargetPlatform platform) =>
-    theme.copyWith(
-      displayLarge: AppTextStyle.largeTitle._on(
-        theme.displayLarge,
-        platform: platform,
-      ),
-      displayMedium: AppTextStyle.largeTitle._on(
-        theme.displayMedium,
-        platform: platform,
-      ),
-      displaySmall: AppTextStyle.largeTitle._on(
-        theme.displaySmall,
-        platform: platform,
-      ),
-      headlineLarge: AppTextStyle.largeTitle._on(
-        theme.headlineLarge,
-        platform: platform,
-      ),
-      headlineMedium: AppTextStyle.title1._on(
-        theme.headlineMedium,
-        platform: platform,
-      ),
-      headlineSmall: AppTextStyle.title2._on(
-        theme.headlineSmall,
-        platform: platform,
-      ),
-      titleLarge: AppTextStyle.title3._on(theme.titleLarge, platform: platform),
-      titleMedium: AppTextStyle.headline._on(
-        theme.titleMedium,
-        platform: platform,
-      ),
-      titleSmall: AppTextStyle.subheadline._on(
-        theme.titleSmall,
-        platform: platform,
-        emphasized: true,
-      ),
-      bodyLarge: AppTextStyle.body._on(theme.bodyLarge, platform: platform),
-      bodyMedium: AppTextStyle.subheadline._on(
-        theme.bodyMedium,
-        platform: platform,
-      ),
-      bodySmall: AppTextStyle.footnote._on(theme.bodySmall, platform: platform),
-      labelLarge: AppTextStyle.subheadline._on(
-        theme.labelLarge,
-        platform: platform,
-        emphasized: true,
-      ),
-      labelMedium: AppTextStyle.caption1._on(
-        theme.labelMedium,
-        platform: platform,
-        emphasized: true,
-      ),
-      labelSmall: AppTextStyle.caption2._on(
-        theme.labelSmall,
-        platform: platform,
-        emphasized: true,
-      ),
-    );
-
-// YaHei UI has no semibold face; requesting 600 can select its bold face.
-FontWeight _platformWeight(FontWeight weight, TargetPlatform platform) =>
-    platform == TargetPlatform.windows && weight == FontWeight.w600
-    ? FontWeight.w500
-    : weight;
+TextTheme _onAppScale(TextTheme theme) => theme.copyWith(
+  displayLarge: AppTextStyle.largeTitle._on(theme.displayLarge),
+  displayMedium: AppTextStyle.largeTitle._on(theme.displayMedium),
+  displaySmall: AppTextStyle.largeTitle._on(theme.displaySmall),
+  headlineLarge: AppTextStyle.largeTitle._on(theme.headlineLarge),
+  headlineMedium: AppTextStyle.title1._on(theme.headlineMedium),
+  headlineSmall: AppTextStyle.title2._on(theme.headlineSmall),
+  titleLarge: AppTextStyle.title3._on(theme.titleLarge),
+  titleMedium: AppTextStyle.headline._on(theme.titleMedium),
+  titleSmall: AppTextStyle.subheadline._on(theme.titleSmall, emphasized: true),
+  bodyLarge: AppTextStyle.body._on(theme.bodyLarge),
+  bodyMedium: AppTextStyle.subheadline._on(theme.bodyMedium),
+  bodySmall: AppTextStyle.footnote._on(theme.bodySmall),
+  labelLarge: AppTextStyle.subheadline._on(theme.labelLarge, emphasized: true),
+  labelMedium: AppTextStyle.caption1._on(theme.labelMedium, emphasized: true),
+  labelSmall: AppTextStyle.caption2._on(theme.labelSmall, emphasized: true),
+);

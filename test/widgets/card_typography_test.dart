@@ -36,12 +36,7 @@ void main() {
         expect(body.fontWeight, FontWeight.w400);
         expect(body.fontSize, AppTextStyle.subheadline.size);
         final heading = tester.widget<Text>(find.text('套餐与流量')).style!;
-        expect(
-          heading.fontWeight,
-          platform == TargetPlatform.windows
-              ? FontWeight.w500
-              : FontWeight.w600,
-        );
+        expect(heading.fontWeight, FontWeight.w600);
         expect(heading.fontSize, AppTextStyle.headline.size);
       });
     }
@@ -49,9 +44,7 @@ void main() {
       tester,
     ) async {
       final theme = ThemeData(platform: platform).withAppTypography;
-      final medium = platform == TargetPlatform.windows
-          ? FontWeight.w500
-          : FontWeight.w600;
+      const medium = FontWeight.w600;
       expect(theme.textTheme.labelLarge!.fontWeight, medium);
       expect(theme.primaryTextTheme.labelLarge!.fontWeight, medium);
       expect(theme.textTheme.bodyLarge!.fontWeight, FontWeight.w400);

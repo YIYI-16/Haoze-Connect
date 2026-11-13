@@ -16,6 +16,7 @@ void main() {
   group('Han variant', () {
     test('follows a Chinese, Japanese or Korean UI language', () {
       expect(fallback(TargetPlatform.windows, const [Locale('zh', 'CN')]), [
+        'Noto Sans SC',
         'Microsoft YaHei UI',
       ]);
       expect(fallback(TargetPlatform.windows, const [Locale('ja')]), [
@@ -78,7 +79,7 @@ void main() {
       fallback(TargetPlatform.windows, const [
         Locale('zh'),
       ], fontFamily: 'LXGW WenKai'),
-      ['Segoe UI', 'Microsoft YaHei UI'],
+      ['Segoe UI', 'Noto Sans SC', 'Microsoft YaHei UI'],
     );
     expect(
       fallback(TargetPlatform.macOS, const [Locale('en')], fontFamily: 'Menlo'),

@@ -14,6 +14,14 @@ jobs:
         with:
           flutter-version: '3.47.6'
           cache: true
+      - name: Verify application typography
+        shell: pwsh
+        run: |
+          $spec = Get-Content pubspec.yaml -Raw
+          Set-Content pubspec.yaml ($spec.Replace('build_assets: true', 'build_assets: false'))
+          flutter pub get
+          flutter analyze --no-fatal-infos
+          flutter test --no-pub test/common/font_test.dart test/common/bundled_font_test.dart test/widgets/card_typography_test.dart test/manager/theme_manager_test.dart tool/haoze_windows_typography_preview_test.dart
       - name: Create isolated typography app
         shell: pwsh
         run: |
@@ -25,14 +33,19 @@ jobs:
           Set-Location $probe
           flutter pub add material_ui:^1.5.0
           New-Item -ItemType Directory -Force assets
-          Invoke-WebRequest 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf' -OutFile assets/NotoSansSC.ttf
+          Copy-Item "$env:GITHUB_WORKSPACE/assets/fonts/NotoSansSC.ttf" assets/NotoSansSC.ttf
           $spec = Get-Content pubspec.yaml -Raw
           $spec += "`n  fonts:`n    - family: Noto Sans SC`n      fonts:`n        - asset: assets/NotoSansSC.ttf`n          weight: 400`n        - asset: assets/NotoSansSC.ttf`n          weight: 500`n        - asset: assets/NotoSansSC.ttf`n          weight: 600`n        - asset: assets/NotoSansSC.ttf`n          weight: 700`n"
           Set-Content pubspec.yaml $spec
           flutter pub get
           flutter analyze lib --no-fatal-infos
           flutter build windows --release
+          Copy-Item "$env:GITHUB_WORKSPACE/assets/fonts/OFL-NotoSansSC.txt" build/windows/x64/runner/Release/
       - uses: actions/upload-artifact@v4
         with:
           name: isolated-font-probe
           path: ${{ runner.temp }}/haoze_font_probe/build/windows/x64/runner/Release/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: typography-before-after
+          path: ${{ runner.temp }}/haoze-typography-preview/*.png
