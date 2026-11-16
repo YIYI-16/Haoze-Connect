@@ -8842,14 +8842,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Encrypted Client Hello (ECH)`
+  /// `ECH`
   String get haozeEch {
-    return Intl.message(
-      'Encrypted Client Hello (ECH)',
-      name: 'haozeEch',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('ECH', name: 'haozeEch', desc: '', args: []);
   }
 
   /// `Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.`

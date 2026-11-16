@@ -710,7 +710,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohRetest": MessageLookupByLibrary.simpleMessage("重新测速"),
     "haozeDohTencent": MessageLookupByLibrary.simpleMessage("腾讯云"),
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("无法连接"),
-    "haozeEch": MessageLookupByLibrary.simpleMessage("加密客户端问候（ECH）"),
+    "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
       "默认开启。站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
     ),

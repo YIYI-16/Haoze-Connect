@@ -1047,7 +1047,7 @@
   "haozeDohLatencyDescription": "Mesure avec une requête DNS via la connexion actuelle. Les fournisseurs inaccessibles restent sélectionnables.",
   "haozeDohLatency": "{latency} ms",
   "haozeDohUnavailable": "Indisponible",
-  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEch": "ECH",
   "haozeEchDescription": "Activé par défaut. Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
   "@haozeDohLatency": {
     "placeholders": {

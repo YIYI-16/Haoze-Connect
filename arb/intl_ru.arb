@@ -1047,7 +1047,7 @@
   "haozeDohLatencyDescription": "Задержка измеряется DNS-запросом через текущее подключение. Недоступных провайдеров также можно выбрать.",
   "haozeDohLatency": "{latency} мс",
   "haozeDohUnavailable": "Недоступен",
-  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEch": "ECH",
   "haozeEchDescription": "Включено по умолчанию. ECH используется, когда сайт публикует поддерживаемую конфигурацию; иначе используется обычный HTTPS.",
   "@haozeDohLatency": {
     "placeholders": {

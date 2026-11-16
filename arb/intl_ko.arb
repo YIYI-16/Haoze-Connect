@@ -1047,7 +1047,7 @@
   "haozeDohLatencyDescription": "현재 연결에서 DNS 쿼리로 지연 시간을 측정합니다. 연결할 수 없는 제공자도 선택할 수 있습니다.",
   "haozeDohLatency": "{latency}밀리초",
   "haozeDohUnavailable": "연결 불가",
-  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEch": "ECH",
   "haozeEchDescription": "기본적으로 켜져 있습니다. 사이트가 지원되는 설정을 게시하면 ECH를 사용하고, 그렇지 않으면 일반 HTTPS를 사용합니다.",
   "@haozeDohLatency": {
     "placeholders": {

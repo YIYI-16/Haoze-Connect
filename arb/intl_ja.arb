@@ -1047,7 +1047,7 @@
   "haozeDohLatencyDescription": "現在の接続で DNS クエリの遅延を測定します。接続できないプロバイダーも選択できます。",
   "haozeDohLatency": "{latency} ミリ秒",
   "haozeDohUnavailable": "接続不可",
-  "haozeEch": "Encrypted Client Hello（ECH）",
+  "haozeEch": "ECH",
   "haozeEchDescription": "既定で有効です。サイトが対応する設定を公開している場合は ECH を使用し、それ以外は通常の HTTPS を使用します。",
   "@haozeDohLatency": {
     "placeholders": {

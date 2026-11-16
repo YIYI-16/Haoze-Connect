@@ -917,9 +917,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohRetest": MessageLookupByLibrary.simpleMessage("Test again"),
     "haozeDohTencent": MessageLookupByLibrary.simpleMessage("Tencent Cloud"),
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
-    "haozeEch": MessageLookupByLibrary.simpleMessage(
-      "Encrypted Client Hello (ECH)",
-    ),
+    "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
       "Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.",
     ),

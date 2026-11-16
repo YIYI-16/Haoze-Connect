@@ -978,9 +978,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage(
       "No disponible",
     ),
-    "haozeEch": MessageLookupByLibrary.simpleMessage(
-      "Encrypted Client Hello (ECH)",
-    ),
+    "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
       "Activado por defecto. Usa ECH si el sitio publica una configuración compatible; en caso contrario, usa HTTPS estándar.",
     ),

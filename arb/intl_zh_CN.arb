@@ -1047,7 +1047,7 @@
   "haozeDohLatencyDescription": "通过当前连接发送 DNS 查询测量延迟。无法连接的提供商仍可选择。",
   "haozeDohLatency": "{latency} 毫秒",
   "haozeDohUnavailable": "无法连接",
-  "haozeEch": "加密客户端问候（ECH）",
+  "haozeEch": "ECH",
   "haozeEchDescription": "默认开启。站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
   "@haozeDohLatency": {
     "placeholders": {
