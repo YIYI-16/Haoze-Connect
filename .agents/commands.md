@@ -389,3 +389,17 @@ evict everything `dev` had saved. Release builds therefore start cold; branch ru
 bash tool/worktrees.sh list       # every worktree with owner tool and dirty/clean state
 bash tool/worktrees.sh prune      # remove clean worktrees; add --force to drop dirty ones too
 ```
+
+
+### Rust bridge generation and loader validation
+
+Run `python3 tool/haoze_rust_bridge.py generate` with the pinned code generator,
+Cargo, and Flutter on PATH. This checks Cargo metadata before generation and
+rejects a generated loader whose library name differs from Cargo's library
+name. Do not accept the generator's `UNKNOWN` fallback.
+
+`python3 tool/haoze_rust_bridge.py check --apk <apk>` checks every packaged ABI.
+The default-loader Flutter test needs `FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR`
+to point at `build/native_assets/<os>` on a test host, or at the packaged Windows
+Release directory when validating that bundle. It must call `RustLib.init()`
+without supplying an explicit library, so a broken default name remains visible.

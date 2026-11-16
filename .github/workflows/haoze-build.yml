@@ -35,6 +35,11 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify generated Rust loader name
+        run: python tool/haoze_rust_bridge.py check
       - run: flutter pub get
       - working-directory: packages/haoze_xboard
         run: flutter pub get
@@ -48,6 +53,10 @@ jobs:
       - name: Verify native account transport and proxy DNS
         run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml account_
       - run: flutter analyze --no-fatal-infos --no-pub
+      - name: Verify default Rust loader on the test host
+        env:
+          FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR: ${{ github.workspace }}/build/native_assets/linux
+        run: flutter test --no-pub test/plugins/rust_api_loader_test.dart
       - run: flutter test --no-pub test/features/haoze test/features/update test/manager/app_env_manager_test.dart test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/common/system_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
       - name: Test signing and release metadata gates
         run: python3 -m unittest discover -s tool -p "test_haoze_*.py"
@@ -81,9 +90,18 @@ jobs:
       - run: |
           rustup toolchain install 1.99.0 --profile minimal
           rustup default 1.99.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify generated Rust loader name
+        run: python tool/haoze_rust_bridge.py check
       - run: flutter pub get
       - name: Build account UI and Windows native runtime
         run: flutter build windows --release --no-pub --dart-define=APP_ENV=stable
+      - name: Verify default Rust loader from the Windows release bundle
+        env:
+          FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR: '${{ github.workspace }}\build\windows\x64\runner\Release'
+        run: flutter test --no-pub test/plugins/rust_api_loader_test.dart
       - name: Verify native account transport and proxy DNS
         run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml account_
       - name: Probe Windows DoH and ECH against public sites
@@ -195,8 +213,13 @@ jobs:
           go-version: '1.27.1'
           cache-dependency-path: core/go.sum
       - run: |
-          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android,x86_64-linux-android
           rustup default 1.99.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify generated Rust loader name
+        run: python tool/haoze_rust_bridge.py check
       - run: flutter pub get
       - name: Prepare Gradle wrapper for JVM tests
         working-directory: android
@@ -240,12 +263,51 @@ jobs:
       - name: Verify production APK identity and version
         run: |
           mkdir -p "$RUNNER_TEMP/haoze-android-release"
+          python3 tool/haoze_rust_bridge.py check --apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           python3 tool/haoze_android_signing.py verify --apk build/app/outputs/flutter-apk/app-arm64-v8a-release.apk --output "$RUNNER_TEMP/haoze-android-release/android-release.json"
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "$RUNNER_TEMP/haoze-android-release/HaozeConnect-Android-arm64.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: HaozeConnect-Stable-Android-arm64
           path: ${{ runner.temp }}/haoze-android-release/*
+      - name: Build Android release startup acceptance APK
+        env:
+          HAOZE_ANDROID_STORE_PASSWORD: ${{ secrets.HAOZE_ANDROID_STORE_PASSWORD }}
+          HAOZE_ANDROID_KEY_ALIAS: ${{ secrets.HAOZE_ANDROID_KEY_ALIAS }}
+          HAOZE_ANDROID_KEY_PASSWORD: ${{ secrets.HAOZE_ANDROID_KEY_PASSWORD }}
+        run: flutter build apk --release --no-pub --target-platform android-x64 --split-per-abi --dart-define=APP_ENV=stable --dart-define=SAFE_MODE=true
+      - name: Verify Android release actually reaches login
+        timeout-minutes: 15
+        run: |
+          python3 tool/haoze_rust_bridge.py check --apk build/app/outputs/flutter-apk/app-x86_64-release.apk
+          sdkmanager 'emulator' 'system-images;android-35;google_apis;x86_64'
+          echo no | avdmanager create avd --force --name haoze-startup --package 'system-images;android-35;google_apis;x86_64'
+          sudo chmod 666 /dev/kvm
+          "$ANDROID_HOME/emulator/emulator" -avd haoze-startup -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/haoze-emulator.log" 2>&1 &
+          haoze_emulator_pid=$!
+          trap 'kill "$haoze_emulator_pid" 2>/dev/null || true' EXIT
+          timeout 180 adb -s emulator-5554 wait-for-device
+          haoze_booted=false
+          for attempt in $(seq 1 120); do
+            if [ "$(adb -s emulator-5554 shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; then
+              haoze_booted=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$haoze_booted" != true ]; then
+            tail -100 "$RUNNER_TEMP/haoze-emulator.log"
+            exit 1
+          fi
+          python3 tool/haoze_android_startup_acceptance.py --apk build/app/outputs/flutter-apk/app-x86_64-release.apk --output "$RUNNER_TEMP/haoze-android-startup"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Haoze-Android-startup-acceptance
+          path: |
+            ${{ runner.temp }}/haoze-android-startup/*
+            ${{ runner.temp }}/haoze-emulator.log
+          if-no-files-found: warn
       - name: Remove transient signing file
         if: always()
         run: rm -f -- "$RUNNER_TEMP/haoze-signing/release.p12"
