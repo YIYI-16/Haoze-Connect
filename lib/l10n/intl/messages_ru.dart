@@ -937,11 +937,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
       "Подтвердите пароль",
     ),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage(
+      "Маршрут подключения",
+    ),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "Вход или регистрация отклонены. Проверьте данные.",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5 (по умолчанию)",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "При выключенном DoH используется обычный DNS. Если включён прокси, DNS-запросы также проходят через него.",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -953,7 +960,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("Недоступен"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "Включено по умолчанию. ECH используется, когда сайт публикует поддерживаемую конфигурацию; иначе используется обычный HTTPS.",
+      "ECH используется, когда сайт публикует поддерживаемую конфигурацию; иначе используется обычный HTTPS.",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("Электронная почта"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("Код из письма"),
@@ -1015,7 +1022,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Использовать прокси",
     ),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "Прокси разрешает домены назначения. Запросы DoH также проходят через прокси.",
+      "Прокси разрешает домены назначения. DNS-запросы также проходят через прокси.",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage(
       "Настройки сети",
@@ -1038,6 +1045,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("Обновить трафик"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("Регистрация"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("Осталось"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Проверка с Alibaba DoH и стандартным ECH: выключен для маршрута 1, включён для маршрута 2. Используется текущий прокси, ваши настройки не меняются.",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("Маршрут 1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("Маршрут 2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "Сессия истекла. Войдите снова.",

@@ -74,7 +74,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-        stem: 'rust_api',
+        stem: 'UNKNOWN',
         ioDirectory: 'rust/target/release/',
         webPrefix: 'pkg/',
         wasmBindgenName: 'wasm_bindgen',
@@ -1492,14 +1492,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   AccountNetworkOptions dco_decode_account_network_options(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 5)
-      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
     return AccountNetworkOptions(
       dohProvider: dco_decode_String(arr[0]),
       echEnabled: dco_decode_bool(arr[1]),
-      proxyUrl: dco_decode_opt_String(arr[2]),
-      proxyUsername: dco_decode_String(arr[3]),
-      proxyPassword: dco_decode_String(arr[4]),
+      dohEnabled: dco_decode_bool(arr[2]),
+      systemDnsServers: dco_decode_list_String(arr[3]),
+      proxyUrl: dco_decode_opt_String(arr[4]),
+      proxyUsername: dco_decode_String(arr[5]),
+      proxyPassword: dco_decode_String(arr[6]),
     );
   }
 
@@ -1911,12 +1913,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_dohProvider = sse_decode_String(deserializer);
     var var_echEnabled = sse_decode_bool(deserializer);
+    var var_dohEnabled = sse_decode_bool(deserializer);
+    var var_systemDnsServers = sse_decode_list_String(deserializer);
     var var_proxyUrl = sse_decode_opt_String(deserializer);
     var var_proxyUsername = sse_decode_String(deserializer);
     var var_proxyPassword = sse_decode_String(deserializer);
     return AccountNetworkOptions(
       dohProvider: var_dohProvider,
       echEnabled: var_echEnabled,
+      dohEnabled: var_dohEnabled,
+      systemDnsServers: var_systemDnsServers,
       proxyUrl: var_proxyUrl,
       proxyUsername: var_proxyUsername,
       proxyPassword: var_proxyPassword,
@@ -2416,6 +2422,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.dohProvider, serializer);
     sse_encode_bool(self.echEnabled, serializer);
+    sse_encode_bool(self.dohEnabled, serializer);
+    sse_encode_list_String(self.systemDnsServers, serializer);
     sse_encode_opt_String(self.proxyUrl, serializer);
     sse_encode_String(self.proxyUsername, serializer);
     sse_encode_String(self.proxyPassword, serializer);

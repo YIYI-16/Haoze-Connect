@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:fl_clash/plugins/app.dart';
 import 'dart:typed_data';
 
 import 'package:haoze_xboard/haoze_xboard.dart';
@@ -20,9 +22,12 @@ typedef AccountDohProbe =
     Future<int> Function({required native.AccountNetworkOptions options});
 
 native.AccountNetworkOptions nativeNetworkOptions(
-  AccountNetworkSettings value,
-) => native.AccountNetworkOptions(
+  AccountNetworkSettings value, {
+  List<String> systemDnsServers = const [],
+}) => native.AccountNetworkOptions(
   dohProvider: value.dohProvider.name,
+  dohEnabled: value.dohEnabled,
+  systemDnsServers: systemDnsServers,
   echEnabled: value.echEnabled,
   proxyUrl: value.proxyUrl,
   proxyUsername: value.proxyUsername,
@@ -30,11 +35,19 @@ native.AccountNetworkOptions nativeNetworkOptions(
 );
 
 class AccountNetworkTransport implements XboardTransport {
-  AccountNetworkTransport(this.settings, {AccountHttpRunner? run})
-    : _run = run ?? native.accountHttpRequest;
+  AccountNetworkTransport(
+    this.settings, {
+    AccountHttpRunner? run,
+    Future<List<String>> Function()? systemDns,
+  }) : _run = run ?? native.accountHttpRequest,
+       _systemDns = systemDns ?? _androidSystemDns;
+
+  static Future<List<String>> _androidSystemDns() async =>
+      Platform.isAndroid ? await app!.getSystemDnsServers() : const [];
 
   final AccountNetworkController settings;
   final AccountHttpRunner _run;
+  final Future<List<String>> Function() _systemDns;
   bool _closed = false;
 
   @override
@@ -91,10 +104,19 @@ class AccountNetworkTransport implements XboardTransport {
     if (_closed) throw const XboardException(XboardFailure.socket);
     final native.AccountHttpResponse response;
     try {
+      final servers =
+          !value.dohEnabled && value.echEnabled && !value.proxyEnabled
+          ? await _systemDns()
+          : const <String>[];
+      if (_closed) throw const XboardException(XboardFailure.socket);
       response = await _run(
-        options: nativeNetworkOptions(value),
+        options: nativeNetworkOptions(value, systemDnsServers: servers),
         method: method,
-        url: uri.toString(),
+        url:
+            AccountRoute.values.any((route) => route.host == uri.host) &&
+                uri.port == 443
+            ? uri.replace(host: value.route.host).toString()
+            : uri.toString(),
         headers: {
           ...headers,
           if (body != null) 'Content-Type': 'application/json',
@@ -129,4 +151,35 @@ class AccountNetworkTransport implements XboardTransport {
 
 final accountDohProbeProvider = Provider<AccountDohProbe>(
   (ref) => native.accountDohLatency,
+);
+
+typedef AccountRouteProbe =
+    Future<int> Function({required AccountNetworkSettings settings});
+
+Future<int> _measureAccountRoute({
+  required AccountNetworkSettings settings,
+}) async {
+  final controller = AccountNetworkController(
+    read: () async => jsonEncode(settings.toJson()),
+  );
+  final transport = AccountNetworkTransport(controller);
+  final watch = Stopwatch()..start();
+  try {
+    final response = await transport.send(
+      'GET',
+      settings.route.origin.replace(path: '/api/v1/guest/comm/config'),
+      {'Accept': 'application/json'},
+      null,
+    );
+    if (response.statusCode != 200 || response.body is! Map<String, dynamic>) {
+      throw const XboardException(XboardFailure.protocol);
+    }
+    return watch.elapsedMilliseconds;
+  } finally {
+    transport.close();
+  }
+}
+
+final accountRouteProbeProvider = Provider<AccountRouteProbe>(
+  (ref) => _measureAccountRoute,
 );

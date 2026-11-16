@@ -8752,10 +8752,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The proxy resolves destination domains. DoH requests also pass through the proxy.`
+  /// `The proxy resolves destination domains. DNS queries also pass through the proxy.`
   String get haozeNetworkProxyDescription {
     return Intl.message(
-      'The proxy resolves destination domains. DoH requests also pass through the proxy.',
+      'The proxy resolves destination domains. DNS queries also pass through the proxy.',
       name: 'haozeNetworkProxyDescription',
       desc: '',
       args: [],
@@ -8847,11 +8847,56 @@ class AppLocalizations {
     return Intl.message('ECH', name: 'haozeEch', desc: '', args: []);
   }
 
-  /// `Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.`
+  /// `Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.`
   String get haozeEchDescription {
     return Intl.message(
-      'Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.',
+      'Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.',
       name: 'haozeEchDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Content route`
+  String get haozeContentRoute {
+    return Intl.message(
+      'Content route',
+      name: 'haozeContentRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route 1`
+  String get haozeRouteOne {
+    return Intl.message('Route 1', name: 'haozeRouteOne', desc: '', args: []);
+  }
+
+  /// `Route 2`
+  String get haozeRouteTwo {
+    return Intl.message('Route 2', name: 'haozeRouteTwo', desc: '', args: []);
+  }
+
+  /// `DoH`
+  String get haozeDoh {
+    return Intl.message('DoH', name: 'haozeDoh', desc: '', args: []);
+  }
+
+  /// `With DoH off, uses conventional DNS. When a proxy is enabled, DNS queries also pass through it.`
+  String get haozeDohDescription {
+    return Intl.message(
+      'With DoH off, uses conventional DNS. When a proxy is enabled, DNS queries also pass through it.',
+      name: 'haozeDohDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tests with Alibaba DoH and each route’s default ECH setting: off for Route 1, on for Route 2. Uses the current proxy without changing your custom switches.`
+  String get haozeRouteLatencyDescription {
+    return Intl.message(
+      'Tests with Alibaba DoH and each route’s default ECH setting: off for Route 1, on for Route 2. Uses the current proxy without changing your custom switches.',
+      name: 'haozeRouteLatencyDescription',
       desc: '',
       args: [],
     );

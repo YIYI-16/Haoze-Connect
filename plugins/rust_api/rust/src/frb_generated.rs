@@ -1684,12 +1684,16 @@ impl SseDecode for crate::api::account_network::AccountNetworkOptions {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_dohProvider = <String>::sse_decode(deserializer);
         let mut var_echEnabled = <bool>::sse_decode(deserializer);
+        let mut var_dohEnabled = <bool>::sse_decode(deserializer);
+        let mut var_systemDnsServers = <Vec<String>>::sse_decode(deserializer);
         let mut var_proxyUrl = <Option<String>>::sse_decode(deserializer);
         let mut var_proxyUsername = <String>::sse_decode(deserializer);
         let mut var_proxyPassword = <String>::sse_decode(deserializer);
         return crate::api::account_network::AccountNetworkOptions {
             doh_provider: var_dohProvider,
             ech_enabled: var_echEnabled,
+            doh_enabled: var_dohEnabled,
+            system_dns_servers: var_systemDnsServers,
             proxy_url: var_proxyUrl,
             proxy_username: var_proxyUsername,
             proxy_password: var_proxyPassword,
@@ -2166,6 +2170,8 @@ impl flutter_rust_bridge::IntoDart for crate::api::account_network::AccountNetwo
         [
             self.doh_provider.into_into_dart().into_dart(),
             self.ech_enabled.into_into_dart().into_dart(),
+            self.doh_enabled.into_into_dart().into_dart(),
+            self.system_dns_servers.into_into_dart().into_dart(),
             self.proxy_url.into_into_dart().into_dart(),
             self.proxy_username.into_into_dart().into_dart(),
             self.proxy_password.into_into_dart().into_dart(),
@@ -2483,6 +2489,8 @@ impl SseEncode for crate::api::account_network::AccountNetworkOptions {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.doh_provider, serializer);
         <bool>::sse_encode(self.ech_enabled, serializer);
+        <bool>::sse_encode(self.doh_enabled, serializer);
+        <Vec<String>>::sse_encode(self.system_dns_servers, serializer);
         <Option<String>>::sse_encode(self.proxy_url, serializer);
         <String>::sse_encode(self.proxy_username, serializer);
         <String>::sse_encode(self.proxy_password, serializer);

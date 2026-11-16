@@ -16,6 +16,7 @@ void main() {
     AccountNetworkSettings settings = const AccountNetworkSettings(),
     Future<void> Function(String)? write,
     AccountDohProbe? probe,
+    AccountRouteProbe? routeProbe,
     Size size = const Size(390, 844),
   }) async {
     tester.view.physicalSize = size;
@@ -32,6 +33,9 @@ void main() {
               read: () async => jsonEncode(settings.toJson()),
               write: write ?? (_) async {},
             ),
+          ),
+          accountRouteProbeProvider.overrideWithValue(
+            routeProbe ?? ({required settings}) async => 48,
           ),
           accountDohProbeProvider.overrideWithValue(
             probe ?? ({required options}) async => 32,
@@ -103,6 +107,17 @@ void main() {
         stored = value;
       },
     );
+    await tester.scrollUntilVisible(
+      find.text('SOCKS5'),
+      250,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView).last,
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('SOCKS5'), findsOneWidget);
     final fields = find.byType(TextFormField);
     expect(fields, findsNWidgets(4));
@@ -113,12 +128,42 @@ void main() {
     await tester.enterText(fields.at(1), '0');
     await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.textContaining('Enter a valid proxy host'),
+      -300,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView).last,
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     expect(find.textContaining('Enter a valid proxy host'), findsOneWidget);
     expect(stored, isNull);
+    await tester.scrollUntilVisible(
+      find.text('Port'),
+      250,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView).last,
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.enterText(fields.at(1), '1080');
     await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView).last, const Offset(0, 600));
+    await tester.scrollUntilVisible(
+      find.text('Secure storage could not be updated. Please retry.'),
+      -300,
+      scrollable: find
+          .descendant(
+            of: find.byType(ListView).last,
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     expect(
       find.text('Secure storage could not be updated. Please retry.'),
@@ -135,6 +180,74 @@ void main() {
     expect(find.byType(AccountNetworkSettingsPage), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'routes measure defaults, preserve custom switches and save the selected route',
+    (tester) async {
+      final measured = <AccountNetworkSettings>[];
+      String? stored;
+      await open(
+        tester,
+        settings: const AccountNetworkSettings(
+          primaryDohEnabled: false,
+          primaryEchEnabled: true,
+          secondaryDohEnabled: false,
+          secondaryEchEnabled: false,
+          dohProvider: AccountDohProvider.google,
+          proxyEnabled: true,
+        ),
+        routeProbe: ({required settings}) async {
+          measured.add(settings);
+          if (settings.route == AccountRoute.secondary) {
+            throw StateError('unreachable');
+          }
+          return 48;
+        },
+        write: (value) async => stored = value,
+      );
+      await tester.tap(find.text('Content route'));
+      await tester.pumpAndSettle();
+      expect(measured.length, 2);
+      expect(measured.map((value) => value.dohEnabled), [true, true]);
+      expect(measured.map((value) => value.echEnabled), [false, true]);
+      expect(measured.every((value) => value.proxyEnabled), isTrue);
+      expect(
+        measured.every(
+          (value) => value.dohProvider == AccountDohProvider.alibaba,
+        ),
+        isTrue,
+      );
+      expect(find.text('48 ms'), findsOneWidget);
+      expect(find.text('Unavailable'), findsOneWidget);
+      await tester.tap(find.text('Route 2 · alt.haoze.cyou'));
+      await tester.pumpAndSettle();
+      var switches = tester
+          .widgetList<CommonSwitch>(find.byType(CommonSwitch))
+          .toList();
+      expect(switches.map((item) => item.value), [false, false]);
+      switches[1].onChanged!(true);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Content route'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Route 1 · www.haoze.cyou'));
+      await tester.pumpAndSettle();
+      switches = tester
+          .widgetList<CommonSwitch>(find.byType(CommonSwitch))
+          .toList();
+      expect(switches.map((item) => item.value), [false, true]);
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pumpAndSettle();
+      final saved = AccountNetworkSettings.fromJson(
+        jsonDecode(stored!) as Map<String, dynamic>,
+      );
+      expect(saved.route, AccountRoute.primary);
+      expect(saved.primaryDohEnabled, isFalse);
+      expect(saved.primaryEchEnabled, isTrue);
+      expect(saved.secondaryDohEnabled, isFalse);
+      expect(saved.secondaryEchEnabled, isTrue);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('closing pending probes does not update a disposed page', (
     tester,

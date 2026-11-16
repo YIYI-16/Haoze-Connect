@@ -1038,7 +1038,7 @@
   "haozeNetworkSettings": "ネットワーク設定",
   "haozeNetworkDescription": "アプリ内のアカウント接続に適用します。外部ブラウザーは独自のネットワーク設定を使用します。",
   "haozeNetworkProxy": "プロキシを使用",
-  "haozeNetworkProxyDescription": "接続先ドメインはプロキシが名前解決します。DoH リクエストもプロキシを経由します。",
+  "haozeNetworkProxyDescription": "接続先ドメインはプロキシが名前解決します。DNS クエリもプロキシを経由します。",
   "haozeNetworkInvalidProxy": "有効なプロキシホストとポート（1～65535）を入力してください。認証情報はそれぞれ UTF-8 で 255 バイト以内にしてください。",
   "haozeDohProvider": "DoH プロバイダー",
   "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5（既定）",
@@ -1048,12 +1048,18 @@
   "haozeDohLatency": "{latency} ミリ秒",
   "haozeDohUnavailable": "接続不可",
   "haozeEch": "ECH",
-  "haozeEchDescription": "既定で有効です。サイトが対応する設定を公開している場合は ECH を使用し、それ以外は通常の HTTPS を使用します。",
+  "haozeEchDescription": "サイトが対応する設定を公開している場合は ECH を使用し、それ以外は通常の HTTPS を使用します。",
   "@haozeDohLatency": {
     "placeholders": {
       "latency": {
         "type": "int"
       }
     }
-  }
+  },
+  "haozeContentRoute": "接続先ルート",
+  "haozeRouteOne": "ルート1",
+  "haozeRouteTwo": "ルート2",
+  "haozeDoh": "DoH",
+  "haozeDohDescription": "DoH がオフの場合は通常の DNS を使用します。プロキシ有効時は DNS クエリもプロキシを経由します。",
+  "haozeRouteLatencyDescription": "Alibaba DoH と各ルートの既定の ECH 設定で測定します。ルート1はオフ、ルート2はオンです。現在のプロキシを使い、カスタム設定は変更しません。"
 }

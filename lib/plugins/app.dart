@@ -40,6 +40,10 @@ class App {
     return _instance!;
   }
 
+  Future<List<String>> getSystemDnsServers() async =>
+      await methodChannel.invokeListMethod<String>('getSystemDnsServers') ??
+      const [];
+
   Future<bool?> moveTaskToBack() async {
     return methodChannel.invokeMethod<bool>('moveTaskToBack');
   }

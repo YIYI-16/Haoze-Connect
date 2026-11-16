@@ -903,11 +903,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
       "Confirm password",
     ),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage("Content route"),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "Sign-in or registration was rejected. Check the account details and panel requirements.",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5 (default)",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "With DoH off, uses conventional DNS. When a proxy is enabled, DNS queries also pass through it.",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -919,7 +924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("Unavailable"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.",
+      "Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("Email"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("Email code"),
@@ -977,7 +982,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNetworkProxy": MessageLookupByLibrary.simpleMessage("Use proxy"),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "The proxy resolves destination domains. DoH requests also pass through the proxy.",
+      "The proxy resolves destination domains. DNS queries also pass through the proxy.",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage(
       "Network settings",
@@ -1002,6 +1007,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("Refresh usage"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("Create account"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("Remaining"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Tests with Alibaba DoH and each route’s default ECH setting: off for Route 1, on for Route 2. Uses the current proxy without changing your custom switches.",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("Route 1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("Route 2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("Send code"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "Your session expired. Please sign in again.",

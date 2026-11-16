@@ -6,3 +6,5 @@ mod ipc;
 mod script;
 
 mod account_network;
+
+mod account_dns;

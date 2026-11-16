@@ -12,32 +12,195 @@ Matcher failure(XboardFailure kind) =>
     isA<XboardException>().having((error) => error.kind, 'kind', kind);
 
 void main() {
-  test('defaults to Alibaba DoH and ECH, stores settings securely', () async {
-    String? stored;
-    final controller = AccountNetworkController(
-      read: () async => stored,
-      write: (value) async => stored = value,
-    );
-    final defaults = await controller.current;
-    expect(defaults.dohProvider, AccountDohProvider.alibaba);
-    expect(defaults.echEnabled, isTrue);
-    expect(defaults.proxyUrl, isNull);
-    final settings = defaults.copyWith(
-      proxyEnabled: true,
-      proxyKind: AccountProxyKind.socks5,
-      proxyHost: '::1',
-      proxyPort: 1080,
-      proxyUsername: 'a@b',
-      proxyPassword: 'p:@/#',
-    );
-    await controller.save(settings);
-    final loaded = await AccountNetworkController(
-      read: () async => stored,
-    ).current;
-    expect(loaded.toJson(), settings.toJson());
-    expect(loaded.proxyUrl, 'socks5h://[::1]:1080');
-    expect(loaded.proxyUrl, isNot(contains('p:@')));
-  });
+  test(
+    'defaults to primary with Alibaba DoH and ECH off, stores settings securely',
+    () async {
+      String? stored;
+      final controller = AccountNetworkController(
+        read: () async => stored,
+        write: (value) async => stored = value,
+      );
+      final defaults = await controller.current;
+      expect(defaults.dohProvider, AccountDohProvider.alibaba);
+      expect(defaults.route, AccountRoute.primary);
+      expect(defaults.dohEnabled, isTrue);
+      expect(defaults.echEnabled, isFalse);
+      expect(defaults.proxyUrl, isNull);
+      final settings = defaults.copyWith(
+        proxyEnabled: true,
+        proxyKind: AccountProxyKind.socks5,
+        proxyHost: '::1',
+        proxyPort: 1080,
+        proxyUsername: 'a@b',
+        proxyPassword: 'p:@/#',
+      );
+      await controller.save(settings);
+      final loaded = await AccountNetworkController(
+        read: () async => stored,
+      ).current;
+      expect(loaded.toJson(), settings.toJson());
+      expect(loaded.proxyUrl, 'socks5h://[::1]:1080');
+      expect(loaded.proxyUrl, isNot(contains('p:@')));
+    },
+  );
+
+  test(
+    'each route retains its switches and probes use route defaults',
+    () async {
+      var settings = const AccountNetworkSettings();
+      settings = settings.copyWith(dohEnabled: false, echEnabled: true);
+      settings = settings.copyWith(route: AccountRoute.secondary);
+      expect(settings.dohEnabled, isTrue);
+      expect(settings.echEnabled, isTrue);
+      settings = settings.copyWith(dohEnabled: false, echEnabled: false);
+      settings = settings.copyWith(route: AccountRoute.primary);
+      expect(settings.dohEnabled, isFalse);
+      expect(settings.echEnabled, isTrue);
+      final persisted = AccountNetworkSettings.fromJson(settings.toJson());
+      expect(persisted.toJson(), settings.toJson());
+      expect(
+        persisted.copyWith(route: AccountRoute.secondary).echEnabled,
+        isFalse,
+      );
+      final custom = settings.copyWith(
+        dohProvider: AccountDohProvider.google,
+        proxyEnabled: true,
+        proxyPassword: 'secret',
+      );
+      for (final route in AccountRoute.values) {
+        final probe = custom.defaultsFor(route);
+        expect(probe.dohEnabled, isTrue);
+        expect(probe.echEnabled, route == AccountRoute.secondary);
+        expect(probe.dohProvider, AccountDohProvider.alibaba);
+        expect(probe.proxyUrl, custom.proxyUrl);
+        expect(probe.proxyPassword, 'secret');
+      }
+      final old = {...const AccountNetworkSettings().toJson()}
+        ..remove('version')
+        ..remove('route')
+        ..remove('primary')
+        ..remove('secondary')
+        ..['echEnabled'] = true;
+      expect(AccountNetworkSettings.fromJson(old).primaryEchEnabled, isTrue);
+      expect(AccountNetworkSettings.fromJson(old).secondaryEchEnabled, isTrue);
+      expect(
+        () => AccountNetworkSettings.fromJson({
+          ...settings.toJson(),
+          'version': 99,
+        }),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test(
+    'route changes reach the selected host, preserving paths and external hosts',
+    () async {
+      final settings = AccountNetworkController(
+        read: () async => null,
+        write: (_) async {},
+      );
+      final urls = <Uri>[];
+      final configs = <native.AccountNetworkOptions>[];
+      int dnsReads = 0;
+      final transport = AccountNetworkTransport(
+        settings,
+        systemDns: () async {
+          dnsReads++;
+          return ['192.0.2.53'];
+        },
+        run:
+            ({
+              required options,
+              required method,
+              required url,
+              required headers,
+              required body,
+            }) async {
+              urls.add(Uri.parse(url));
+              configs.add(options);
+              return native.AccountHttpResponse(
+                status: 200,
+                body: Uint8List.fromList(utf8.encode('{}')),
+                echUsed: false,
+              );
+            },
+      );
+      final target = Uri.parse('https://www.haoze.cyou/api/v1/user/info?a=1');
+      await transport.send('GET', target, {}, null);
+      await settings.save(
+        const AccountNetworkSettings(
+          route: AccountRoute.secondary,
+          secondaryDohEnabled: false,
+          secondaryEchEnabled: true,
+        ),
+      );
+      await transport.send('GET', target, {}, null);
+      await transport.send(
+        'GET',
+        Uri.https('sso.zhouhaoze.com', '/native/v1/config'),
+        {},
+        null,
+      );
+      expect(urls[0].host, 'www.haoze.cyou');
+      expect(urls[1].host, 'alt.haoze.cyou');
+      expect(urls[1].path, target.path);
+      expect(urls[1].query, 'a=1');
+      expect(urls[2].host, 'sso.zhouhaoze.com');
+      expect(configs.last.dohEnabled, isFalse);
+      expect(configs.last.echEnabled, isTrue);
+      expect(configs.last.systemDnsServers, ['192.0.2.53']);
+      expect(dnsReads, 2);
+      await settings.save(
+        (await settings.current).copyWith(proxyEnabled: true),
+      );
+      await transport.send('GET', target, {}, null);
+      expect(dnsReads, 2);
+      expect(configs.last.systemDnsServers, isEmpty);
+      transport.close();
+    },
+  );
+
+  test(
+    'closing while reading system DNS cannot start a later native request',
+    () async {
+      final config = const AccountNetworkSettings().copyWith(
+        dohEnabled: false,
+        echEnabled: true,
+      );
+      final controller = AccountNetworkController(
+        read: () async => jsonEncode(config.toJson()),
+      );
+      final dns = Completer<List<String>>();
+      int calls = 0;
+      final transport = AccountNetworkTransport(
+        controller,
+        systemDns: () => dns.future,
+        run:
+            ({
+              required options,
+              required method,
+              required url,
+              required headers,
+              required body,
+            }) async {
+              calls++;
+              throw StateError('must not start');
+            },
+      );
+      final pending = transport.send(
+        'GET',
+        Uri.https('www.haoze.cyou'),
+        {},
+        null,
+      );
+      await Future<void>.delayed(Duration.zero);
+      transport.close();
+      dns.complete(['192.0.2.53']);
+      await expectLater(pending, throwsA(failure(XboardFailure.socket)));
+      expect(calls, 0);
+    },
+  );
 
   test(
     'storage failure retains previous proxy and corrupt state fails closed',
@@ -97,7 +260,7 @@ void main() {
           proxyEnabled: true,
           proxyKind: AccountProxyKind.socks5,
           dohProvider: AccountDohProvider.tencent,
-          echEnabled: false,
+          primaryEchEnabled: false,
         ),
       );
       await expectLater(

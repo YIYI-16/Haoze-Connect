@@ -696,11 +696,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeCodeSent": MessageLookupByLibrary.simpleMessage("验证码已发送，请查看邮箱。"),
     "haozeConfigError": MessageLookupByLibrary.simpleMessage("无法加载注册设置。"),
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage("确认密码"),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage("内容线路"),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "登录或注册被拒绝，请检查账号信息及面板要求。",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "阿里云 · 223.5.5.5（默认）",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "关闭 DoH 后使用常规 DNS；启用代理时，DNS 查询也交由代理处理。",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -712,7 +717,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("无法连接"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "默认开启。站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
+      "站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("邮箱"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("邮箱验证码"),
@@ -760,7 +765,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNetworkProxy": MessageLookupByLibrary.simpleMessage("使用代理"),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "目标域名交由代理解析，DoH 请求也通过代理发送。",
+      "目标域名交由代理解析，DNS 查询也通过代理发送。",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage("网络设置"),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("暂无可用套餐"),
@@ -779,6 +784,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("刷新流量"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("注册账号"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("剩余流量"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "使用阿里云 DoH 和各线路默认 ECH 设置测速：线路一关闭 ECH，线路二开启 ECH。测试经过当前代理，不改变自定义开关。",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("线路一"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("线路二"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("发送验证码"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage("登录已失效，请重新登录。"),
     "haozeStorageError": MessageLookupByLibrary.simpleMessage("无法更新安全存储，请重试。"),

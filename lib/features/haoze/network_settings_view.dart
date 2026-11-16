@@ -92,11 +92,48 @@ class _AccountNetworkSettingsPageState
     }
   }
 
+  Future<void> _chooseRoute() async {
+    if (!_validate()) return;
+    final settings = _draft;
+    final probe = ref.read(accountRouteProbeProvider);
+    final l10n = context.appLocalizations;
+    final route = await showFormSheet<AccountRoute>(
+      context: context,
+      builder: (_) => _NetworkChoicePage<AccountRoute>(
+        title: l10n.haozeContentRoute,
+        choices: AccountRoute.values,
+        selected: settings.route,
+        label: (route) => route.label,
+        footer: l10n.haozeRouteLatencyDescription,
+        probe: (route) => probe(settings: settings.defaultsFor(route)),
+        timeout: const Duration(seconds: 22),
+      ),
+    );
+    if (mounted && route != null) {
+      setState(() => _value = _value!.copyWith(route: route));
+    }
+  }
+
   Future<void> _chooseDoh() async {
     if (!_validate()) return;
+    final settings = _draft;
+    final probe = ref.read(accountDohProbeProvider);
+    final l10n = context.appLocalizations;
     final provider = await showFormSheet<AccountDohProvider>(
       context: context,
-      builder: (_) => _DohProviderPage(settings: _draft),
+      builder: (_) => _NetworkChoicePage<AccountDohProvider>(
+        title: l10n.haozeDohProvider,
+        choices: AccountDohProvider.values,
+        selected: settings.dohProvider,
+        label: (provider) => provider.label,
+        footer: l10n.haozeDohLatencyDescription,
+        probe: (provider) => probe(
+          options: nativeNetworkOptions(
+            settings.copyWith(dohProvider: provider),
+          ),
+        ),
+        timeout: const Duration(seconds: 6),
+      ),
     );
     if (mounted && provider != null) {
       setState(() => _value = _value!.copyWith(dohProvider: provider));
@@ -126,6 +163,23 @@ class _AccountNetworkSettingsPageState
           footer: l10n.haozeNetworkDescription,
           items: [
             FormRow(
+              title: l10n.haozeContentRoute,
+              onPressed: _saving ? null : _chooseRoute,
+              trailing: Text(value.route.label),
+            ),
+            FormRow(
+              title: l10n.haozeDoh,
+              trailing: CommonSwitch(
+                semanticLabel: l10n.haozeDoh,
+                value: value.dohEnabled,
+                onChanged: _saving
+                    ? null
+                    : (enabled) => setState(() {
+                        _value = value.copyWith(dohEnabled: enabled);
+                      }),
+              ),
+            ),
+            FormRow(
               title: l10n.haozeDohProvider,
               onPressed: _saving ? null : _chooseDoh,
               trailing: Text(value.dohProvider.label),
@@ -147,7 +201,7 @@ class _AccountNetworkSettingsPageState
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            l10n.haozeEchDescription,
+            '${l10n.haozeDohDescription}\n${l10n.haozeEchDescription}',
             style: AppTextStyle.footnote
                 .of(context)
                 .copyWith(color: context.colorScheme.onSurfaceVariant),
@@ -233,16 +287,30 @@ class _AccountNetworkSettingsPageState
   }
 }
 
-class _DohProviderPage extends ConsumerStatefulWidget {
-  const _DohProviderPage({required this.settings});
-  final AccountNetworkSettings settings;
+class _NetworkChoicePage<T> extends StatefulWidget {
+  const _NetworkChoicePage({
+    required this.title,
+    required this.choices,
+    required this.selected,
+    required this.label,
+    required this.footer,
+    required this.probe,
+    required this.timeout,
+  });
+  final String title;
+  final List<T> choices;
+  final T selected;
+  final String Function(T) label;
+  final String footer;
+  final Future<int> Function(T) probe;
+  final Duration timeout;
 
   @override
-  ConsumerState<_DohProviderPage> createState() => _DohProviderPageState();
+  State<_NetworkChoicePage<T>> createState() => _NetworkChoicePageState<T>();
 }
 
-class _DohProviderPageState extends ConsumerState<_DohProviderPage> {
-  final _latencies = <AccountDohProvider, int?>{};
+class _NetworkChoicePageState<T> extends State<_NetworkChoicePage<T>> {
+  final _latencies = <T, int?>{};
   int _generation = 0;
 
   @override
@@ -253,22 +321,17 @@ class _DohProviderPageState extends ConsumerState<_DohProviderPage> {
 
   Future<void> _probe() async {
     final generation = ++_generation;
-    final probe = ref.read(accountDohProbeProvider);
     setState(_latencies.clear);
     await Future.wait(
-      AccountDohProvider.values.map((provider) async {
+      widget.choices.map((choice) async {
         int? latency;
         try {
-          latency = await probe(
-            options: nativeNetworkOptions(
-              widget.settings.copyWith(dohProvider: provider),
-            ),
-          ).timeout(const Duration(seconds: 6));
+          latency = await widget.probe(choice).timeout(widget.timeout);
         } catch (_) {
           latency = null;
         }
         if (mounted && generation == _generation) {
-          setState(() => _latencies[provider] = latency);
+          setState(() => _latencies[choice] = latency);
         }
       }),
     );
@@ -278,14 +341,12 @@ class _DohProviderPageState extends ConsumerState<_DohProviderPage> {
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     return CommonScaffold(
-      title: l10n.haozeDohProvider,
+      title: widget.title,
       iconActions: [
         IconButtonData(
           glyph: AppGlyphs.refresh,
           tooltip: l10n.haozeDohRetest,
-          onPressed: _latencies.length == AccountDohProvider.values.length
-              ? _probe
-              : null,
+          onPressed: _latencies.length == widget.choices.length ? _probe : null,
         ),
       ],
       body: ListView(
@@ -298,18 +359,18 @@ class _DohProviderPageState extends ConsumerState<_DohProviderPage> {
         ),
         children: [
           generateSection(
-            footer: l10n.haozeDohLatencyDescription,
+            footer: widget.footer,
             items: [
-              for (final provider in AccountDohProvider.values)
+              for (final choice in widget.choices)
                 FormRow(
-                  title: provider.label,
-                  leading: provider == widget.settings.dohProvider
+                  title: widget.label(choice),
+                  leading: choice == widget.selected
                       ? const GlyphIcon(AppGlyphs.check)
                       : null,
-                  onPressed: () => Navigator.of(context).pop(provider),
-                  trailing: !_latencies.containsKey(provider)
+                  onPressed: () => Navigator.of(context).pop(choice),
+                  trailing: !_latencies.containsKey(choice)
                       ? const CommonCircleLoading(size: 16)
-                      : Text(switch (_latencies[provider]) {
+                      : Text(switch (_latencies[choice]) {
                           final int latency => l10n.haozeDohLatency(latency),
                           null => l10n.haozeDohUnavailable,
                         }),

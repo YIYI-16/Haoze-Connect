@@ -54,6 +54,8 @@ class AccountHttpResponse {
 class AccountNetworkOptions {
   final String dohProvider;
   final bool echEnabled;
+  final bool dohEnabled;
+  final List<String> systemDnsServers;
   final String? proxyUrl;
   final String proxyUsername;
   final String proxyPassword;
@@ -61,6 +63,8 @@ class AccountNetworkOptions {
   const AccountNetworkOptions({
     required this.dohProvider,
     required this.echEnabled,
+    required this.dohEnabled,
+    required this.systemDnsServers,
     this.proxyUrl,
     required this.proxyUsername,
     required this.proxyPassword,
@@ -70,6 +74,8 @@ class AccountNetworkOptions {
   int get hashCode =>
       dohProvider.hashCode ^
       echEnabled.hashCode ^
+      dohEnabled.hashCode ^
+      systemDnsServers.hashCode ^
       proxyUrl.hashCode ^
       proxyUsername.hashCode ^
       proxyPassword.hashCode;
@@ -81,6 +87,8 @@ class AccountNetworkOptions {
           runtimeType == other.runtimeType &&
           dohProvider == other.dohProvider &&
           echEnabled == other.echEnabled &&
+          dohEnabled == other.dohEnabled &&
+          systemDnsServers == other.systemDnsServers &&
           proxyUrl == other.proxyUrl &&
           proxyUsername == other.proxyUsername &&
           proxyPassword == other.proxyPassword;

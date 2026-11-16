@@ -962,11 +962,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
       "Confirmar contraseña",
     ),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage(
+      "Ruta de conexión",
+    ),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "Acceso o registro rechazado. Revisa los datos.",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5 (predeterminado)",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "Con DoH desactivado se usa DNS convencional. Si hay un proxy, las consultas DNS también lo atraviesan.",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -980,7 +987,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "Activado por defecto. Usa ECH si el sitio publica una configuración compatible; en caso contrario, usa HTTPS estándar.",
+      "Usa ECH si el sitio publica una configuración compatible; en caso contrario, usa HTTPS estándar.",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("Correo electrónico"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("Código del correo"),
@@ -1042,7 +1049,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNetworkProxy": MessageLookupByLibrary.simpleMessage("Usar proxy"),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "El proxy resuelve los dominios de destino. Las solicitudes DoH también pasan por el proxy.",
+      "El proxy resuelve los dominios de destino. Las consultas DNS también pasan por el proxy.",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage(
       "Ajustes de red",
@@ -1067,6 +1074,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("Actualizar consumo"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("Crear cuenta"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("Restante"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Se mide con Alibaba DoH y el ECH predeterminado: desactivado en la ruta 1 y activado en la ruta 2. Usa el proxy actual sin cambiar tus ajustes.",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("Ruta 1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("Ruta 2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("Enviar código"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "La sesión ha caducado. Inicia sesión de nuevo.",

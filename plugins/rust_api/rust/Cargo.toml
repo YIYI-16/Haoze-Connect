@@ -14,6 +14,7 @@ ropey = { version = "1.6.1", default-features = false, features = ["simd"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["blocking", "rustls", "socks", "http2"] }
 rustls = { version = "0.23.46", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
 webpki-roots = "1"
+base64 = "0.22"
 hickory-proto = { version = "0.26.3", default-features = false, features = ["std"] }
 
 # The IPC server exists so a desktop Core process can talk to the app. Android
@@ -35,6 +36,7 @@ rquickjs = { version = "0.12", default-features = false, features = ["bindgen"] 
 dispatch2 = "0.3"
 
 [target.'cfg(windows)'.dependencies]
+ipconfig = "0.3.4"
 windows-sys = { version = "0.61", features = [
   "Win32_Foundation",
   "Win32_System_Threading",

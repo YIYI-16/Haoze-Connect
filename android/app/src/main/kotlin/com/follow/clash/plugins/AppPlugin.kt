@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -43,6 +44,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import java.net.Inet6Address
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -146,6 +148,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "getSystemDnsServers" -> reply(result) {
+                val manager = GlobalState.application
+                    .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                manager.activeNetwork?.let { manager.getLinkProperties(it) }
+                    ?.dnsServers?.mapNotNull { address ->
+                        val host = address.hostAddress ?: return@mapNotNull null
+                        if (address is Inet6Address && address.scopeId > 0) {
+                            "[${host.substringBefore('%')}%${address.scopeId}]:53"
+                        } else host
+                    } ?: emptyList<String>()
+            }
             "getUpdateIdentity" -> reply(result) {
                 UpdateInstaller.identityMap(GlobalState.application)
             }

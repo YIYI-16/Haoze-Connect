@@ -126,7 +126,23 @@ Alibaba `dns.alidns.com` / `223.5.5.5` (default), Cloudflare
 probes through the current connection. Measurement failures do not switch the
 selected provider.
 
-ECH defaults on. HTTPS/SVCB records and CNAME aliases supply a compatible ECH
+Content routes are `www.haoze.cyou` (default: DoH on, ECH off) and
+`alt.haoze.cyou` (default: DoH on, ECH on). Each route retains independent
+DoH/ECH preferences. Selecting a route rewrites only the two approved content
+hosts, preserving paths and queries; account identity stays canonical so a
+route change does not discard the session. SSO and unrelated hosts keep their
+own hostnames. Route selection measures a verified account-config GET using
+Alibaba DoH and each route's default ECH flag through the current proxy. It
+does not change saved switches or select a faster route automatically.
+
+With DoH disabled, address resolution uses the OS resolver. ECH records are
+queried with conventional DNS over TCP: system-configured DNS servers when
+direct, or the selected provider's public DNS through the proxy. Android
+supplies active-network DNS servers; Windows reads active adapters. Both HTTP
+CONNECT and authenticated SOCKS5 support these DNS tunnels without direct
+fallback. The DoH provider chooser intentionally measures DoH service queries.
+
+HTTPS/SVCB records and CNAME aliases supply a compatible ECH
 configuration to rustls. Without a compatible configuration, ordinary verified
 HTTPS is used. Once ECH is selected, a handshake failure is returned without a
 clear-SNI retry. Site TLS and DNS configuration are outside this client change.

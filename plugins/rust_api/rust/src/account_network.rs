@@ -144,14 +144,46 @@ fn remaining(deadline: Instant) -> Result<Duration, String> {
         .ok_or("timeout".into())
 }
 
+enum DnsTransport {
+    Doh {
+        client: Client,
+        endpoint: String,
+    },
+    System {
+        options: AccountNetworkOptions,
+        servers: Vec<SocketAddr>,
+    },
+}
+
 struct Resolver {
-    client: Client,
-    endpoint: String,
+    transport: DnsTransport,
     deadline: Instant,
 }
 
 impl Resolver {
     fn new(options: &AccountNetworkOptions, deadline: Instant) -> Result<Self, String> {
+        if !options.doh_enabled {
+            let servers = if options.proxy_url.is_some() {
+                let ip = if options.doh_provider == "tencent" {
+                    "119.29.29.29"
+                } else {
+                    provider(&options.doh_provider)?.ip
+                };
+                vec![SocketAddr::new(
+                    ip.parse().map_err(|_| "configuration")?,
+                    53,
+                )]
+            } else {
+                crate::account_dns::system_servers(options)?
+            };
+            return Ok(Self {
+                transport: DnsTransport::System {
+                    options: options.clone(),
+                    servers,
+                },
+                deadline,
+            });
+        }
         let provider = provider(&options.doh_provider)?;
         let address = SocketAddr::new(provider.ip.parse().map_err(|_| "configuration")?, 443);
         let client = client_builder(options, remaining(deadline)?.min(DNS_TIMEOUT))?
@@ -159,8 +191,10 @@ impl Resolver {
             .build()
             .map_err(network_error)?;
         Ok(Self {
-            client,
-            endpoint: format!("https://{}/dns-query", provider.host),
+            transport: DnsTransport::Doh {
+                client,
+                endpoint: format!("https://{}/dns-query", provider.host),
+            },
             deadline,
         })
     }
@@ -170,19 +204,29 @@ impl Resolver {
         let mut query = Message::query();
         query.metadata.recursion_desired = true;
         query.queries.push(Query::query(name, kind));
-        let response = self
-            .client
-            .post(&self.endpoint)
-            .header("Content-Type", "application/dns-message")
-            .header("Accept", "application/dns-message")
-            .timeout(remaining(self.deadline)?.min(DNS_TIMEOUT))
-            .body(query.to_vec().map_err(|_| "dns")?)
-            .send()
-            .map_err(network_error)?;
-        if !response.status().is_success() {
-            return Err("dns".into());
-        }
-        let bytes = read_limited(response, 65535)?;
+        let wire = query.to_vec().map_err(|_| "dns")?;
+        let bytes = match &self.transport {
+            DnsTransport::Doh { client, endpoint } => {
+                let response = client
+                    .post(endpoint)
+                    .header("Content-Type", "application/dns-message")
+                    .header("Accept", "application/dns-message")
+                    .timeout(remaining(self.deadline)?.min(DNS_TIMEOUT))
+                    .body(wire)
+                    .send()
+                    .map_err(network_error)?;
+                if !response.status().is_success() {
+                    return Err("dns".into());
+                }
+                read_limited(response, 65535)?
+            }
+            DnsTransport::System { options, servers } => crate::account_dns::query(
+                options,
+                servers,
+                &wire,
+                self.deadline.min(Instant::now() + DNS_TIMEOUT),
+            )?,
+        };
         let message = Message::from_vec(&bytes).map_err(|_| "dns")?;
         validate_response(&query, &message)?;
         Ok(message)
@@ -349,13 +393,18 @@ pub(crate) fn request(
     let mut builder = client_builder(&options, REQUEST_TIMEOUT)?;
     let mut ech = None;
     if host.trim_matches(['[', ']']).parse::<IpAddr>().is_err() {
-        let resolver = Resolver::new(&options, deadline)?;
+        let resolver = if options.doh_enabled || options.ech_enabled {
+            Some(Resolver::new(&options, deadline)?)
+        } else {
+            None
+        };
         if options.ech_enabled {
-            ech = resolver.ech(host)?;
+            ech = resolver.as_ref().ok_or("dns")?.ech(host)?;
         }
         // CONNECT and socks5h receive the original host, including its DNS lookup.
-        if options.proxy_url.is_none() {
-            builder = builder.resolve_to_addrs(host, &resolver.addresses(host)?);
+        if options.proxy_url.is_none() && options.doh_enabled {
+            builder =
+                builder.resolve_to_addrs(host, &resolver.as_ref().ok_or("dns")?.addresses(host)?);
         }
     }
     let ech_used = ech.is_some();
@@ -388,8 +437,9 @@ pub(crate) fn request(
     })
 }
 
-pub(crate) fn latency(options: AccountNetworkOptions) -> Result<u32, String> {
+pub(crate) fn latency(mut options: AccountNetworkOptions) -> Result<u32, String> {
     let started = Instant::now();
+    options.doh_enabled = true;
     let resolver = Resolver::new(&options, started + DNS_TIMEOUT)?;
     let message = resolver.query("www.haoze.cyou", RecordType::A)?;
     if !message
@@ -412,6 +462,8 @@ mod tests {
     fn options(proxy_url: Option<String>) -> AccountNetworkOptions {
         AccountNetworkOptions {
             doh_provider: "alibaba".into(),
+            doh_enabled: true,
+            system_dns_servers: Vec::new(),
             ech_enabled: false,
             proxy_url,
             proxy_username: "test-user".into(),
@@ -431,6 +483,7 @@ mod tests {
         let address = listener.local_addr().unwrap();
         let server = thread::spawn(move || {
             let (mut socket, _) = listener.accept().unwrap();
+            socket.set_nonblocking(false).unwrap();
             socket
                 .set_read_timeout(Some(Duration::from_secs(5)))
                 .unwrap();
@@ -465,6 +518,7 @@ mod tests {
         let address = listener.local_addr().unwrap();
         let server = thread::spawn(move || {
             let (mut socket, _) = listener.accept().unwrap();
+            socket.set_nonblocking(false).unwrap();
             socket
                 .set_read_timeout(Some(Duration::from_secs(5)))
                 .unwrap();
@@ -547,6 +601,49 @@ mod tests {
         response.queries = query.queries.clone();
         response.metadata.response_code = ResponseCode::NXDomain;
         assert!(validate_response(&query, &response).is_err());
+    }
+
+    #[test]
+    fn ech_without_doh_queries_the_system_dns_server_for_https_records() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let server = thread::spawn(move || {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let mut socket = loop {
+                if let Ok((socket, _)) = listener.accept() {
+                    break socket;
+                }
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(5));
+            };
+            socket.set_nonblocking(false).unwrap();
+            socket
+                .set_read_timeout(Some(Duration::from_secs(5)))
+                .unwrap();
+            let bytes = read_bytes(&mut socket, 2);
+            let bytes = read_bytes(
+                &mut socket,
+                u16::from_be_bytes([bytes[0], bytes[1]]) as usize,
+            );
+            let mut message = Message::from_vec(&bytes).unwrap();
+            assert_eq!(message.queries[0].query_type, RecordType::HTTPS);
+            assert_eq!(message.queries[0].name, dns_name("alt.haoze.cyou").unwrap());
+            message.metadata.message_type = MessageType::Response;
+            let bytes = message.to_vec().unwrap();
+            socket
+                .write_all(&(bytes.len() as u16).to_be_bytes())
+                .unwrap();
+            socket.write_all(&bytes).unwrap();
+        });
+        let mut config = options(None);
+        config.doh_enabled = false;
+        config.ech_enabled = true;
+        config.doh_provider = "no-doh-provider-may-be-used".into();
+        config.system_dns_servers = vec![address.to_string()];
+        let resolver = Resolver::new(&config, Instant::now() + Duration::from_secs(5)).unwrap();
+        assert!(resolver.ech("alt.haoze.cyou").unwrap().is_none());
+        server.join().unwrap();
     }
 
     #[test]

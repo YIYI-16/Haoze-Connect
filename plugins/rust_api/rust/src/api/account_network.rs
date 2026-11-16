@@ -4,6 +4,8 @@ use std::collections::HashMap;
 pub struct AccountNetworkOptions {
     pub doh_provider: String,
     pub ech_enabled: bool,
+    pub doh_enabled: bool,
+    pub system_dns_servers: Vec<String>,
     pub proxy_url: Option<String>,
     pub proxy_username: String,
     pub proxy_password: String,

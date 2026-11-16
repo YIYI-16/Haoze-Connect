@@ -141,3 +141,11 @@ extension AccountProxyKindL10n on AccountProxyKind {
     AccountProxyKind.socks5 => 'SOCKS5',
   };
 }
+
+extension AccountRouteL10n on AccountRoute {
+  String get label => switch (this) {
+    AccountRoute.primary => '${currentAppLocalizations.haozeRouteOne} · $host',
+    AccountRoute.secondary =>
+      '${currentAppLocalizations.haozeRouteTwo} · $host',
+  };
+}

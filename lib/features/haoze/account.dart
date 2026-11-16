@@ -189,6 +189,7 @@ class HaozeManagedProfile implements XboardManagedProfile {
     final downloaded = await downloads.download(uri);
     final policy = await HaozeRoutingResources().ensure({
       Uri.parse(haozePanelUrl).host,
+      ...AccountRoute.values.map((route) => route.host),
       uri.host,
     });
     final bytes = await compute(_protectSubscription, (

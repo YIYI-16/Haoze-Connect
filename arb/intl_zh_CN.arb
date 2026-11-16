@@ -1038,7 +1038,7 @@
   "haozeNetworkSettings": "网络设置",
   "haozeNetworkDescription": "用于应用内的账户连接。外部浏览器使用其自身的网络设置。",
   "haozeNetworkProxy": "使用代理",
-  "haozeNetworkProxyDescription": "目标域名交由代理解析，DoH 请求也通过代理发送。",
+  "haozeNetworkProxyDescription": "目标域名交由代理解析，DNS 查询也通过代理发送。",
   "haozeNetworkInvalidProxy": "请输入有效的代理地址和端口（1–65535），用户名和密码各不超过 255 个 UTF-8 字节。",
   "haozeDohProvider": "DoH 提供商",
   "haozeDohAlibaba": "阿里云 · 223.5.5.5（默认）",
@@ -1048,12 +1048,18 @@
   "haozeDohLatency": "{latency} 毫秒",
   "haozeDohUnavailable": "无法连接",
   "haozeEch": "ECH",
-  "haozeEchDescription": "默认开启。站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
+  "haozeEchDescription": "站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
   "@haozeDohLatency": {
     "placeholders": {
       "latency": {
         "type": "int"
       }
     }
-  }
+  },
+  "haozeContentRoute": "内容线路",
+  "haozeRouteOne": "线路一",
+  "haozeRouteTwo": "线路二",
+  "haozeDoh": "DoH",
+  "haozeDohDescription": "关闭 DoH 后使用常规 DNS；启用代理时，DNS 查询也交由代理处理。",
+  "haozeRouteLatencyDescription": "使用阿里云 DoH 和各线路默认 ECH 设置测速：线路一关闭 ECH，线路二开启 ECH。测试经过当前代理，不改变自定义开关。"
 }

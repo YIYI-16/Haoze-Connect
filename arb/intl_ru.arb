@@ -1038,7 +1038,7 @@
   "haozeNetworkSettings": "Настройки сети",
   "haozeNetworkDescription": "Применяется к подключениям учётной записи в приложении. Внешние браузеры используют собственные настройки сети.",
   "haozeNetworkProxy": "Использовать прокси",
-  "haozeNetworkProxyDescription": "Прокси разрешает домены назначения. Запросы DoH также проходят через прокси.",
+  "haozeNetworkProxyDescription": "Прокси разрешает домены назначения. DNS-запросы также проходят через прокси.",
   "haozeNetworkInvalidProxy": "Введите допустимый адрес и порт прокси (1–65535). Логин и пароль должны занимать не более 255 байт UTF-8 каждый.",
   "haozeDohProvider": "Провайдер DoH",
   "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5 (по умолчанию)",
@@ -1048,12 +1048,18 @@
   "haozeDohLatency": "{latency} мс",
   "haozeDohUnavailable": "Недоступен",
   "haozeEch": "ECH",
-  "haozeEchDescription": "Включено по умолчанию. ECH используется, когда сайт публикует поддерживаемую конфигурацию; иначе используется обычный HTTPS.",
+  "haozeEchDescription": "ECH используется, когда сайт публикует поддерживаемую конфигурацию; иначе используется обычный HTTPS.",
   "@haozeDohLatency": {
     "placeholders": {
       "latency": {
         "type": "int"
       }
     }
-  }
+  },
+  "haozeContentRoute": "Маршрут подключения",
+  "haozeRouteOne": "Маршрут 1",
+  "haozeRouteTwo": "Маршрут 2",
+  "haozeDoh": "DoH",
+  "haozeDohDescription": "При выключенном DoH используется обычный DNS. Если включён прокси, DNS-запросы также проходят через него.",
+  "haozeRouteLatencyDescription": "Проверка с Alibaba DoH и стандартным ECH: выключен для маршрута 1, включён для маршрута 2. Используется текущий прокси, ваши настройки не меняются."
 }

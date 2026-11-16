@@ -1038,7 +1038,7 @@
   "haozeNetworkSettings": "Paramètres réseau",
   "haozeNetworkDescription": "S’applique aux connexions de compte dans l’application. Les navigateurs externes utilisent leurs propres paramètres réseau.",
   "haozeNetworkProxy": "Utiliser un proxy",
-  "haozeNetworkProxyDescription": "Le proxy résout les domaines de destination. Les requêtes DoH passent aussi par le proxy.",
+  "haozeNetworkProxyDescription": "Le proxy résout les domaines de destination. Les requêtes DNS passent aussi par le proxy.",
   "haozeNetworkInvalidProxy": "Saisissez un hôte et un port valides (1–65535). Chaque identifiant doit faire au plus 255 octets UTF-8.",
   "haozeDohProvider": "Fournisseur DoH",
   "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5 (par défaut)",
@@ -1048,12 +1048,18 @@
   "haozeDohLatency": "{latency} ms",
   "haozeDohUnavailable": "Indisponible",
   "haozeEch": "ECH",
-  "haozeEchDescription": "Activé par défaut. Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
+  "haozeEchDescription": "Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
   "@haozeDohLatency": {
     "placeholders": {
       "latency": {
         "type": "int"
       }
     }
-  }
+  },
+  "haozeContentRoute": "Route de connexion",
+  "haozeRouteOne": "Route 1",
+  "haozeRouteTwo": "Route 2",
+  "haozeDoh": "DoH",
+  "haozeDohDescription": "Sans DoH, utilise le DNS classique. Avec un proxy, les requêtes DNS passent aussi par celui-ci.",
+  "haozeRouteLatencyDescription": "Mesure avec Alibaba DoH et le réglage ECH par défaut : désactivé pour la route 1, activé pour la route 2. Utilise le proxy actuel sans changer vos réglages."
 }

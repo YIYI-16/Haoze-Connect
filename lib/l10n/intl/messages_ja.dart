@@ -765,11 +765,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "登録設定を読み込めませんでした。",
     ),
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage("パスワード確認"),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage("接続先ルート"),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "ログインまたは登録が拒否されました。入力内容をご確認ください。",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5（既定）",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "DoH がオフの場合は通常の DNS を使用します。プロキシ有効時は DNS クエリもプロキシを経由します。",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -781,7 +786,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("接続不可"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "既定で有効です。サイトが対応する設定を公開している場合は ECH を使用し、それ以外は通常の HTTPS を使用します。",
+      "サイトが対応する設定を公開している場合は ECH を使用し、それ以外は通常の HTTPS を使用します。",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("メール"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("メール確認コード"),
@@ -837,7 +842,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNetworkProxy": MessageLookupByLibrary.simpleMessage("プロキシを使用"),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "接続先ドメインはプロキシが名前解決します。DoH リクエストもプロキシを経由します。",
+      "接続先ドメインはプロキシが名前解決します。DNS クエリもプロキシを経由します。",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage("ネットワーク設定"),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("利用可能なプランなし"),
@@ -856,6 +861,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("使用量を更新"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("アカウント作成"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("残量"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Alibaba DoH と各ルートの既定の ECH 設定で測定します。ルート1はオフ、ルート2はオンです。現在のプロキシを使い、カスタム設定は変更しません。",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("ルート1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("ルート2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "セッションが切れました。再度ログインしてください。",

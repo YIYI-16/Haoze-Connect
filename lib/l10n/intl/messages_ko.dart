@@ -752,11 +752,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "가입 설정을 불러오지 못했습니다.",
     ),
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage("비밀번호 확인"),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage("접속 경로"),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "로그인 또는 가입이 거부되었습니다. 정보를 확인하세요.",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5 (기본값)",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "DoH를 끄면 일반 DNS를 사용합니다. 프록시를 켜면 DNS 쿼리도 프록시를 통과합니다.",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -768,7 +773,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("연결 불가"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "기본적으로 켜져 있습니다. 사이트가 지원되는 설정을 게시하면 ECH를 사용하고, 그렇지 않으면 일반 HTTPS를 사용합니다.",
+      "사이트가 지원되는 설정을 게시하면 ECH를 사용하고, 그렇지 않으면 일반 HTTPS를 사용합니다.",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("이메일"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage("이메일 인증 코드"),
@@ -822,7 +827,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeNetworkProxy": MessageLookupByLibrary.simpleMessage("프록시 사용"),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "프록시가 대상 도메인을 해석합니다. DoH 요청도 프록시를 통과합니다.",
+      "프록시가 대상 도메인을 해석합니다. DNS 쿼리도 프록시를 통과합니다.",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage("네트워크 설정"),
     "haozeNoPlan": MessageLookupByLibrary.simpleMessage("사용 가능한 요금제 없음"),
@@ -841,6 +846,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeRefresh": MessageLookupByLibrary.simpleMessage("사용량 새로고침"),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("회원 가입"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("남은 데이터"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Alibaba DoH와 경로별 기본 ECH 설정으로 측정합니다. 경로 1은 꺼짐, 경로 2는 켜짐입니다. 현재 프록시를 사용하며 사용자 설정을 변경하지 않습니다.",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("경로 1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("경로 2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("코드 전송"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "세션이 만료되었습니다. 다시 로그인하세요.",

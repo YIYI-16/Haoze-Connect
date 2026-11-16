@@ -959,11 +959,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeConfirmPassword": MessageLookupByLibrary.simpleMessage(
       "Confirmer le mot de passe",
     ),
+    "haozeContentRoute": MessageLookupByLibrary.simpleMessage(
+      "Route de connexion",
+    ),
     "haozeCredentialsError": MessageLookupByLibrary.simpleMessage(
       "Connexion ou inscription refusée. Vérifiez les informations.",
     ),
+    "haozeDoh": MessageLookupByLibrary.simpleMessage("DoH"),
     "haozeDohAlibaba": MessageLookupByLibrary.simpleMessage(
       "Alibaba Cloud · 223.5.5.5 (par défaut)",
+    ),
+    "haozeDohDescription": MessageLookupByLibrary.simpleMessage(
+      "Sans DoH, utilise le DNS classique. Avec un proxy, les requêtes DNS passent aussi par celui-ci.",
     ),
     "haozeDohLatency": m34,
     "haozeDohLatencyDescription": MessageLookupByLibrary.simpleMessage(
@@ -975,7 +982,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "haozeDohUnavailable": MessageLookupByLibrary.simpleMessage("Indisponible"),
     "haozeEch": MessageLookupByLibrary.simpleMessage("ECH"),
     "haozeEchDescription": MessageLookupByLibrary.simpleMessage(
-      "Activé par défaut. Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
+      "Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
     ),
     "haozeEmail": MessageLookupByLibrary.simpleMessage("E-mail"),
     "haozeEmailCode": MessageLookupByLibrary.simpleMessage(
@@ -1041,7 +1048,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Utiliser un proxy",
     ),
     "haozeNetworkProxyDescription": MessageLookupByLibrary.simpleMessage(
-      "Le proxy résout les domaines de destination. Les requêtes DoH passent aussi par le proxy.",
+      "Le proxy résout les domaines de destination. Les requêtes DNS passent aussi par le proxy.",
     ),
     "haozeNetworkSettings": MessageLookupByLibrary.simpleMessage(
       "Paramètres réseau",
@@ -1068,6 +1075,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "haozeRegister": MessageLookupByLibrary.simpleMessage("Créer un compte"),
     "haozeRemaining": MessageLookupByLibrary.simpleMessage("Restant"),
+    "haozeRouteLatencyDescription": MessageLookupByLibrary.simpleMessage(
+      "Mesure avec Alibaba DoH et le réglage ECH par défaut : désactivé pour la route 1, activé pour la route 2. Utilise le proxy actuel sans changer vos réglages.",
+    ),
+    "haozeRouteOne": MessageLookupByLibrary.simpleMessage("Route 1"),
+    "haozeRouteTwo": MessageLookupByLibrary.simpleMessage("Route 2"),
     "haozeSendCode": MessageLookupByLibrary.simpleMessage("Envoyer le code"),
     "haozeSessionExpired": MessageLookupByLibrary.simpleMessage(
       "Session expirée. Reconnectez-vous.",
