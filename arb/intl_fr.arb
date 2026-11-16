@@ -1034,5 +1034,26 @@
   "haozeGoogleReturn": "Autorisation Google reçue. Revenez dans Haoze pour terminer la connexion.",
   "haozeGoogleReturnToApp": "Revenir à l’application Windows",
   "haozeNativeGoogleWaiting": "Suivez les instructions de Google, puis revenez dans Haoze.",
-  "haozeGoogleNonceError": "Les identifiants Google ne contiennent pas la vérification de cette connexion. Mettez à jour les services Google Play et réessayez."
+  "haozeGoogleNonceError": "Les identifiants Google ne contiennent pas la vérification de cette connexion. Mettez à jour les services Google Play et réessayez.",
+  "haozeNetworkSettings": "Paramètres réseau",
+  "haozeNetworkDescription": "S’applique aux connexions de compte dans l’application. Les navigateurs externes utilisent leurs propres paramètres réseau.",
+  "haozeNetworkProxy": "Utiliser un proxy",
+  "haozeNetworkProxyDescription": "Le proxy résout les domaines de destination. Les requêtes DoH passent aussi par le proxy.",
+  "haozeNetworkInvalidProxy": "Saisissez un hôte et un port valides (1–65535). Chaque identifiant doit faire au plus 255 octets UTF-8.",
+  "haozeDohProvider": "Fournisseur DoH",
+  "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5 (par défaut)",
+  "haozeDohTencent": "Tencent Cloud",
+  "haozeDohRetest": "Tester à nouveau",
+  "haozeDohLatencyDescription": "Mesure avec une requête DNS via la connexion actuelle. Les fournisseurs inaccessibles restent sélectionnables.",
+  "haozeDohLatency": "{latency} ms",
+  "haozeDohUnavailable": "Indisponible",
+  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEchDescription": "Activé par défaut. Utilise ECH si le site publie une configuration compatible ; sinon, utilise HTTPS standard.",
+  "@haozeDohLatency": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  }
 }

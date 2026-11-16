@@ -1034,5 +1034,26 @@
   "haozeGoogleReturn": "Google 인증을 받았습니다. Haoze로 돌아가 로그인을 완료하세요.",
   "haozeGoogleReturnToApp": "Windows 앱으로 돌아가기",
   "haozeNativeGoogleWaiting": "Google 안내에 따라 인증한 후 Haoze로 돌아오세요.",
-  "haozeGoogleNonceError": "Google 인증 정보에 이번 로그인 확인 정보가 없습니다. Google Play 서비스를 업데이트한 후 다시 시도하세요."
+  "haozeGoogleNonceError": "Google 인증 정보에 이번 로그인 확인 정보가 없습니다. Google Play 서비스를 업데이트한 후 다시 시도하세요.",
+  "haozeNetworkSettings": "네트워크 설정",
+  "haozeNetworkDescription": "앱 내 계정 연결에 적용됩니다. 외부 브라우저는 자체 네트워크 설정을 사용합니다.",
+  "haozeNetworkProxy": "프록시 사용",
+  "haozeNetworkProxyDescription": "프록시가 대상 도메인을 해석합니다. DoH 요청도 프록시를 통과합니다.",
+  "haozeNetworkInvalidProxy": "올바른 프록시 호스트와 포트(1–65535)를 입력하세요. 사용자 이름과 비밀번호는 각각 UTF-8 기준 255바이트 이하여야 합니다.",
+  "haozeDohProvider": "DoH 제공자",
+  "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5 (기본값)",
+  "haozeDohTencent": "Tencent Cloud",
+  "haozeDohRetest": "다시 측정",
+  "haozeDohLatencyDescription": "현재 연결에서 DNS 쿼리로 지연 시간을 측정합니다. 연결할 수 없는 제공자도 선택할 수 있습니다.",
+  "haozeDohLatency": "{latency}밀리초",
+  "haozeDohUnavailable": "연결 불가",
+  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEchDescription": "기본적으로 켜져 있습니다. 사이트가 지원되는 설정을 게시하면 ECH를 사용하고, 그렇지 않으면 일반 HTTPS를 사용합니다.",
+  "@haozeDohLatency": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  }
 }

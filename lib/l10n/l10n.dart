@@ -8721,6 +8721,146 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Network settings`
+  String get haozeNetworkSettings {
+    return Intl.message(
+      'Network settings',
+      name: 'haozeNetworkSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applies to in-app account connections. External browsers use their own network settings.`
+  String get haozeNetworkDescription {
+    return Intl.message(
+      'Applies to in-app account connections. External browsers use their own network settings.',
+      name: 'haozeNetworkDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use proxy`
+  String get haozeNetworkProxy {
+    return Intl.message(
+      'Use proxy',
+      name: 'haozeNetworkProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The proxy resolves destination domains. DoH requests also pass through the proxy.`
+  String get haozeNetworkProxyDescription {
+    return Intl.message(
+      'The proxy resolves destination domains. DoH requests also pass through the proxy.',
+      name: 'haozeNetworkProxyDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid proxy host and port (1–65535). Credentials must each be at most 255 UTF-8 bytes.`
+  String get haozeNetworkInvalidProxy {
+    return Intl.message(
+      'Enter a valid proxy host and port (1–65535). Credentials must each be at most 255 UTF-8 bytes.',
+      name: 'haozeNetworkInvalidProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DoH provider`
+  String get haozeDohProvider {
+    return Intl.message(
+      'DoH provider',
+      name: 'haozeDohProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alibaba Cloud · 223.5.5.5 (default)`
+  String get haozeDohAlibaba {
+    return Intl.message(
+      'Alibaba Cloud · 223.5.5.5 (default)',
+      name: 'haozeDohAlibaba',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tencent Cloud`
+  String get haozeDohTencent {
+    return Intl.message(
+      'Tencent Cloud',
+      name: 'haozeDohTencent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test again`
+  String get haozeDohRetest {
+    return Intl.message(
+      'Test again',
+      name: 'haozeDohRetest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Measured with a DNS query over your current connection. Unavailable providers remain selectable.`
+  String get haozeDohLatencyDescription {
+    return Intl.message(
+      'Measured with a DNS query over your current connection. Unavailable providers remain selectable.',
+      name: 'haozeDohLatencyDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{latency} ms`
+  String haozeDohLatency(int latency) {
+    return Intl.message(
+      '$latency ms',
+      name: 'haozeDohLatency',
+      desc: '',
+      args: [latency],
+    );
+  }
+
+  /// `Unavailable`
+  String get haozeDohUnavailable {
+    return Intl.message(
+      'Unavailable',
+      name: 'haozeDohUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Encrypted Client Hello (ECH)`
+  String get haozeEch {
+    return Intl.message(
+      'Encrypted Client Hello (ECH)',
+      name: 'haozeEch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.`
+  String get haozeEchDescription {
+    return Intl.message(
+      'Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.',
+      name: 'haozeEchDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

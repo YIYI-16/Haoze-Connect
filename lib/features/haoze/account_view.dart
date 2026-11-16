@@ -17,6 +17,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'account.dart';
+import 'network_settings_view.dart';
 
 String? _issue(BuildContext context, XboardAccountIssue? issue) {
   final l10n = context.appLocalizations;
@@ -247,6 +248,18 @@ class _AuthenticationPageState extends ConsumerState<_AuthenticationPage> {
     final step = _result?.step;
     return CommonScaffold(
       title: appName,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.settings,
+          tooltip: l10n.haozeNetworkSettings,
+          onPressed: busy
+              ? null
+              : () => showFormSheet<void>(
+                  context: context,
+                  builder: (_) => const AccountNetworkSettingsPage(),
+                ),
+        ),
+      ],
       body: Builder(
         builder: (context) => SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(

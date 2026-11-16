@@ -1034,5 +1034,26 @@
   "haozeGoogleReturn": "Google authorization received. Return to Haoze to finish signing in.",
   "haozeGoogleReturnToApp": "Return to Windows app",
   "haozeNativeGoogleWaiting": "Follow the Google sign-in prompt, then return to Haoze.",
-  "haozeGoogleNonceError": "Google returned a credential without this login challenge. Update Google Play services and try again."
+  "haozeGoogleNonceError": "Google returned a credential without this login challenge. Update Google Play services and try again.",
+  "haozeNetworkSettings": "Network settings",
+  "haozeNetworkDescription": "Applies to in-app account connections. External browsers use their own network settings.",
+  "haozeNetworkProxy": "Use proxy",
+  "haozeNetworkProxyDescription": "The proxy resolves destination domains. DoH requests also pass through the proxy.",
+  "haozeNetworkInvalidProxy": "Enter a valid proxy host and port (1–65535). Credentials must each be at most 255 UTF-8 bytes.",
+  "haozeDohProvider": "DoH provider",
+  "haozeDohAlibaba": "Alibaba Cloud · 223.5.5.5 (default)",
+  "haozeDohTencent": "Tencent Cloud",
+  "haozeDohRetest": "Test again",
+  "haozeDohLatencyDescription": "Measured with a DNS query over your current connection. Unavailable providers remain selectable.",
+  "haozeDohLatency": "{latency} ms",
+  "haozeDohUnavailable": "Unavailable",
+  "haozeEch": "Encrypted Client Hello (ECH)",
+  "haozeEchDescription": "Enabled by default. Uses ECH when the site publishes a supported configuration; otherwise uses standard HTTPS.",
+  "@haozeDohLatency": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  }
 }

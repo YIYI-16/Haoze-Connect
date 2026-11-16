@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/features/haoze/account.dart';
 import 'package:fl_clash/features/haoze/account_view.dart';
+import 'package:fl_clash/features/haoze/network_settings.dart';
+import 'package:fl_clash/features/haoze/network_settings_view.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/ui.dart';
@@ -289,6 +291,12 @@ void main() {
           haozeAccountProvider.overrideWith(() => _Account(engine)),
           haozeNativeLoginProvider.overrideWithValue(native),
           haozeNativeGoogleProvider.overrideWithValue(google),
+          haozeNetworkProvider.overrideWithValue(
+            AccountNetworkController(
+              read: () async => null,
+              write: (_) async {},
+            ),
+          ),
           initProvider.overrideWithBuild((_, _) => true),
           viewSizeProvider.overrideWithBuild((_, _) => size),
         ],
@@ -363,6 +371,14 @@ void main() {
       expect(engine.state.authenticated, true);
     },
   );
+  testWidgets('login corner button opens network settings', (tester) async {
+    await open(tester);
+    await tester.tap(find.byTooltip('Network settings'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AccountNetworkSettingsPage), findsOneWidget);
+    expect(find.text('DoH provider'), findsOneWidget);
+  });
+
   testWidgets('login page does not offer update checks', (tester) async {
     await open(tester);
     expect(engine.state.authenticated, isFalse);

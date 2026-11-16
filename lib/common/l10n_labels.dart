@@ -3,6 +3,7 @@ import 'package:fl_clash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
+import 'package:fl_clash/features/haoze/network_settings.dart';
 
 extension PageLabelL10n on PageLabel {
   String get label {
@@ -123,4 +124,20 @@ extension LocaleL10n on Locale {
       final code => code,
     };
   }
+}
+
+extension AccountDohProviderL10n on AccountDohProvider {
+  String get label => switch (this) {
+    AccountDohProvider.alibaba => currentAppLocalizations.haozeDohAlibaba,
+    AccountDohProvider.cloudflare => '1.1.1.1',
+    AccountDohProvider.google => '8.8.8.8',
+    AccountDohProvider.tencent => currentAppLocalizations.haozeDohTencent,
+  };
+}
+
+extension AccountProxyKindL10n on AccountProxyKind {
+  String get label => switch (this) {
+    AccountProxyKind.http => 'HTTP',
+    AccountProxyKind.socks5 => 'SOCKS5',
+  };
 }

@@ -1034,5 +1034,26 @@
   "haozeGoogleReturn": "已收到 Google 授权，请返回 Haoze 完成登录。",
   "haozeGoogleReturnToApp": "返回 Windows 程序",
   "haozeNativeGoogleWaiting": "请按 Google 提示完成验证，然后返回 Haoze。",
-  "haozeGoogleNonceError": "Google 返回的登录凭证缺少本次验证信息。请更新 Google Play 服务后重试。"
+  "haozeGoogleNonceError": "Google 返回的登录凭证缺少本次验证信息。请更新 Google Play 服务后重试。",
+  "haozeNetworkSettings": "网络设置",
+  "haozeNetworkDescription": "用于应用内的账户连接。外部浏览器使用其自身的网络设置。",
+  "haozeNetworkProxy": "使用代理",
+  "haozeNetworkProxyDescription": "目标域名交由代理解析，DoH 请求也通过代理发送。",
+  "haozeNetworkInvalidProxy": "请输入有效的代理地址和端口（1–65535），用户名和密码各不超过 255 个 UTF-8 字节。",
+  "haozeDohProvider": "DoH 提供商",
+  "haozeDohAlibaba": "阿里云 · 223.5.5.5（默认）",
+  "haozeDohTencent": "腾讯云",
+  "haozeDohRetest": "重新测速",
+  "haozeDohLatencyDescription": "通过当前连接发送 DNS 查询测量延迟。无法连接的提供商仍可选择。",
+  "haozeDohLatency": "{latency} 毫秒",
+  "haozeDohUnavailable": "无法连接",
+  "haozeEch": "加密客户端问候（ECH）",
+  "haozeEchDescription": "默认开启。站点公布受支持的配置时自动使用 ECH，否则使用标准 HTTPS。",
+  "@haozeDohLatency": {
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  }
 }

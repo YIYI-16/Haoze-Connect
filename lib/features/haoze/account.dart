@@ -6,6 +6,8 @@ import 'package:fl_clash/common/yaml_writer.dart';
 import 'package:yaml/yaml.dart';
 import 'routing_resources.dart';
 import 'native_google.dart';
+import 'network_settings.dart';
+import 'network_transport.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -33,10 +35,14 @@ const haozeCoreVersion = String.fromEnvironment(
 const haozeAccountUrl = 'https://account.zhouhaoze.com';
 
 final haozeNativeLoginProvider = Provider<XboardNativeLogin>((ref) {
-  final client = XboardClient(panelOrigin: Uri.parse(haozePanelUrl));
+  final client = XboardClient(
+    panelOrigin: Uri.parse(haozePanelUrl),
+    transport: AccountNetworkTransport(ref.read(haozeNetworkProvider)),
+  );
   final login = XboardNativeLogin(
     origin: Uri.parse('https://sso.zhouhaoze.com'),
     client: client,
+    transport: AccountNetworkTransport(ref.read(haozeNetworkProvider)),
   );
   ref.onDispose(() {
     login.close();
@@ -55,7 +61,10 @@ final haozeNativeGoogleProvider = Provider<NativeGoogleSignIn>((ref) {
 });
 
 final haozeBrowserLoginProvider = Provider<XboardBrowserLogin>((ref) {
-  final client = XboardClient(panelOrigin: Uri.parse(haozePanelUrl));
+  final client = XboardClient(
+    panelOrigin: Uri.parse(haozePanelUrl),
+    transport: AccountNetworkTransport(ref.read(haozeNetworkProvider)),
+  );
   final login = XboardBrowserLogin(
     client: client,
     origin: Uri.parse(haozePanelUrl),
@@ -79,9 +88,12 @@ class HaozeAccount extends Notifier<XboardAccountState> {
   @override
   XboardAccountState build() {
     final origin = Uri.parse(haozePanelUrl);
-    final downloads = StrictIoXboardTransport();
+    final downloads = AccountNetworkTransport(ref.read(haozeNetworkProvider));
     controller = XboardAccountController(
-      client: XboardClient(panelOrigin: origin),
+      client: XboardClient(
+        panelOrigin: origin,
+        transport: AccountNetworkTransport(ref.read(haozeNetworkProvider)),
+      ),
       store: SecureAccountStore(),
       profiles: HaozeManagedProfile(ref, downloads),
       origin: origin,
@@ -158,7 +170,7 @@ class SecureAccountStore implements XboardAccountStore {
 class HaozeManagedProfile implements XboardManagedProfile {
   HaozeManagedProfile(this.ref, this.downloads);
   final Ref ref;
-  final StrictIoXboardTransport downloads;
+  final AccountNetworkTransport downloads;
   final _changed = <int>{};
 
   @override

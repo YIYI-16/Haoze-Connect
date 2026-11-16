@@ -110,3 +110,29 @@ can build both platforms from an approved immutable source commit and uploads
 artifacts without automatically publishing a release. Signing a Windows
 installer with a trusted publisher certificate remains separate; existing
 Windows artifacts are explicitly marked unsigned.
+
+
+## Account network settings (6.2.1)
+
+The login page opens a network form before a proxy profile or core is started.
+Settings and optional proxy credentials live in platform secure storage. A failed
+read fails closed; a failed write keeps the prior settings. New account requests
+and managed subscription downloads use the saved settings immediately.
+
+The native Rust transport uses pinned, certificate-verified DoH endpoints:
+Alibaba `dns.alidns.com` / `223.5.5.5` (default), Cloudflare
+`cloudflare-dns.com` / `1.1.1.1`, Google `dns.google` / `8.8.8.8`, and Tencent
+`doh.pub` / `1.12.12.12`. Provider selection starts four bounded DNS latency
+probes through the current connection. Measurement failures do not switch the
+selected provider.
+
+ECH defaults on. HTTPS/SVCB records and CNAME aliases supply a compatible ECH
+configuration to rustls. Without a compatible configuration, ordinary verified
+HTTPS is used. Once ECH is selected, a handshake failure is returned without a
+clear-SNI retry. Site TLS and DNS configuration are outside this client change.
+
+HTTP CONNECT and SOCKS5 remote-DNS mode (`socks5h`) pass destination domain names
+to the proxy; DoH requests also pass through it. There is no direct fallback if
+the proxy fails. The proxy host itself may use system DNS when entered as a
+hostname. External OAuth browsers use the browser's network configuration.
+Requests remain HTTPS-only, reject redirects, and enforce bounded responses.

@@ -45,6 +45,8 @@ jobs:
       - run: |
           rustup toolchain install 1.99.0 --profile minimal
           rustup default 1.99.0
+      - name: Verify native account transport and proxy DNS
+        run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml account_network
       - run: flutter analyze --no-fatal-infos --no-pub
       - run: flutter test --no-pub test/features/haoze test/features/update test/manager/app_env_manager_test.dart test/application_test.dart test/state_run_globals_test.dart test/l10n test/lint test/providers/action_test.dart test/providers/system_action_test.dart test/providers/database_test.dart test/common/preferences_test.dart test/common/system_test.dart test/core/desktop test/core/service_test.dart test/core/protocol_contract_test.dart test/manager/core_manager_test.dart test/providers/state_derived_test.dart test/views/network_config_test.dart test/views/general_config_test.dart
       - name: Test signing and release metadata gates
@@ -82,6 +84,11 @@ jobs:
       - run: flutter pub get
       - name: Build account UI and Windows native runtime
         run: flutter build windows --release --no-pub --dart-define=APP_ENV=stable
+      - name: Verify native account transport and proxy DNS
+        run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml account_network
+      - name: Probe Windows DoH and ECH against public sites
+        continue-on-error: true
+        run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml live_doh_and_opportunistic_ech -- --ignored
       - name: Verify native login callbacks and Windows data migration
         run: flutter test --no-pub test/features/haoze/native_google_test.dart test/features/haoze/account_view_test.dart test/common/haoze_data_migration_test.dart
       - name: Verify Windows text weights and render native-font preview

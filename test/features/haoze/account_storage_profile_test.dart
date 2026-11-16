@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fl_clash/features/haoze/network_transport.dart';
 import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
@@ -29,7 +30,7 @@ rules:
 
 class _Storage extends Mock implements FlutterSecureStorage {}
 
-class _Downloads extends Mock implements StrictIoXboardTransport {}
+class _Downloads extends Mock implements AccountNetworkTransport {}
 
 class _Core extends Mock implements CoreController {}
 
